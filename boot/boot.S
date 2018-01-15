@@ -1,3 +1,12 @@
+/*
+ *  boot/boot.S
+ *
+ *  Copyright (C) 2018 Henry.Zeng <henryz_e@163.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the MIT License.
+ */
+
 #include <include/asm.h>
 #include <include/mmu.h>
 

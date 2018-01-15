@@ -11,13 +11,14 @@ LDFLAGS += -m $(shell $(LD) -V | grep elf_i386 2>/dev/null | head -n 1)
 
 all: bootblock
 
-bootblock: boot.S
+bootblock: boot.S bootmain.c
+	$(CC) $(CFLAGS) -fno-pic -O -nostdinc -I../ -c bootmain.c
 	$(CC) $(CFLAGS) -fno-pic -nostdinc -I../ -c boot.S
-	$(LD) $(LDFLAGS) -N -e start -Ttext 0x7C00 -o $@.o boot.o
+	$(LD) $(LDFLAGS) -N -e start -Ttext 0x7C00 -o $@.o boot.o bootmain.o
 	$(OBJDUMP) -S $@.o > $@.asm
 	$(OBJCOPY) -S -O binary -j .text $@.o $@
 	./sign.pl $@
 
 clean:
-	rm boot.o boot.asm
+	rm *.d *.o *.asm bootblock
 
