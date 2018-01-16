@@ -7,9 +7,9 @@
  * it under the terms of the MIT License.
  */
 
-#include <include/types.h>
-#include <include/x86.h>
-#include <include/elf.h>
+#include <boot/types.h>
+#include <boot/x86.h>
+#include <boot/elf.h>
 
 #define SECTSIZE  512
 

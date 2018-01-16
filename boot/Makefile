@@ -9,11 +9,13 @@ CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 &
 ASFLAGS = -m32 -gdwarf-2 -Wa,-divide
 LDFLAGS += -m $(shell $(LD) -V | grep elf_i386 2>/dev/null | head -n 1)
 
+INCDIR = ../include
+
 all: bootblock
 
 bootblock: boot.S bootmain.c
-	$(CC) $(CFLAGS) -fno-pic -O -nostdinc -I../ -c bootmain.c
-	$(CC) $(CFLAGS) -fno-pic -nostdinc -I../ -c boot.S
+	$(CC) $(CFLAGS) -O -nostdinc -I$(INCDIR) -c bootmain.c
+	$(CC) $(CFLAGS) -nostdinc -I$(INCDIR) -c boot.S
 	$(LD) $(LDFLAGS) -N -e start -Ttext 0x7C00 -o $@.o boot.o bootmain.o
 	$(OBJDUMP) -S $@.o > $@.asm
 	$(OBJCOPY) -S -O binary -j .text $@.o $@
