@@ -11,16 +11,15 @@ LDFLAGS += -m $(shell $(LD) -V | grep elf_i386 2>/dev/null | head -n 1)
 
 INCDIR = ../include
 
-all: bootblock
+all: kernel
 
-bootblock: boot.S bootmain.c
-	$(CC) $(CFLAGS) -O -nostdinc -I$(INCDIR) -c bootmain.c
-	$(CC) $(CFLAGS) -nostdinc -I$(INCDIR) -c boot.S
-	$(LD) $(LDFLAGS) -N -e start -Ttext 0x7C00 -o $@.o boot.o bootmain.o
+kernel: entry.S entry_pgdir.c
+	$(CC) $(CFLAGS) -O -nostdinc -I$(INCDIR) -c entry_pgdir.c
+	$(CC) $(CFLAGS) -nostdinc -I$(INCDIR) -c entry.S
+	$(LD) $(LDFLAGS) -N -e entry -Ttext 0xf0100000 -o $@.o entry.o entry_pgdir.o
 	$(OBJDUMP) -S $@.o > $@.asm
 	$(OBJCOPY) -S -O binary -j .text $@.o $@
-	./sign.pl $@
 
 clean:
-	@-rm *.d *.o *.asm bootblock
+	@-rm *.d *.o *.asm kernel
 

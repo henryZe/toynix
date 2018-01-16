@@ -7,6 +7,9 @@
  * it under the terms of the MIT License.
  */
 
+#include <kernel/mmu.h>
+#include <kernel/memlayout.h>
+
 ##########################################################################
 # The kernel (this code) is linked at address ~(KERNBASE + 1 Meg), 
 # but the bootloader loads it at address ~1 Meg.
