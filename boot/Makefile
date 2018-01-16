@@ -22,5 +22,5 @@ bootblock: boot.S bootmain.c
 	./sign.pl $@
 
 clean:
-	@-rm *.d *.o *.asm bootblock
+	rm -rf *.d *.o *.asm bootblock
 

@@ -26,7 +26,7 @@ start:
 	movw    %ax, %es	# extra segment
 	movw    %ax, %ss	# stack segment
 
-	# Physical address line A20 is tied to zero so that the first PCs 
+	# Physical address line A20 is tied to zero so that the first PCs
 	# with 2 MB would run software that assumed 1 MB.  Undo that.
 seta20.1:
 	inb     $0x64, %al	# Wait for not busy
@@ -58,7 +58,7 @@ seta20.2:
 	# translation, so that the mapping is still the identity mapping.
 	ljmp    $(SEG_KCODE<<3), $start32
 
-.code32					# Tell assembler to generate 32-bit code now.
+.code32			# Tell assembler to generate 32-bit code now.
 start32:
 	# Set up the protected-mode data segment registers
 	movw    $(SEG_KDATA<<3), %ax    # Our data segment selector
