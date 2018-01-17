@@ -28,8 +28,10 @@ cprintf(const char *fmt, ...)
 	va_list ap;
 	int cnt;
 
+	/* set ap as (&fmt + 1) */
 	va_start(ap, fmt);
 	cnt = vcprintf(fmt, ap);
+	/* set ap as NULL */
 	va_end(ap);
 
 	return cnt;

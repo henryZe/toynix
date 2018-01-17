@@ -191,7 +191,7 @@ cga_putc(int c)
 		break;
 	}
 
-	// What is the purpose of this?
+	// update the screan when the crt_buf is full
 	if (crt_pos >= CRT_SIZE) {
 		int i;
 
