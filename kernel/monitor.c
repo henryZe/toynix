@@ -1,15 +1,15 @@
 // Simple command-line kernel monitor useful for
 // controlling the kernel and exploring the system interactively.
 
-#include <inc/stdio.h>
-#include <inc/string.h>
-#include <inc/memlayout.h>
-#include <inc/assert.h>
-#include <inc/x86.h>
+#include <kernel/stdio.h>
+#include <kernel/string.h>
+#include <kernel/memlayout.h>
+//#include <kernel/assert.h>
+#include <kernel/x86.h>
 
-#include <kern/console.h>
-#include <kern/monitor.h>
-#include <kern/kdebug.h>
+//#include <kernel/console.h>
+//#include <kern/monitor.h>
+//#include <kern/kdebug.h>
 
 #define CMDBUF_SIZE	80	// enough for one VGA text line
 
