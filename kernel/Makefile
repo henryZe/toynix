@@ -2,7 +2,7 @@ CC := $(TOOLPREFIX)gcc
 AS := $(TOOLPREFIX)gas
 LD := $(TOOLPREFIX)ld
 OBJCOPY := $(TOOLPREFIX)objcopy
-OBJDUMP := $(TOOLPREFIX)objdump                                                                    
+OBJDUMP := $(TOOLPREFIX)objdump
 NM := $(GCCPREFIX)nm
 
 CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -fvar-tracking -fvar-tracking-assignments -O0 -g -Wall -MD -gdwarf-2 -m32 -Werror -fno-omit-frame-pointer

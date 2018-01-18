@@ -221,7 +221,7 @@ read_ebp(void)
 {
 	uint32_t ebp;
 
-	asm volatile("movl %%ebp,%0" : "=r" (ebp));
+	asm volatile("movl %%ebp, %0" : "=r" (ebp));
 	return ebp;
 }
 
