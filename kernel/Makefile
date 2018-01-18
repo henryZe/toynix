@@ -25,6 +25,7 @@ KERN_SRCFILES := entry.S \
 			init.c \
 			console.c \
 			printf.c \
+			monitor.c \
 			../lib/printfmt.c \
 			../lib/string.c
 

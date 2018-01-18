@@ -7,33 +7,31 @@
 #define NESTED_TIME_TEST 5
 struct Trapframe;
 
-/* bootstacktop: 0xf010a000
-* 
-* call func ->
-* 1. (esp - 4)
-* 2. *esp =  next_eip
-* 3. eip = func
-* push %ebp			# store ebp
-* mov  %esp,%ebp	# set ebp as old_esp
-* push %edi
-
-* pop %edi
-* pop %ebp
-* ret ->				# convert call 
-* 1. eip = *esp
-* 2. (esp + 4)
+/*
+*	in Entry.S:
+*	movl		$0x0, %ebp
+*	movl		$(bootstacktop), %esp
+*
+*	call func				# 1. (esp - 4); 2. *esp =  next_eip; 3. eip = func
+*	push %ebp			# store ebp
+*	mov  %esp,%ebp		# set ebp as old_esp
+*	push %edi
+*
+*	pop %edi
+*	pop %ebp
+*	ret					# convert call: 1. eip = *esp; 2. (esp + 4)
 *
 *
-* refer to kernblock.asm:
-* ebp[f0109ec8] eip[f0100071 : read_ebp] args[f0101910 00010074 f0109f08 0000001a f01009a8]
-* ebp[f0109f18] eip[f0100152 : mon_backtrace] args[00000000 00000000 00000000 0000001a f0101958]
-* ebp[f0109f38] eip[f0100134 : test_backtrace] args[00000000 00000001 f0109f64 0000001a f0101958]
-* ebp[f0109f58] eip[f0100134 : test_backtrace] args[00000001 00000002 f0109f84 0000001a f0101958]
-* ebp[f0109f78] eip[f0100134 : test_backtrace] args[00000002 00000003 f0109fa4 0000001a f0101958]
-* ebp[f0109f98] eip[f0100134 : test_backtrace] args[00000003 00000004 f0109fc4 0000001a f010198f]
-* ebp[f0109fb8] eip[f0100134 : test_backtrace] args[00000004 00000005 f0109fe4 00000010 00000000]
-* ebp[f0109fd8] eip[f01001b2 : init] args[00000005 00000000 0000023c 00000000 00000000]
-* ebp[f0109ff8] eip[f010003e : spin (entry.S)] args[00000003 00001003 00002003 00003003 00004003]
+*	refer to kernblock.asm:
+*	ebp[f0109ec8] eip[f0100071 : read_ebp] 		args[f0101910 00010074 f0109f08 0000001a f01009a8]
+*	ebp[f0109f18] eip[f0100152 : mon_backtrace]	args[00000000 00000000 00000000 0000001a f0101958]
+*	ebp[f0109f38] eip[f0100134 : test_backtrace]	args[00000000 00000001 f0109f64 0000001a f0101958]
+*	ebp[f0109f58] eip[f0100134 : test_backtrace]	args[00000001 00000002 f0109f84 0000001a f0101958]
+*	ebp[f0109f78] eip[f0100134 : test_backtrace]	args[00000002 00000003 f0109fa4 0000001a f0101958]
+*	ebp[f0109f98] eip[f0100134 : test_backtrace]	args[00000003 00000004 f0109fc4 0000001a f010198f]
+*	ebp[f0109fb8] eip[f0100134 : test_backtrace]	args[00000004 00000005 f0109fe4 00000010 00000000]
+*	ebp[f0109fd8] eip[f01001b2 : init]			args[00000005 00000000 0000023c 00000000 00000000]
+*	ebp[f0109ff8] eip[f010003e : spin (entry.S)]	args[00000003 00001003 00002003 00003003 00004003]
 *
 */
 int
@@ -44,7 +42,7 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 	unsigned long eip;
 	int i;
 
-	/* read old stack pointer */
+	/* read old func stack pointer (also new func base pointer) */
 	ebp = read_ebp();
 
 	cprintf("Stack backtrace:\n");
@@ -98,9 +96,7 @@ init(void)
 	// Test the stack backtrace function.
 	test_backtrace(NESTED_TIME_TEST);
 
-	while(1);
-
 	// Drop into the kernel monitor.
-//	while (1)
-//		monitor(NULL);
+	while (1)
+		monitor(NULL);
 }
