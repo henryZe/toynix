@@ -2,8 +2,8 @@
 #define INC_MEMLAYOUT_H
 
 #ifndef __ASSEMBLER__
-#include <kernel/types.h>
-#include <kernel/mmu.h>
+#include <types.h>
+#include <mmu.h>
 #endif /* not __ASSEMBLER__ */
 
 /*

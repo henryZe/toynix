@@ -7,8 +7,8 @@
  * it under the terms of the MIT License.
  */
 
-#include <kernel/mmu.h>
-#include <kernel/memlayout.h>
+#include <mmu.h>
+#include <memlayout.h>
 
 ##########################################################################
 # The kernel (this code) is linked at address ~(KERNBASE + 1 Meg),

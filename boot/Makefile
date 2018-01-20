@@ -22,7 +22,7 @@ bootblock: boot.S bootmain.c
 	./sign.pl $@
 
 install:
-	cp bootblock /zhsa022/usrhome/henry.zeng/github/lab/obj/boot/boot
+	cp bootblock ../../lab/obj/boot/boot
 
 clean:
 	rm -rf *.d *.o *.asm bootblock

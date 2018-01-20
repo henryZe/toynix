@@ -1,7 +1,7 @@
 #ifndef INC_X86_H
 #define INC_X86_H
 
-#include <kernel/types.h>
+#include <types.h>
 
 static inline void
 breakpoint(void)

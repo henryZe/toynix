@@ -1,12 +1,12 @@
 /* See COPYRIGHT for copyright information. */
 
-#include <kernel/types.h>
-#include <kernel/x86.h>
-#include <kernel/memlayout.h>
-#include <kernel/kbdreg.h>
-#include <kernel/string.h>
+#include <types.h>
+#include <x86.h>
+#include <memlayout.h>
+#include <string.h>
+#include <stdio.h>
+#include <kbdreg.h>
 #include <kernel/console.h>
-#include <kernel/stdio.h>
 
 static void cons_intr(int (*proc)(void));
 static void cons_putc(int c);

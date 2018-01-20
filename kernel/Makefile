@@ -26,8 +26,10 @@ KERN_SRCFILES := entry.S \
 			console.c \
 			printf.c \
 			monitor.c \
+			kdebug.c \
 			../lib/printfmt.c \
-			../lib/string.c
+			../lib/string.c \
+			../lib/readline.c
 
 KERN_OBJFILES := $(patsubst %.c, %.o, $(KERN_SRCFILES))
 KERN_OBJFILES := $(patsubst %.S, %.o, $(KERN_OBJFILES))
@@ -40,7 +42,7 @@ kernblock: $(KERN_SRCFILES)
 	$(NM) -n $@ > $@.sym
 
 install:
-	cp kernblock /zhsa022/usrhome/henry.zeng/github/lab/obj/kern/kernel
+	cp kernblock ../../lab/obj/kern/kernel
 
 clean:
 	rm -rf *.d *.o *.asm *.sym kernblock

@@ -1,6 +1,6 @@
 // Basic string routines.  Not hardware optimized, but not shabby.
 
-#include <kernel/string.h>
+#include <string.h>
 
 // Using assembly for memset/memmove
 // makes some difference on real hardware,

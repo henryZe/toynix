@@ -1,9 +1,8 @@
-#include <inc/stab.h>
-#include <inc/string.h>
-#include <inc/memlayout.h>
-#include <inc/assert.h>
-
-#include <kern/kdebug.h>
+#include <stab.h>
+#include <string.h>
+#include <memlayout.h>
+#include <assert.h>
+#include <kernel/kdebug.h>
 
 extern const struct Stab __STAB_BEGIN__[];	// Beginning of stabs table
 extern const struct Stab __STAB_END__[];	// End of stabs table
@@ -106,7 +105,7 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 {
 	const struct Stab *stabs, *stab_end;
 	const char *stabstr, *stabstr_end;
-	int lfile, rfile, lfun, rfun, lline, rline;
+	int lfile, rfile, lfun, rfun, lline;//, rline;
 
 	// Initialize *info
 	info->eip_file = "<unknown>";
@@ -158,13 +157,13 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 		addr -= info->eip_fn_addr;
 		// Search within the function definition for the line number.
 		lline = lfun;
-		rline = rfun;
+		//rline = rfun;
 	} else {
 		// Couldn't find function stab!  Maybe we're in an assembly
 		// file.  Search the whole file for the line number.
 		info->eip_fn_addr = addr;
 		lline = lfile;
-		rline = rfile;
+		//rline = rfile;
 	}
 	// Ignore stuff after the colon.
 	info->eip_fn_namelen = strfind(info->eip_fn_name, ':') - info->eip_fn_name;

@@ -1,7 +1,9 @@
-#ifndef JOS_KERN_MONITOR_H
-#define JOS_KERN_MONITOR_H
+#ifndef KERN_MONITOR_H
+#define KERN_MONITOR_H
 
 struct Trapframe;
+
+void test_backtrace(int x);
 
 // Activate the kernel monitor,
 // optionally providing a trap frame indicating the current state
@@ -13,4 +15,4 @@ int mon_help(int argc, char **argv, struct Trapframe *tf);
 int mon_kerninfo(int argc, char **argv, struct Trapframe *tf);
 int mon_backtrace(int argc, char **argv, struct Trapframe *tf);
 
-#endif	// !JOS_KERN_MONITOR_H
+#endif	// !KERN_MONITOR_H

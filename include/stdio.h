@@ -1,7 +1,7 @@
 #ifndef INC_STDIO_H
 #define INC_STDIO_H
 
-#include <kernel/stdarg.h>
+#include <stdarg.h>
 
 #ifndef NULL
 #define NULL	((void *) 0)
