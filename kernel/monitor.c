@@ -6,7 +6,6 @@
 #include <memlayout.h>
 //#include <assert.h>
 #include <x86.h>
-
 //#include <kernel/console.h>
 #include <kernel/monitor.h>
 //#include <kernel/kdebug.h>
