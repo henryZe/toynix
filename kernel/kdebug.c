@@ -105,7 +105,7 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 {
 	const struct Stab *stabs, *stab_end;
 	const char *stabstr, *stabstr_end;
-	int lfile, rfile, lfun, rfun, lline, rline;
+	int i, lfile, rfile, lfun, rfun, lline, rline;
 
 	// Initialize *info
 	info->eip_file = "<unknown>";
@@ -130,10 +130,10 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 	if (stabstr_end <= stabstr || stabstr_end[-1] != 0)
 		return -1;
 
-	// Now we find the right stabs that define the function containing
-	// 'eip'.  First, we find the basic source file containing 'eip'.
-	// Then, we look in that source file for the function.  Then we look
-	// for the line number.
+	// Now we find the right stabs that define the function containing 'eip':
+	// First, we find the basic source file containing 'eip'.
+	// Then, we look in that source file for the function.
+	// Then we look for the line number.
 
 	// Search the entire set of stabs for the source file (type N_SO).
 	lfile = 0;
@@ -195,11 +195,15 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 
 	// Set eip_fn_narg to the number of arguments taken by the function,
 	// or 0 if there was no containing function.
-	if (lfun < rfun)
-		for (lline = lfun + 1;
-		     lline < rfun && stabs[lline].n_type == N_PSYM;
-		     lline++)
+	if (lfun < rfun) {
+		for (i = 0, lline = lfun + 1;
+			lline < rfun && stabs[lline].n_type == N_PSYM;
+			i++, lline++) {
 			info->eip_fn_narg++;
+			info->eip_fn_arg[i] = stabstr + stabs[lline].n_strx;
+			info->eip_fn_arglen[i] = strfind(info->eip_fn_arg[i], ':') - info->eip_fn_arg[i];
+		}
+	}
 
 	return 0;
 }

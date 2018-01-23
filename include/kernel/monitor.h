@@ -3,7 +3,7 @@
 
 struct Trapframe;
 
-void test_backtrace(int x);
+int test_backtrace(int argc, char **argv, struct Trapframe *tf);
 
 // Activate the kernel monitor,
 // optionally providing a trap frame indicating the current state

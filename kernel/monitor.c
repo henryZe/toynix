@@ -101,12 +101,22 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 		for (i = 0; i < 5; i++)
 			cprintf("%08x ", *((unsigned long *)ebp + 2 + i));
 
-		cprintf("\n\t%s: %d, %.*s + 0x%x, %d arg(s)\n",
+		cprintf("\n%s: %d, %.*s + 0x%x, %d arg(s)",
 			info.eip_file, info.eip_line,
 			info.eip_fn_namelen, info.eip_fn_name,
 			eip - info.eip_fn_addr,
 			info.eip_fn_narg);
 
+		if (info.eip_fn_narg) {
+			cprintf(": ");
+			for (i = 0; i < info.eip_fn_narg; i++)
+				cprintf("%.*s ",
+					info.eip_fn_arglen[i], info.eip_fn_arg[i]);
+		}
+
+		cprintf("\n\n");
+
+		/* switch to parent function */
 		ebp = *((unsigned long *)ebp);
 	}
 
@@ -114,21 +124,24 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 }
 
 // Test the stack backtrace function
-void
-test_backtrace(int x)
+int
+test_backtrace(int argc, char **argv, struct Trapframe *tf)
 {
-	cprintf("entering test_backtrace %d\n", x);
-	if (x > 0)
-		test_backtrace(x-1);
+	argc -= 1;
+
+	cprintf("entering test_backtrace %d\n", argc);
+	if (argc > 0)
+		test_backtrace(argc, NULL, NULL);
 	else
-		mon_backtrace(0, 0, 0);
-	cprintf("leaving test_backtrace %d\n", x);
+		mon_backtrace(0, NULL, NULL);
+	cprintf("leaving test_backtrace %d\n", argc);
+
+	return 0;
 }
 
 /***** Kernel monitor command interpreter *****/
 
 #define WHITESPACE "\t\r\n "
-#define MAXARGS 16
 
 static int
 runcmd(char *buf, struct Trapframe *tf)
@@ -162,8 +175,10 @@ runcmd(char *buf, struct Trapframe *tf)
 	if (argc == 0)
 		return 0;
 	for (i = 0; i < ARRAY_SIZE(commands); i++) {
-		if (strcmp(argv[0], commands[i].name) == 0)
+		if (strcmp(argv[0], commands[i].name) == 0){
+			cprintf("argv: %p\n", argv);
 			return commands[i].func(argc, argv, tf);
+		}
 	}
 	cprintf("Unknown command '%s'\n", argv[0]);
 	return 0;
@@ -180,6 +195,7 @@ monitor(struct Trapframe *tf)
 	while (1) {
 		buf = readline("K> ");
 		if (buf != NULL)
+			cprintf("buf: %p\n", buf);
 			if (runcmd(buf, tf) < 0)
 				break;
 	}
