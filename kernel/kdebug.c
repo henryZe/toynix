@@ -105,7 +105,7 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 {
 	const struct Stab *stabs, *stab_end;
 	const char *stabstr, *stabstr_end;
-	int lfile, rfile, lfun, rfun, lline;//, rline;
+	int lfile, rfile, lfun, rfun, lline, rline;
 
 	// Initialize *info
 	info->eip_file = "<unknown>";
@@ -123,7 +123,7 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 		stabstr_end = __STABSTR_END__;
 	} else {
 		// Can't search for user-level addresses yet!
-  	        panic("User address");
+		panic("User address");
 	}
 
 	// String table validity checks
@@ -157,13 +157,13 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 		addr -= info->eip_fn_addr;
 		// Search within the function definition for the line number.
 		lline = lfun;
-		//rline = rfun;
+		rline = rfun;
 	} else {
 		// Couldn't find function stab!  Maybe we're in an assembly
 		// file.  Search the whole file for the line number.
 		info->eip_fn_addr = addr;
 		lline = lfile;
-		//rline = rfile;
+		rline = rfile;
 	}
 	// Ignore stuff after the colon.
 	info->eip_fn_namelen = strfind(info->eip_fn_name, ':') - info->eip_fn_name;
@@ -172,13 +172,13 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 	// Search within [lline, rline] for the line number stab.
 	// If found, set info->eip_line to the right line number.
 	// If not found, return -1.
-	//
-	// Hint:
-	//	There's a particular stabs type used for line numbers.
-	//	Look at the STABS documentation and <inc/stab.h> to find
-	//	which one.
-	// Your code here.
+	info->eip_file = stabstr + stabs[lfile].n_strx;
 
+	stab_binsearch(stabs, &lline, &rline, N_SLINE, addr);
+	if (lline <= rline)
+		info->eip_line = stabs[lline].n_desc;
+	else
+		return -1;
 
 	// Search backwards from the line number for the relevant filename
 	// stab.

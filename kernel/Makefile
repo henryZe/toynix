@@ -5,9 +5,7 @@ OBJCOPY := $(TOOLPREFIX)objcopy
 OBJDUMP := $(TOOLPREFIX)objdump
 NM := $(GCCPREFIX)nm
 
-CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -fvar-tracking -fvar-tracking-assignments -O0 -g -Wall -MD -gdwarf-2 -m32 -Werror -fno-omit-frame-pointer
-CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
-ASFLAGS = -m32 -gdwarf-2 -Wa,-divide
+CFLAGS = -pipe -nostdinc -O0 -fno-builtin -MD -fno-omit-frame-pointer -std=gnu99 -static -Wall -Wno-format -Wno-unused -Werror -gstabs -m32 -fno-tree-ch -fno-stack-protector -DJOS_KERNEL -gstabs
 LDFLAGS += -m $(shell $(LD) -V | grep elf_i386 2>/dev/null | head -n 1)
 KERN_LDFLAGS := $(LDFLAGS) -T kernel.ld -nostdlib
 GCC_LIB := $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
@@ -37,7 +35,7 @@ KERN_OBJFILES := $(patsubst %.S, %.o, $(KERN_OBJFILES))
 KERN_OBJFILES := $(patsubst ../lib/%, %, $(KERN_OBJFILES))
 
 kernblock: $(KERN_SRCFILES)
-	$(CC) $(CFLAGS) -nostdinc -I$(INCDIR) -c $(KERN_SRCFILES)
+	$(CC) $(CFLAGS) -I$(INCDIR) -c $(KERN_SRCFILES)
 	$(LD) -o $@ $(KERN_LDFLAGS) $(KERN_OBJFILES) $(GCC_LIB)
 	$(OBJDUMP) -S $@ > $@.asm
 	$(NM) -n $@ > $@.sym

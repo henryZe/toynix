@@ -4,11 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <memlayout.h>
-//#include <assert.h>
 #include <x86.h>
-//#include <kernel/console.h>
 #include <kernel/monitor.h>
-//#include <kernel/kdebug.h>
+#include <kernel/kdebug.h>
 
 #define CMDBUF_SIZE	80	// enough for one VGA text line
 
@@ -22,6 +20,7 @@ struct Command {
 static struct Command commands[] = {
 	{ "help", "Display this list of commands", mon_help },
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
+	{ "backtrace", "Display the trace of function call", mon_backtrace },
 };
 
 /***** Implementations of basic kernel monitor commands *****/
@@ -82,10 +81,10 @@ mon_kerninfo(int argc, char **argv, struct Trapframe *tf)
 int
 mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 {
-	unsigned long args[5];
+	struct Eipdebuginfo info;
 	unsigned long ebp;
 	unsigned long eip;
-	int i;
+	int i, ret;
 
 	/* read old func stack pointer (also new func base pointer) */
 	ebp = read_ebp();
@@ -94,11 +93,19 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 	while (ebp != 0) {
 		eip = *((unsigned long *)ebp + 1);
 
-		for (i = 0; i < ARRAY_SIZE(args); i++)
-			args[i] = *((unsigned long *)ebp + 2 + i);
+		ret = debuginfo_eip(eip, &info);
+		if (ret < 0)
+			cprintf("debuginfo not found location of eip\n");
 
-		cprintf("ebp[%08x] eip[%08x] [%08x %08x %08x %08x %08x]\n",
-			ebp, eip, args[0], args[1], args[2], args[3], args[4]);
+		cprintf("ebp[%08x] eip[%08x] ", ebp, eip);
+		for (i = 0; i < 5; i++)
+			cprintf("%08x ", *((unsigned long *)ebp + 2 + i));
+
+		cprintf("\n\t%s: %d, %.*s + 0x%x, %d arg(s)\n",
+			info.eip_file, info.eip_line,
+			info.eip_fn_namelen, info.eip_fn_name,
+			eip - info.eip_fn_addr,
+			info.eip_fn_narg);
 
 		ebp = *((unsigned long *)ebp);
 	}

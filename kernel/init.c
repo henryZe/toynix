@@ -4,8 +4,6 @@
 #include <kernel/console.h>
 #include <kernel/monitor.h>
 
-#define NESTED_TIME_TEST 5
-
 void
 init(void)
 {
