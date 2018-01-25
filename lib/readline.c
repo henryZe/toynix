@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <error.h>
 
 #define BUFLEN 1024
 static char buf[BUFLEN];
@@ -35,4 +34,3 @@ readline(const char *prompt)
 		}
 	}
 }
-

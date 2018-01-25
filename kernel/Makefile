@@ -26,6 +26,8 @@ KERN_SRCFILES := entry.S \
 			monitor.c \
 			kdebug.c \
 			panic.c \
+			pmap.c \
+			kclock.c \
 			../lib/printfmt.c \
 			../lib/string.c \
 			../lib/readline.c

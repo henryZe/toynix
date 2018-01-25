@@ -3,6 +3,7 @@
 #include <x86.h>
 #include <kernel/console.h>
 #include <kernel/monitor.h>
+#include <kernel/pmap.h>
 
 void
 init(void)
@@ -23,6 +24,8 @@ init(void)
 	cons_init();
 
 	cprintf("Enter toynix...\n");
+
+	mem_init();
 
 	// Drop into the kernel monitor.
 	while (1)
