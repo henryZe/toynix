@@ -94,14 +94,14 @@ boot_alloc(uint32_t n)
 	if (!nextfree) {
 		extern char end[];
 		// already used by loading image
-		nextfree = ROUNDUP((char *) end, PGSIZE);
+		nextfree = ROUNDUP((char *)end, PGSIZE);
 	}
 
 	// Allocate a chunk large enough to hold 'n' bytes, then update
 	// nextfree.  Make sure nextfree is kept aligned
 	// to a multiple of PGSIZE.
 	temp = nextfree;
-	alloc_size = ROUNDUP(n , PGSIZE);
+	alloc_size = ROUNDUP(n, PGSIZE);
 	nextfree += alloc_size;
 	if (((uint32_t)nextfree - KERNBASE) > (npages * PGSIZE))
 		panic("Out of memory\n");
@@ -131,9 +131,6 @@ mem_init(void)
 	kern_pgdir = (pde_t *)boot_alloc(PGSIZE);
 	memset(kern_pgdir, 0, PGSIZE);
 
-	// Remove this line when you're ready to test this function.
-	panic("mem_init: This function is not finished\n");
-
 	//////////////////////////////////////////////////////////////////////
 	// Recursively insert PD in itself as a page table, to form
 	// a virtual page table at virtual address UVPT.
@@ -149,8 +146,8 @@ mem_init(void)
 	// each physical page, there is a corresponding struct PageInfo in this
 	// array.  'npages' is the number of physical pages in memory.  Use memset
 	// to initialize all fields of each struct PageInfo to 0.
-	// Your code goes here:
-
+	pages = (struct PageInfo *)boot_alloc(sizeof(struct PageInfo) * npages);
+	memset(pages, 0, sizeof(struct PageInfo) * npages);
 
 	//////////////////////////////////////////////////////////////////////
 	// Now that we've allocated the initial kernel data structures, we set
@@ -250,15 +247,37 @@ page_init(void)
 	//     in physical memory?  Which pages are already in use for
 	//     page tables and other data structures?
 	//
+	//
+	//  |    base memory   |  io hole |     extern memory     |
+	//  | zero page | free | reserved | boot allocated | free |
+	//
+	//
 	// Change the code to reflect this.
 	// NB: DO NOT actually touch the physical memory corresponding to
 	// free pages!
-	size_t i;
+	size_t i, allocated_pgnum, iohole_pgnum, free_pgnum = 0;
+
+	allocated_pgnum = ((size_t)boot_alloc(0) - KERNBASE)/PGSIZE;
+	iohole_pgnum = (EXTPHYSMEM - IOPHYSMEM)/PGSIZE;
+
 	for (i = 0; i < npages; i++) {
-		pages[i].pp_ref = 0;
-		pages[i].pp_link = page_free_list;
-		page_free_list = &pages[i];
+		if (i == 0) {
+			/* for zero page */
+			pages[i].pp_ref = 1;
+
+		} else if ((i >= npages_basemem) && \
+			(i < npages_basemem + iohole_pgnum + allocated_pgnum)) {
+			/* used for io_hole & boot_alloc */
+			pages[i].pp_ref = 1;
+
+		} else {
+			free_pgnum++;
+			pages[i].pp_link = page_free_list;
+			page_free_list = &pages[i];
+		}
 	}
+
+	cprintf("npages:%d free pages:%d\n", npages, free_pgnum);
 }
 
 //
@@ -276,8 +295,22 @@ page_init(void)
 struct PageInfo *
 page_alloc(int alloc_flags)
 {
-	// Fill this function in
-	return 0;
+	struct PageInfo *pp;
+
+	pp = page_free_list;
+	if (!pp) {
+		cprintf("Out of free memory.\n");
+		goto out; 
+	}
+
+	page_free_list = page_free_list->pp_link;
+	pp->pp_link = NULL;
+
+	if (alloc_flags & ALLOC_ZERO)
+		memset(page2kva(pp), 0, PGSIZE);
+
+out:
+	return pp;
 }
 
 //
@@ -287,9 +320,17 @@ page_alloc(int alloc_flags)
 void
 page_free(struct PageInfo *pp)
 {
-	// Fill this function in
-	// Hint: You may want to panic if pp->pp_ref is nonzero or
-	// pp->pp_link is not NULL.
+	if (!pp->pp_ref && !pp->pp_link) {
+		pp->pp_link = page_free_list;
+		page_free_list = pp;
+
+	} else if (pp->pp_ref) {
+		panic("Busy page\n");
+
+	} else {
+		/* pp->pp_link is not NULL */
+		panic("Free twice\n");
+	}
 }
 
 //
@@ -445,7 +486,7 @@ check_page_free_list(bool only_low_memory)
 {
 	struct PageInfo *pp;
 	unsigned pdx_limit = only_low_memory ? 1 : NPDENTRIES;
-	int nfree_basemem = 0, nfree_extmem = 0;
+	int nfree_basemem = 0, nfree_extmem = 0, i = 0;
 	char *first_free_page;
 
 	if (!page_free_list)
@@ -456,8 +497,10 @@ check_page_free_list(bool only_low_memory)
 		// list, since entry_pgdir does not map all pages.
 		struct PageInfo *pp1, *pp2;
 		struct PageInfo **tp[2] = { &pp1, &pp2 };
+
 		for (pp = page_free_list; pp; pp = pp->pp_link) {
-			int pagetype = PDX(page2pa(pp)) >= pdx_limit;
+			int pagetype = (PDX(page2pa(pp)) >= pdx_limit);
+
 			*tp[pagetype] = pp;
 			tp[pagetype] = &pp->pp_link;
 		}
@@ -473,29 +516,35 @@ check_page_free_list(bool only_low_memory)
 			memset(page2kva(pp), 0x97, 128);
 
 	first_free_page = (char *) boot_alloc(0);
-	for (pp = page_free_list; pp; pp = pp->pp_link) {
-		// check that we didn't corrupt the free list itself
-		assert(pp >= pages);
-		assert(pp < pages + npages);
-		assert(((char *) pp - (char *) pages) % sizeof(*pp) == 0);
+	for (pp = page_free_list; pp; pp = pp->pp_link) {		
+		if (PDX(page2pa(pp)) < pdx_limit) {
+			// check that we didn't corrupt the free list itself
+			assert(pp >= pages);
+			assert(pp < pages + npages);
+			assert(((char *) pp - (char *) pages) % sizeof(*pp) == 0);
 
-		// check a few pages that shouldn't be on the free list
-		assert(page2pa(pp) != 0);
-		assert(page2pa(pp) != IOPHYSMEM);
-		assert(page2pa(pp) != EXTPHYSMEM - PGSIZE);
-		assert(page2pa(pp) != EXTPHYSMEM);
-		assert(page2pa(pp) < EXTPHYSMEM || (char *) page2kva(pp) >= first_free_page);
+			// check a few pages that shouldn't be on the free list
+			assert(page2pa(pp) != 0);
+			assert(page2pa(pp) != IOPHYSMEM);
+			assert(page2pa(pp) != EXTPHYSMEM - PGSIZE);
+			assert(page2pa(pp) != EXTPHYSMEM);
+			assert(page2pa(pp) < EXTPHYSMEM || (char *) page2kva(pp) >= first_free_page);
 
-		if (page2pa(pp) < EXTPHYSMEM)
-			++nfree_basemem;
-		else
-			++nfree_extmem;
+			if (page2pa(pp) < EXTPHYSMEM)
+				++nfree_basemem;
+			else
+				++nfree_extmem;
+
+		} else {
+			break;
+		}
 	}
 
 	assert(nfree_basemem > 0);
 	assert(nfree_extmem > 0);
-
-	cprintf("check_page_free_list() succeeded!\n");
+		
+	cprintf("nfree_basemem %dKB, nfree_extmem %dKB\n", nfree_basemem << 2, nfree_extmem << 2);
+	cprintf("check_page_free_list(%d) succeeded!\n", only_low_memory);
 }
 
 //

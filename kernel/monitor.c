@@ -176,7 +176,6 @@ runcmd(char *buf, struct Trapframe *tf)
 		return 0;
 	for (i = 0; i < ARRAY_SIZE(commands); i++) {
 		if (strcmp(argv[0], commands[i].name) == 0){
-			cprintf("argv: %p\n", argv);
 			return commands[i].func(argc, argv, tf);
 		}
 	}
@@ -195,7 +194,6 @@ monitor(struct Trapframe *tf)
 	while (1) {
 		buf = readline("K> ");
 		if (buf != NULL)
-			cprintf("buf: %p\n", buf);
 			if (runcmd(buf, tf) < 0)
 				break;
 	}
