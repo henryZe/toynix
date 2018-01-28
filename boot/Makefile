@@ -11,7 +11,7 @@ LDFLAGS += -m $(shell $(LD) -V | grep elf_i386 2>/dev/null | head -n 1)
 
 INCDIR = ../include
 
-all: bootblock install
+all: bootblock
 
 bootblock: boot.S bootmain.c
 	$(CC) $(CFLAGS) -O -nostdinc -I$(INCDIR) -c bootmain.c
@@ -20,9 +20,6 @@ bootblock: boot.S bootmain.c
 	$(OBJDUMP) -S $@.o > $@.asm
 	$(OBJCOPY) -S -O binary -j .text $@.o $@
 	./sign.pl $@
-
-install:
-	cp bootblock ../../lab/obj/boot/boot
 
 clean:
 	rm -rf *.d *.o *.asm bootblock

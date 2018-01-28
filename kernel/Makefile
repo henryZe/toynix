@@ -12,7 +12,7 @@ GCC_LIB := $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
 
 INCDIR = ../include
 
-all: kernblock install
+all: kernblock.img
 
 # entry.S must be first, so that it's the first code in the text segment!!!
 #
@@ -37,14 +37,18 @@ KERN_OBJFILES := $(patsubst %.S, %.o, $(KERN_OBJFILES))
 KERN_OBJFILES := $(patsubst ../lib/%, %, $(KERN_OBJFILES))
 
 kernblock: $(KERN_SRCFILES)
+	@echo + mk $@
 	$(CC) $(CFLAGS) -I$(INCDIR) -c $(KERN_SRCFILES)
 	$(LD) -o $@ $(KERN_LDFLAGS) $(KERN_OBJFILES) $(GCC_LIB)
 	$(OBJDUMP) -S $@ > $@.asm
 	$(NM) -n $@ > $@.sym
 
-install:
-	cp kernblock ../../lab/obj/kern/kernel
+kernblock.img: kernblock ../boot/bootblock
+	@echo + mk $@
+	dd if=/dev/zero of=kernblock.img~ count=10000 2>/dev/null
+	dd if=../boot/bootblock of=kernblock.img~ conv=notrunc 2>/dev/null
+	dd if=kernblock of=kernblock.img~ seek=1 conv=notrunc 2>/dev/null
+	mv kernblock.img~ kernblock.img
 
 clean:
-	rm -rf *.d *.o *.asm *.sym kernblock
-
+	rm -rf *.d *.o *.asm *.sym kernblock kernblock.img
