@@ -1,9 +1,3 @@
-*.o
-*.d
-*.asm
-*.sym
-*.img
-bootblock
-kernblock
 .gdbinit
+obj/
 

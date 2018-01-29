@@ -66,7 +66,7 @@ mon_kerninfo(int argc, char **argv, struct Trapframe *tf)
 *	ret					# convert call: 1. eip = *esp; 2. (esp + 4)
 *
 *
-*	refer to kernblock.asm:
+*	refer to kernel.asm:
 *	ebp[f0109ec8] eip[f0100071 : read_ebp] 		args[f0101910 00010074 f0109f08 0000001a f01009a8]
 *	ebp[f0109f18] eip[f0100152 : mon_backtrace]	args[00000000 00000000 00000000 0000001a f0101958]
 *	ebp[f0109f38] eip[f0100134 : test_backtrace]	args[00000000 00000001 f0109f64 0000001a f0101958]
