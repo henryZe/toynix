@@ -303,7 +303,7 @@ page_alloc(int alloc_flags)
 
 	pp = page_free_list;
 	if (!pp) {
-		cprintf("Out of free memory.\n");
+		warn("%e", E_NO_MEM);
 		goto out;
 	}
 
@@ -437,14 +437,19 @@ page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 	if (!pt_entry)
 		return -E_NO_MEM;
 
-	if (*pt_entry & PTE_P)
-		page_remove(pgdir, va);
+	if (*pt_entry & PTE_P) {
+		/* the same pp is re-inserted at the same virtual address */
+		if (page_lookup(pgdir, va, NULL) == pp)
+			goto out;
 
+		page_remove(pgdir, va);
+	}
+	pp->pp_ref++;
+
+out:
 	/* link page to page table entry */
 	*pt_entry = (page2pa(pp) | PTE_P | perm);
 	pgdir[PDX(va)] |= perm;
-
-	pp->pp_ref++;
 
 	return 0;
 }
