@@ -4,6 +4,7 @@
 #include <mmu.h>
 #include <string.h>
 #include <assert.h>
+#include <error.h>
 #include <kernel/pmap.h>
 #include <kernel/kclock.h>
 
@@ -300,7 +301,7 @@ page_alloc(int alloc_flags)
 	pp = page_free_list;
 	if (!pp) {
 		cprintf("Out of free memory.\n");
-		goto out; 
+		goto out;
 	}
 
 	page_free_list = page_free_list->pp_link;
@@ -355,39 +356,51 @@ page_decref(struct PageInfo* pp)
 //    - Otherwise, the new page's reference count is incremented,
 //	the page is cleared,
 //	and pgdir_walk returns a pointer into the new page table page.
-//
-// Hint 1: you can turn a PageInfo * into the physical address of the
-// page it refers to with page2pa() from kern/pmap.h.
-//
-// Hint 2: the x86 MMU checks permission bits in both the page directory
-// and the page table, so it's safe to leave permissions in the page
-// directory more permissive than strictly necessary.
-//
-// Hint 3: look at inc/mmu.h for useful macros that mainipulate page
-// table and page directory entries.
-//
 pte_t *
 pgdir_walk(pde_t *pgdir, const void *va, int create)
 {
-	// Fill this function in
-	return NULL;
+	uint32_t pd_off = PDX(va), pt_off = PTX(va);
+	pde_t *pd_entry = pgdir + pd_off;
+	pte_t *pt_entry;
+	struct PageInfo *new_page;
+
+	if (!(*pd_entry & PTE_P)) {
+		if (!create)
+			return NULL;
+
+		new_page = page_alloc(ALLOC_ZERO);
+		if (!new_page)
+			return NULL;
+
+		*pd_entry = (page2pa(new_page) | PTE_P);
+		new_page->pp_ref++;
+	}
+
+	pt_entry = KADDR(PTE_ADDR(*pd_entry));
+	return (pt_entry + pt_off);
 }
 
-//
 // Map [va, va+size) of virtual address space to physical [pa, pa+size)
 // in the page table rooted at pgdir.  Size is a multiple of PGSIZE, and
 // va and pa are both page-aligned.
 // Use permission bits perm|PTE_P for the entries.
 //
-// This function is only intended to set up the ``static'' mappings
+// This function is only intended to set up the "static'' mappings
 // above UTOP. As such, it should *not* change the pp_ref field on the
 // mapped pages.
-//
-// Hint: the TA solution uses pgdir_walk
 static void
 boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm)
 {
-	// Fill this function in
+	pte_t *pt_entry;
+	int i, npage = ROUNDUP(size, PGSIZE);
+
+	for (i = 0; i < npage; i++) {
+		pt_entry = pgdir_walk(pgdir, (void *)va, 1);
+		*pt_entry = (pa | PTE_P | perm);
+
+		va += PGSIZE;
+		pa += PGSIZE;
+	}
 }
 
 //
@@ -396,7 +409,7 @@ boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm
 // should be set to 'perm|PTE_P'.
 //
 // Requirements
-//   - If there is already a page mapped at 'va', it should be page_remove()d.
+//   - If there is already a page mapped at 'va', it should be page_remove().
 //   - If necessary, on demand, a page table should be allocated and inserted
 //     into 'pgdir'.
 //   - pp->pp_ref should be incremented if the insertion succeeds.
@@ -411,14 +424,25 @@ boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm
 // RETURNS:
 //   0 on success
 //   -E_NO_MEM, if page table couldn't be allocated
-//
-// Hint: The TA solution is implemented using pgdir_walk, page_remove,
-// and page2pa.
-//
 int
 page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 {
-	// Fill this function in
+	pte_t *pt_entry;
+
+	/* create page table entry in page directory */
+	pt_entry = pgdir_walk(pgdir, va, 1);
+	if (!pt_entry)
+		return -E_NO_MEM;
+
+	if (*pt_entry & PTE_P)
+		page_remove(pgdir, va);
+
+	/* link page to page table entry */
+	*pt_entry = (page2pa(pp) | PTE_P | perm);
+	pgdir[PDX(va)] |= perm;
+
+	pp->pp_ref++;
+
 	return 0;
 }
 
@@ -430,14 +454,22 @@ page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 // but should not be used by most callers.
 //
 // Return NULL if there is no page mapped at va.
-//
-// Hint: the TA solution uses pgdir_walk and pa2page.
-//
 struct PageInfo *
 page_lookup(pde_t *pgdir, void *va, pte_t **pte_store)
 {
-	// Fill this function in
-	return NULL;
+	pte_t *pt_entry;
+
+	pt_entry = pgdir_walk(pgdir, va, 0);
+	if (!pt_entry)
+		return NULL;
+
+	if (!(*pt_entry & PTE_P))
+		return NULL;
+
+	if (pte_store)
+		*pte_store = pt_entry;
+
+	return pa2page(PTE_ADDR(*pt_entry));
 }
 
 //
@@ -451,14 +483,23 @@ page_lookup(pde_t *pgdir, void *va, pte_t **pte_store)
 //     (if such a PTE exists)
 //   - The TLB must be invalidated if you remove an entry from
 //     the page table.
-//
-// Hint: The TA solution is implemented using page_lookup,
-// 	tlb_invalidate, and page_decref.
-//
 void
 page_remove(pde_t *pgdir, void *va)
 {
-	// Fill this function in
+	pte_t *pt_entry;
+	struct PageInfo *page;
+
+	page = page_lookup(pgdir, va, &pt_entry);
+	if (!page)
+		return;
+
+	/* decrease ref count on the physical page */
+	page_decref(page);
+
+	/* clean page table entry */
+	*pt_entry = 0;
+	/* clean TLB */
+	tlb_invalidate(pgdir, va);
 }
 
 //
@@ -515,29 +556,25 @@ check_page_free_list(bool only_low_memory)
 		if (PDX(page2pa(pp)) < pdx_limit)
 			memset(page2kva(pp), 0x97, 128);
 
-	first_free_page = (char *) boot_alloc(0);
+	first_free_page = (char *)boot_alloc(0);
 	for (pp = page_free_list; pp; pp = pp->pp_link) {		
-		if (PDX(page2pa(pp)) < pdx_limit) {
-			// check that we didn't corrupt the free list itself
-			assert(pp >= pages);
-			assert(pp < pages + npages);
-			assert(((char *) pp - (char *) pages) % sizeof(*pp) == 0);
+		// check that we didn't corrupt the free list itself
+		assert(pp >= pages);
+		assert(pp < pages + npages);
+		assert(((char *) pp - (char *) pages) % sizeof(*pp) == 0);
 
-			// check a few pages that shouldn't be on the free list
-			assert(page2pa(pp) != 0);
-			assert(page2pa(pp) != IOPHYSMEM);
-			assert(page2pa(pp) != EXTPHYSMEM - PGSIZE);
-			assert(page2pa(pp) != EXTPHYSMEM);
-			assert(page2pa(pp) < EXTPHYSMEM || (char *) page2kva(pp) >= first_free_page);
+		// check a few pages that shouldn't be on the free list
+		assert(page2pa(pp) != 0);
+		assert(page2pa(pp) != IOPHYSMEM);
+		assert(page2pa(pp) != EXTPHYSMEM - PGSIZE);
+		assert(page2pa(pp) != EXTPHYSMEM);
+		cprintf("pa: %p, va: %p, first: %p\n", page2pa(pp), page2kva(pp), first_free_page);
+		assert(page2pa(pp) < EXTPHYSMEM || (char *) page2kva(pp) >= first_free_page);
 
-			if (page2pa(pp) < EXTPHYSMEM)
-				++nfree_basemem;
-			else
-				++nfree_extmem;
-
-		} else {
-			break;
-		}
+		if (page2pa(pp) < EXTPHYSMEM)
+			++nfree_basemem;
+		else
+			++nfree_extmem;
 	}
 
 	assert(nfree_basemem > 0);
