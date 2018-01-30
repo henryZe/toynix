@@ -8,6 +8,8 @@
 #include <kernel/pmap.h>
 #include <kernel/kclock.h>
 
+#define OS_MAX_MEMORY (256 * 1024)
+
 // These variables are set by i386_detect_memory()
 size_t npages;			// Amount of physical memory (in pages)
 static size_t npages_basemem;	// Amount of base memory (in pages)
@@ -48,6 +50,7 @@ i386_detect_memory(void)
 	else
 		totalmem = basemem;
 
+	totalmem = (totalmem > OS_MAX_MEMORY)? OS_MAX_MEMORY : totalmem;
 	npages = totalmem / (PGSIZE / 1024);
 	npages_basemem = basemem / (PGSIZE / 1024);
 
@@ -568,7 +571,6 @@ check_page_free_list(bool only_low_memory)
 		assert(page2pa(pp) != IOPHYSMEM);
 		assert(page2pa(pp) != EXTPHYSMEM - PGSIZE);
 		assert(page2pa(pp) != EXTPHYSMEM);
-		cprintf("pa: %p, va: %p, first: %p\n", page2pa(pp), page2kva(pp), first_free_page);
 		assert(page2pa(pp) < EXTPHYSMEM || (char *) page2kva(pp) >= first_free_page);
 
 		if (page2pa(pp) < EXTPHYSMEM)
