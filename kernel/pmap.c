@@ -8,7 +8,7 @@
 #include <kernel/pmap.h>
 #include <kernel/kclock.h>
 
-#define OS_MAX_MEMORY (256 * 1024)
+#define OS_MAX_MEMORY (256 * 1024)	/* KB */
 
 // These variables are set by i386_detect_memory()
 size_t npages;			// Amount of physical memory (in pages)
@@ -126,7 +126,7 @@ void
 mem_init(void)
 {
 	uint32_t cr0;
-	size_t n;
+	size_t i, n;
 
 	// Find out how much memory the machine has (npages & npages_basemem).
 	i386_detect_memory();
@@ -174,7 +174,9 @@ mem_init(void)
 	//    - the new image at UPAGES -- kernel R, user R
 	//      (ie. perm = PTE_U | PTE_P)
 	//    - pages itself -- kernel RW, user NONE
-	// Your code goes here:
+	boot_map_region(kern_pgdir, UPAGES,
+				(sizeof(struct PageInfo) * npages),
+				PADDR(pages), PTE_U);
 
 	//////////////////////////////////////////////////////////////////////
 	// Use the physical memory that 'bootstack' refers to as the kernel
@@ -186,7 +188,8 @@ mem_init(void)
 	//       the kernel overflows its stack, it will fault rather than
 	//       overwrite memory.  Known as a "guard page".
 	//     Permissions: kernel RW, user NONE
-	// Your code goes here:
+	boot_map_region(kern_pgdir, (KSTACKTOP - KSTKSIZE),
+					KSTKSIZE, PADDR(bootstack), PTE_W);
 
 	//////////////////////////////////////////////////////////////////////
 	// Map all of physical memory at KERNBASE.
@@ -195,7 +198,8 @@ mem_init(void)
 	// We might not have 2^32 - KERNBASE bytes of physical memory, but
 	// we just set up the mapping anyway.
 	// Permissions: kernel RW, user NONE
-	// Your code goes here:
+	boot_map_region(kern_pgdir, KERNBASE,
+					(npages * PGSIZE), 0, PTE_W);
 
 	// Check that the initial page directory has been set up correctly.
 	check_kern_pgdir();
@@ -375,7 +379,7 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
 		if (!new_page)
 			return NULL;
 
-		*pd_entry = (page2pa(new_page) | PTE_P);
+		*pd_entry = (page2pa(new_page) | PTE_P | PTE_W | PTE_U);
 		new_page->pp_ref++;
 	}
 
@@ -395,11 +399,11 @@ static void
 boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm)
 {
 	pte_t *pt_entry;
-	int i, npage = ROUNDUP(size, PGSIZE);
+	int i, npage = ROUNDUP(size, PGSIZE) / PGSIZE;
 
 	for (i = 0; i < npage; i++) {
 		pt_entry = pgdir_walk(pgdir, (void *)va, 1);
-		*pt_entry = (pa | PTE_P | perm);
+		*pt_entry = (PTE_ADDR(pa) | PTE_P | perm);
 
 		va += PGSIZE;
 		pa += PGSIZE;
@@ -690,7 +694,6 @@ check_kern_pgdir(void)
 	for (i = 0; i < n; i += PGSIZE)
 		assert(check_va2pa(pgdir, UPAGES + i) == PADDR(pages) + i);
 
-
 	// check phys mem
 	for (i = 0; i < npages * PGSIZE; i += PGSIZE)
 		assert(check_va2pa(pgdir, KERNBASE + i) == i);
@@ -733,9 +736,11 @@ check_va2pa(pde_t *pgdir, uintptr_t va)
 	pgdir = &pgdir[PDX(va)];
 	if (!(*pgdir & PTE_P))
 		return ~0;
+
 	p = (pte_t*) KADDR(PTE_ADDR(*pgdir));
 	if (!(p[PTX(va)] & PTE_P))
 		return ~0;
+
 	return PTE_ADDR(p[PTX(va)]);
 }
 
