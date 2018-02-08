@@ -63,7 +63,8 @@ i386_detect_memory(void)
 // Set up memory mappings above UTOP.
 // --------------------------------------------------------------
 
-static void boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm);
+static void boot_map_region(pde_t *pgdir, uintptr_t va,
+				size_t size, physaddr_t pa, int perm);
 static void check_page_free_list(bool only_low_memory);
 static void check_page_alloc(void);
 static void check_kern_pgdir(void);
@@ -569,7 +570,7 @@ check_page_free_list(bool only_low_memory)
 			memset(page2kva(pp), 0x97, 128);
 
 	first_free_page = (char *)boot_alloc(0);
-	for (pp = page_free_list; pp; pp = pp->pp_link) {		
+	for (pp = page_free_list; pp; pp = pp->pp_link) {
 		// check that we didn't corrupt the free list itself
 		assert(pp >= pages);
 		assert(pp < pages + npages);
@@ -590,7 +591,7 @@ check_page_free_list(bool only_low_memory)
 
 	assert(nfree_basemem > 0);
 	assert(nfree_extmem > 0);
-		
+
 	cprintf("nfree_basemem %dKB, nfree_extmem %dKB\n", nfree_basemem << 2, nfree_extmem << 2);
 	cprintf("check_page_free_list(%d) succeeded!\n", only_low_memory);
 }
