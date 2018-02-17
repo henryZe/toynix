@@ -65,6 +65,8 @@ i386_detect_memory(void)
 
 static void boot_map_region(pde_t *pgdir, uintptr_t va,
 				size_t size, physaddr_t pa, int perm);
+static void boot_map_region_by_hugepage(pde_t *pgdir,
+				uintptr_t va, size_t size, physaddr_t pa, int perm);
 static void check_page_free_list(bool only_low_memory);
 static void check_page_alloc(void);
 static void check_kern_pgdir(void);
@@ -192,6 +194,11 @@ mem_init(void)
 	boot_map_region(kern_pgdir, (KSTACKTOP - KSTKSIZE),
 					KSTKSIZE, PADDR(bootstack), PTE_W);
 
+	cprintf("UPAGES 0x%x paddr 0x%x\n",
+		UPAGES, PADDR(pages));
+	cprintf("KSTACKTOP 0x%x KSTK_START 0x%x paddr 0x%x\n",
+		KSTACKTOP, (KSTACKTOP - KSTKSIZE), PADDR(bootstack));
+
 	//////////////////////////////////////////////////////////////////////
 	// Map all of physical memory at KERNBASE.
 	// Ie.  the VA range [KERNBASE, 2^32) should map to
@@ -199,11 +206,18 @@ mem_init(void)
 	// We might not have 2^32 - KERNBASE bytes of physical memory, but
 	// we just set up the mapping anyway.
 	// Permissions: kernel RW, user NONE
-	boot_map_region(kern_pgdir, KERNBASE,
-					(npages * PGSIZE), 0, PTE_W);
+
+	/* optimize by PTE_PS */
+	/* boot_map_region(kern_pgdir, KERNBASE,
+					(0 - KERNBASE), 0, PTE_W);
+	*/
+
+	/* for reducing PTE overhead */
+	boot_map_region_by_hugepage(kern_pgdir, KERNBASE,
+					(0 - KERNBASE), 0, PTE_W);
 
 	// Check that the initial page directory has been set up correctly.
-	check_kern_pgdir();
+	//check_kern_pgdir();
 
 	// Switch from the minimal entry page directory to the full kern_pgdir
 	// page table we just created.	Our instruction pointer should be
@@ -409,6 +423,29 @@ boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm
 		va += PGSIZE;
 		pa += PGSIZE;
 	}
+}
+
+static void
+enable_cr4_pse(void)
+{
+	uint32_t cr4 = rcr4();
+
+	cr4 |= CR4_PSE;
+	lcr4(cr4);
+}
+
+static void
+boot_map_region_by_hugepage(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm)
+{
+	size_t i = 0;
+
+	enable_cr4_pse();
+
+	for (i = 0; i < (size >> PDXSHIFT); i++) {
+        pgdir[PDX(va)] = pa | PTE_P | PTE_PS | perm;
+        va += PTSIZE;
+        pa += PTSIZE;
+    }
 }
 
 //
