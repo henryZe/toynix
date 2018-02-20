@@ -7,6 +7,7 @@
 #include <x86.h>
 #include <kernel/monitor.h>
 #include <kernel/kdebug.h>
+#include <kernel/pmap.h>
 
 #define CMDBUF_SIZE	80	// enough for one VGA text line
 
@@ -21,6 +22,7 @@ static struct Command commands[] = {
 	{ "help", "Display this list of commands", mon_help },
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
 	{ "backtrace", "Display the trace of function call", mon_backtrace },
+	{ "showmapping", "Display the physical page info of specified va region mapping", mon_showmapping },
 };
 
 /***** Implementations of basic kernel monitor commands *****/
@@ -139,6 +141,90 @@ test_backtrace(int argc, char **argv, struct Trapframe *tf)
 	return 0;
 }
 
+int
+mon_showmapping(int argc, char **argv, struct Trapframe *tf)
+{
+	char *arg1 = argv[1];
+	char *arg2 = argv[2];
+	char *arg3 = argv[3];
+	char bit_w;
+	char bit_u;
+	char bit_a;
+	char bit_d;
+	char bit_s;
+
+	pde_t pde;
+	uintptr_t va_begin = strtol(arg1, NULL, 16);
+	uintptr_t va_last = strtol(arg2, NULL, 16);
+	uintptr_t va_pde_begin;
+	uintptr_t va_pde_end;
+
+	if (arg1 == NULL || arg2 == NULL || arg3) {
+		cprintf("It needs exactly address region!\n");
+		return 0;
+	}
+
+	if (va_begin > va_last) {
+		cprintf("The first argument should not larger than the second argument!\n");
+		return 0;
+	}
+
+	cprintf("entry\t\tVA range\t\t\tflag\tPA range\n");
+	cprintf("============================================================================================\n");
+
+	while (va_begin <= va_last) {
+		pde = kern_pgdir[PDX(va_begin)];
+		va_pde_begin = ROUNDDOWN(va_begin, PTSIZE);
+		va_pde_end = va_pde_begin + PTSIZE - 1;
+
+		if (pde & PTE_P) {
+			bit_w = (pde & PTE_W)? 'W': 'R';
+			bit_u = (pde & PTE_U)? 'U': 'S';
+			bit_a = (pde & PTE_A)? 'A': '-';
+			bit_d = (pde & PTE_D)? 'D': '-';
+			bit_s = (pde & PTE_PS)? 'S': '-';
+
+			cprintf("\n-PDE[%03x]\t", PDX(va_begin));
+			cprintf("[%08x - %08x]\t", va_pde_begin, va_pde_end);
+			cprintf("--%c%c%c--%c%cP\t", bit_s, bit_d, bit_a, bit_u, bit_w);
+
+			if (pde & PTE_PS)
+				cprintf("[%08x - %08x]\n", PTE_ADDR(pde), PTE_ADDR(pde) + PTSIZE - 1);
+			else
+				cprintf("\n");
+
+			if (!(pde & PTE_PS)) {
+				pde = PTE_ADDR(pde);
+				pte_t *pte = (pte_t *)KADDR(pde);
+
+				uintptr_t va_pte_begin = ROUNDDOWN(va_begin, PGSIZE);
+				for (size_t i = PTX(va_begin); (i < (1 << 10)) && (va_pte_begin <= va_last);
+						va_pte_begin += PGSIZE, i++) {
+					if (pte[i] & PTE_P) {
+						bit_w = (pde & PTE_W)? 'W': 'R';
+						bit_u = (pde & PTE_U)? 'U': 'S';
+						bit_a = (pde & PTE_A)? 'A': '-';
+						bit_d = (pde & PTE_D)? 'D': '-';
+						bit_s = (pde & PTE_PS)? 'S': '-';
+
+						cprintf("|PTE[%03x]\t", i);
+						cprintf("[%08x - %08x]\t", va_pte_begin, va_pte_begin + PGSIZE - 1);
+						cprintf("--%c%c%c--%c%cP\t", bit_s, bit_d, bit_a, bit_u, bit_w);
+						cprintf("[%08x - %08x]\n", PTE_ADDR(pte[i]), PTE_ADDR(pte[i]) + PGSIZE - 1);
+					}
+				}
+			}
+		}
+
+		if (va_pde_end == (~0))
+			break;
+
+		va_begin = va_pde_end + 1;
+	}
+
+	return 0;
+}
+
 /***** Kernel monitor command interpreter *****/
 
 #define WHITESPACE "\t\r\n "
@@ -175,7 +261,7 @@ runcmd(char *buf, struct Trapframe *tf)
 	if (argc == 0)
 		return 0;
 	for (i = 0; i < ARRAY_SIZE(commands); i++) {
-		if (strcmp(argv[0], commands[i].name) == 0){
+		if (strcmp(argv[0], commands[i].name) == 0) {
 			return commands[i].func(argc, argv, tf);
 		}
 	}
