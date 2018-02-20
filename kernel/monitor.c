@@ -23,6 +23,8 @@ static struct Command commands[] = {
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
 	{ "backtrace", "Display the trace of function call", mon_backtrace },
 	{ "showmapping", "Display the physical page info of specified va region mapping", mon_showmapping },
+	{ "setaddrmode", "Set the permissions of any mapping in the address space", mon_setaddrmode },
+	{ "dump", "Dump the contents of a range of memory given either a virtual or physical address range", mon_dump },
 };
 
 /***** Implementations of basic kernel monitor commands *****/
@@ -220,6 +222,43 @@ mon_showmapping(int argc, char **argv, struct Trapframe *tf)
 			break;
 
 		va_begin = va_pde_end + 1;
+	}
+
+	return 0;
+}
+
+int
+mon_setaddrmode(int argc, char **argv, struct Trapframe *tf)
+{
+
+
+
+
+
+	return 0;
+}
+
+int
+mon_dump(int argc, char **argv, struct Trapframe *tf)
+{
+	char *arg1 = argv[1];
+	char *arg2 = argv[2];
+	char *arg3 = argv[3];
+
+	if (arg1 == NULL || arg2 == NULL || arg3) {
+		cprintf("It needs exactly address region!\n");
+		return 0;
+	}
+
+	uint32_t *addr = (uint32_t *)strtol(arg1, NULL, 16);
+	uint32_t size = strtol(arg2, NULL, 16);
+	uint32_t i, j;
+
+	for (i = 0; i < ROUNDUP(size, sizeof(uint32_t))/sizeof(uint32_t);) {
+		cprintf("%08x: ", addr + i);
+			for (j = i; (i < (j + 4)) && (i < ROUNDUP(size, sizeof(uint32_t))/sizeof(uint32_t)); i++)
+				cprintf("%08x ", addr[i]);
+		cprintf("\n");
 	}
 
 	return 0;
