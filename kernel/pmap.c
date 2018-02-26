@@ -8,6 +8,9 @@
 #include <kernel/pmap.h>
 #include <kernel/kclock.h>
 
+#define MAX_ORDER 11
+#define INVALID_ORDER (~0)
+
 #define OS_MAX_MEMORY (256 * 1024)	/* KB */
 
 // These variables are set by i386_detect_memory()
@@ -17,7 +20,7 @@ static size_t npages_basemem;	// Amount of base memory (in pages)
 // These variables are set in mem_init()
 pde_t *kern_pgdir;		// Kernel's initial page directory
 struct PageInfo *pages;		// Physical page state array
-static struct PageInfo *page_free_list;	// Free list of physical pages
+struct list_head page_free_list[MAX_ORDER];	/* Recent Free head of physical pages, atomic */
 
 
 // --------------------------------------------------------------
@@ -67,11 +70,15 @@ static void boot_map_region(pde_t *pgdir, uintptr_t va,
 				size_t size, physaddr_t pa, int perm);
 static void boot_map_region_by_hugepage(pde_t *pgdir,
 				uintptr_t va, size_t size, physaddr_t pa, int perm);
+#if 0
 static void check_page_free_list(bool only_low_memory);
 static void check_page_alloc(void);
+#endif
 static void check_kern_pgdir(void);
 static physaddr_t check_va2pa(pde_t *pgdir, uintptr_t va);
+#if 0
 static void check_page(void);
+#endif
 static void check_page_installed_pgdir(void);
 
 // This simple physical memory allocator is used only while JOS is setting
@@ -164,9 +171,9 @@ mem_init(void)
 	// or page_insert
 	page_init();
 
-	check_page_free_list(1);
-	check_page_alloc();
-	check_page();
+	//check_page_free_list(1);
+	//check_page_alloc();
+	//check_page();
 
 	//////////////////////////////////////////////////////////////////////
 	// Now we set up virtual memory
@@ -218,7 +225,7 @@ mem_init(void)
 #endif
 
 	// Check that the initial page directory has been set up correctly.
-	//check_kern_pgdir();
+	check_kern_pgdir();
 
 	// Switch from the minimal entry page directory to the full kern_pgdir
 	// page table we just created.	Our instruction pointer should be
@@ -229,7 +236,7 @@ mem_init(void)
 	// kern_pgdir wrong.
 	lcr3(PADDR(kern_pgdir));
 
-	check_page_free_list(0);
+	//check_page_free_list(0);
 
 	// entry.S set the really important flags in cr0 (including enabling
 	// paging).  Here we configure the rest of the flags that we care about.
@@ -247,6 +254,82 @@ mem_init(void)
 // The 'pages' array has one 'struct PageInfo' entry per physical page.
 // Pages are reference counted, and free pages are kept on a linked list.
 // --------------------------------------------------------------
+
+struct PageInfo *
+page_find_buddy(struct PageInfo *page, unsigned char order)
+{
+	unsigned long page_idx = page - pages;
+    unsigned long buddy_idx = page_idx ^ (1 << order);
+	struct PageInfo *pp = page + buddy_idx - page_idx;
+
+	if ((pp < pages) || (pp >= (pages + npages)))
+		return NULL;
+
+    return pp;
+}
+
+struct PageInfo *
+search_page_from_list(struct PageInfo *pp, unsigned char order)
+{
+	struct PageInfo *target = NULL;
+
+	list_for_each_entry(target, &page_free_list[order], pp_link) {	/* TODO */
+		if (target == pp) {
+			list_del(&pp->pp_link);
+			return pp;
+		}
+	}
+
+	return NULL;
+}
+
+struct PageInfo *
+divide_buddy(unsigned char order)
+{
+	struct PageInfo *buddy, *pp = NULL;
+
+	if (!(order < MAX_ORDER) || (!order))
+		return NULL;
+
+	pp = list_first_entry_or_null(&page_free_list[order], struct PageInfo, pp_link);
+	if (!pp) {
+		pp = divide_buddy(order + 1);
+		if (!pp)
+			return NULL;
+
+	} else {
+		list_del(&pp->pp_link);
+	}
+
+	buddy = page_find_buddy(pp, order - 1);
+	if (buddy) {
+		list_add(&buddy->pp_link, &page_free_list[order - 1]);
+	}
+
+	return pp;
+}
+
+int
+merge_buddy(struct PageInfo *pp, unsigned char order)
+{
+	unsigned char i;
+	struct PageInfo *buddy = NULL;
+
+	for (i = order; i < (MAX_ORDER - 1); i++) {
+		buddy = page_find_buddy(pp, i);
+		if (!buddy)
+			break;
+
+		buddy = search_page_from_list(buddy, i);
+		if (!buddy)
+			break;
+
+		pp = MIN(buddy, pp);
+	}
+
+	list_add(&pp->pp_link, &page_free_list[i]);
+	return 0;
+}
 
 //
 // Initialize page structure and memory free list.
@@ -284,6 +367,9 @@ page_init(void)
 	allocated_pgnum = ((size_t)boot_alloc(0) - KERNBASE)/PGSIZE;
 	iohole_pgnum = (EXTPHYSMEM - IOPHYSMEM)/PGSIZE;
 
+	for (i = 0; i < MAX_ORDER; i++)
+		INIT_LIST_HEAD(&page_free_list[i]);
+
 	for (i = 0; i < npages; i++) {
 		if (i == 0) {
 			/* for zero page */
@@ -296,8 +382,7 @@ page_init(void)
 
 		} else {
 			free_pgnum++;
-			pages[i].pp_link = page_free_list;
-			page_free_list = &pages[i];
+            pages_free(pages + i);
 		}
 	}
 
@@ -311,30 +396,43 @@ page_init(void)
 // or via page_insert).
 //
 // Be sure to set the pp_link field of the allocated page to NULL so
-// page_free can check for double-free bugs.
+// pages_free can check for double-free bugs.
 //
 // Returns NULL if out of free memory.
 //
 // Hint: use page2kva and memset
 struct PageInfo *
-page_alloc(int alloc_flags)
+pages_alloc(int flags, unsigned char order)
 {
-	struct PageInfo *pp;
+	struct PageInfo *pp = NULL;
 
-	pp = page_free_list;
-	if (!pp) {
-		warn("%e", E_NO_MEM);
-		goto out;
+	if (!(order < MAX_ORDER))
+		return NULL;
+
+	pp = list_first_entry_or_null(&page_free_list[order], struct PageInfo, pp_link);
+	if (pp) {
+		list_del(&pp->pp_link);
+
+	} else {
+		pp = divide_buddy(order + 1);
+		if (!pp) {
+			warn("%e", E_NO_MEM);
+			goto out;
+		}
 	}
+	pp->order = order;
 
-	page_free_list = page_free_list->pp_link;
-	pp->pp_link = NULL;
-
-	if (alloc_flags & ALLOC_ZERO)
-		memset(page2kva(pp), 0, PGSIZE);
+	if (flags & ALLOC_ZERO)
+		memset(page2kva(pp), 0, PGSIZE * (1 << order));
 
 out:
 	return pp;
+}
+
+struct PageInfo *
+page_alloc(int alloc_flags)
+{
+	return pages_alloc(ALLOC_ZERO, 0);
 }
 
 //
@@ -342,11 +440,11 @@ out:
 // (This function should only be called when pp->pp_ref reaches 0.)
 //
 void
-page_free(struct PageInfo *pp)
+pages_free(struct PageInfo *pp)
 {
-	if (!pp->pp_ref && !pp->pp_link) {
-		pp->pp_link = page_free_list;
-		page_free_list = pp;
+	if (!pp->pp_ref && !pp->pp_link.prev) {
+		merge_buddy(pp, pp->order);
+		pp->order = INVALID_ORDER;
 
 	} else if (pp->pp_ref) {
 		panic("Busy page\n");
@@ -365,7 +463,7 @@ void
 page_decref(struct PageInfo* pp)
 {
 	if (--pp->pp_ref == 0)
-		page_free(pp);
+		pages_free(pp);
 }
 
 // Given 'pgdir', a pointer to a page directory, pgdir_walk returns
@@ -569,7 +667,7 @@ tlb_invalidate(pde_t *pgdir, void *va)
 // --------------------------------------------------------------
 // Checking functions.
 // --------------------------------------------------------------
-
+#if 0
 //
 // Check that the pages on the page_free_list are reasonable.
 //
@@ -635,7 +733,7 @@ check_page_free_list(bool only_low_memory)
 }
 
 //
-// Check the physical page allocator (page_alloc(), page_free(),
+// Check the physical page allocator (page_alloc(), pages_free(),
 // and page_init()).
 //
 static void
@@ -711,7 +809,7 @@ check_page_alloc(void)
 
 	cprintf("check_page_alloc() succeeded!\n");
 }
-
+#endif
 //
 // Checks that the kernel part of virtual address space
 // has been setup roughly correctly (by mem_init()).
@@ -783,7 +881,7 @@ check_va2pa(pde_t *pgdir, uintptr_t va)
 	return PTE_ADDR(p[PTX(va)]);
 }
 
-
+#if 0
 // check page_insert, page_remove, &c
 static void
 check_page(void)
@@ -936,7 +1034,7 @@ check_page(void)
 
 	cprintf("check_page() succeeded!\n");
 }
-
+#endif
 // check page_insert, page_remove, &c, with an installed kern_pgdir
 static void
 check_page_installed_pgdir(void)
