@@ -162,12 +162,12 @@ mon_showmapping(int argc, char **argv, struct Trapframe *tf)
 	uintptr_t va_pde_end;
 
 	if (arg1 == NULL || arg2 == NULL || arg3) {
-		cprintf("It needs exactly address region!\n");
+		cprintf("Usage: showmapping BEGIN_ADDR END_ADDR\n");
 		return 0;
 	}
 
 	if (va_begin > va_last) {
-		cprintf("The first argument should not larger than the second argument!\n");
+		cprintf("Usage: showmapping BEGIN_ADDR END_ADDR\n");
 		return 0;
 	}
 
@@ -184,7 +184,7 @@ mon_showmapping(int argc, char **argv, struct Trapframe *tf)
 			bit_u = (pde & PTE_U)? 'U': 'S';
 			bit_a = (pde & PTE_A)? 'A': '-';
 			bit_d = (pde & PTE_D)? 'D': '-';
-			bit_s = (pde & PTE_PS)? 'S': '-';
+			bit_s = (pde & PTE_PS)? 'T': '-';
 
 			cprintf("\n-PDE[%03x]\t", PDX(va_begin));
 			cprintf("[%08x - %08x]\t", va_pde_begin, va_pde_end);
@@ -203,11 +203,11 @@ mon_showmapping(int argc, char **argv, struct Trapframe *tf)
 				for (size_t i = PTX(va_begin); (i < (1 << 10)) && (va_pte_begin <= va_last);
 						va_pte_begin += PGSIZE, i++) {
 					if (pte[i] & PTE_P) {
-						bit_w = (pde & PTE_W)? 'W': 'R';
-						bit_u = (pde & PTE_U)? 'U': 'S';
-						bit_a = (pde & PTE_A)? 'A': '-';
-						bit_d = (pde & PTE_D)? 'D': '-';
-						bit_s = (pde & PTE_PS)? 'S': '-';
+						bit_w = (pte[i] & PTE_W)? 'W': 'R';
+						bit_u = (pte[i] & PTE_U)? 'U': 'S';
+						bit_a = (pte[i] & PTE_A)? 'A': '-';
+						bit_d = (pte[i] & PTE_D)? 'D': '-';
+						bit_s = (pte[i] & PTE_PS)? 'T': '-';
 
 						cprintf("|PTE[%03x]\t", i);
 						cprintf("[%08x - %08x]\t", va_pte_begin, va_pte_begin + PGSIZE - 1);
@@ -227,13 +227,74 @@ mon_showmapping(int argc, char **argv, struct Trapframe *tf)
 	return 0;
 }
 
+int mode_print(pte_t pte)
+{
+	char bit_w;
+	char bit_u;
+	char bit_a;
+	char bit_d;
+	char bit_s;
+
+	if (pte & PTE_P) {
+		bit_w = (pte & PTE_W)? 'W': 'R';
+		bit_u = (pte & PTE_U)? 'U': 'S';
+		bit_a = (pte & PTE_A)? 'A': '-';
+		bit_d = (pte & PTE_D)? 'D': '-';
+		bit_s = (pte & PTE_PS)? 'T': '-';
+
+		cprintf("--%c%c%c--%c%cP\n", bit_s, bit_d, bit_a, bit_u, bit_w);
+	} else {
+		cprintf("----------\n");
+	}
+
+	return 0;
+}
+
 int
 mon_setaddrmode(int argc, char **argv, struct Trapframe *tf)
 {
+	char *arg1 = argv[1];
+	char *arg2 = argv[2];
+	char *arg3 = argv[3];
+	char *arg4 = argv[4];
 
+	if (arg1 == NULL || arg2 == NULL || arg3 == NULL || arg4) {
+		cprintf("Usage: setaddrmode ADDR [0|1 : clear or set] [P|W|U]\n");
+		return 0;
+	}
 
+	uint32_t *addr = (uint32_t *)strtol(arg1, NULL, 16);
 
+	pde_t pde = kern_pgdir[PDX(addr)];
+	if (!(pde & PTE_P)) {
+		cprintf("There is not direct mapping here.\n");
+		return 0;
+	}
 
+	pte_t *pte_head = KADDR(PTE_ADDR(pde));
+	pte_t *pte = pte_head + PTX(addr);
+
+	if (!(*pte & PTE_P)) {
+		cprintf("There is not table mapping here.\n");
+		return 0;
+	}
+
+	cprintf("%08x: ", addr);
+	mode_print(*pte);
+
+	uint32_t perm = 0;
+	if (argv[3][0] == 'W')
+		perm = PTE_W;
+	else if (argv[3][0] == 'U')
+		perm = PTE_U;
+
+	if (argv[2][0] == '0')	/* clear */
+		*pte = *pte & (~perm);
+	else					/* set */
+		*pte = *pte | perm;
+
+	cprintf("%08x: ", addr);
+	mode_print(*pte);
 
 	return 0;
 }
@@ -246,7 +307,7 @@ mon_dump(int argc, char **argv, struct Trapframe *tf)
 	char *arg3 = argv[3];
 
 	if (arg1 == NULL || arg2 == NULL || arg3) {
-		cprintf("It needs exactly address region!\n");
+		cprintf("Usage: dump BEGIN_ADDR SIZE\n");
 		return 0;
 	}
 
