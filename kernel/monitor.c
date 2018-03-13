@@ -96,7 +96,8 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 
 	cprintf("Stack backtrace:\n");
 	while (ebp != 0) {
-		eip = *((unsigned long *)ebp + 1);
+		/* back to last instruction */
+		eip = *((unsigned long *)ebp + 1) - 1;
 
 		ret = debuginfo_eip(eip, &info);
 		if (ret < 0)
