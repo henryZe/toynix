@@ -432,7 +432,7 @@ out:
 struct PageInfo *
 page_alloc(int alloc_flags)
 {
-	return pages_alloc(ALLOC_ZERO, 0);
+	return pages_alloc(alloc_flags, 0);
 }
 
 //

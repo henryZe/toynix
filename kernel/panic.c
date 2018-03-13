@@ -12,7 +12,7 @@ const char *panicstr;
  * It prints "panic: mesg", and then enters the kernel monitor.
  */
 void
-_panic(const char *file, int line, const char *fmt,...)
+_panic(const char *file, int line, const char *fmt, ...)
 {
 	va_list ap;
 
@@ -28,6 +28,8 @@ _panic(const char *file, int line, const char *fmt,...)
 	vcprintf(fmt, ap);
 	cprintf("\n");
 	va_end(ap);
+
+	mon_backtrace(0, NULL, NULL);
 
 dead:
 	/* break into the kernel monitor */

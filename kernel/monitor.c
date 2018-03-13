@@ -92,6 +92,7 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 
 	/* read old func stack pointer (also new func base pointer) */
 	ebp = read_ebp();
+	ebp = *(unsigned long *)ebp;
 
 	cprintf("Stack backtrace:\n");
 	while (ebp != 0) {
@@ -101,10 +102,8 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 		if (ret < 0)
 			cprintf("debuginfo not found location of eip\n");
 
-		cprintf("ebp[%08x] eip[%08x] ", ebp, eip);
-		for (i = 0; i < 5; i++)
-			cprintf("%08x ", *((unsigned long *)ebp + 2 + i));
-
+		cprintf("ebp[%08x] n_ebp[%08x] eip[%08x] ",
+			ebp, *(unsigned long *)ebp, eip);
 		cprintf("\n%s: %d, %.*s + 0x%x, %d arg(s)",
 			info.eip_file, info.eip_line,
 			info.eip_fn_namelen, info.eip_fn_name,
@@ -113,16 +112,19 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 
 		if (info.eip_fn_narg) {
 			cprintf(": ");
-			for (i = 0; i < info.eip_fn_narg; i++)
-				cprintf("%.*s ",
-					info.eip_fn_arglen[i], info.eip_fn_arg[i]);
+			for (i = 0; i < info.eip_fn_narg; i++) {
+				cprintf("%.*s[%08x] ",
+					info.eip_fn_arglen[i], info.eip_fn_arg[i],
+					*(*(unsigned long **)ebp + 2 + i));
+			}
 		}
 
-		cprintf("\n\n");
+		cprintf("\n");
 
 		/* switch to parent function */
 		ebp = *((unsigned long *)ebp);
 	}
+	cprintf("\n");
 
 	return 0;
 }
