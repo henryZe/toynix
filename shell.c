@@ -39,6 +39,17 @@ struct pipecmd {
 	struct cmd *right; // right side of pipe
 };
 
+struct listcmd {
+  int type;
+  struct cmd *left;
+  struct cmd *right;
+};
+
+struct backcmd {
+  int type;
+  struct cmd *cmd;
+};
+
 int fork1(void);  // Fork but exits on failure.
 struct cmd *parsecmd(char *);
 
@@ -50,6 +61,8 @@ runcmd(struct cmd *cmd)
 	struct execcmd *ecmd;
 	struct pipecmd *pcmd;
 	struct redircmd *rcmd;
+	struct backcmd *bcmd;
+	struct listcmd *lcmd;
 	char temp[MAXCMDLEN];
 
 	if(cmd == 0)
@@ -120,6 +133,21 @@ runcmd(struct cmd *cmd)
 		close(p[1]);
 		wait(NULL);		/* wait child process */
 		wait(NULL);		/* wait child process */
+		break;
+
+	case '&':
+		bcmd = (struct backcmd *)cmd;
+		if (fork1() == 0)
+			runcmd(bcmd->cmd);
+		break;
+
+	case ';':
+		lcmd = (struct listcmd *)cmd;
+		if (fork1() == 0)
+			runcmd(lcmd->left);
+
+		wait(NULL);
+		runcmd(lcmd->right);
 		break;
 	}    
 
@@ -197,7 +225,7 @@ redircmd(struct cmd *subcmd, char *file, int type)
 	cmd->file = file;
 	cmd->flags = (type == '<') ? O_RDONLY : O_RDWR | O_CREAT | O_TRUNC;
 	cmd->fd = (type == '<') ? 0 : 1;
-	return (struct cmd*)cmd;
+	return (struct cmd *)cmd;
 }
 
 struct cmd *
@@ -210,13 +238,38 @@ pipecmd(struct cmd *left, struct cmd *right)
 	cmd->type = '|';
 	cmd->left = left;
 	cmd->right = right;
+	return (struct cmd *)cmd;
+}
+
+struct cmd*
+listcmd(struct cmd *left, struct cmd *right)
+{
+	struct listcmd *cmd;
+
+	cmd = malloc(sizeof(*cmd));
+	memset(cmd, 0, sizeof(*cmd));
+	cmd->type = ';';
+	cmd->left = left;
+	cmd->right = right;
+	return (struct cmd*)cmd;
+}
+
+struct cmd*
+backcmd(struct cmd *subcmd)
+{
+	struct backcmd *cmd;
+
+	cmd = malloc(sizeof(*cmd));
+	memset(cmd, 0, sizeof(*cmd));
+	cmd->type = '&';
+	cmd->cmd = subcmd;
 	return (struct cmd*)cmd;
 }
 
 // Parsing
 
 char whitespace[] = " \t\r\n\v";
-char symbols[] = "<|>";
+char symbols[] = "<|>&;";
 
 int
 gettoken(char **ps, char *es, char **q, char **eq)
@@ -236,16 +289,16 @@ gettoken(char **ps, char *es, char **q, char **eq)
 	case 0:
 		break;
 	case '|':
+	case '&':
+	case ';':
 	case '<':
-		s++;
-		break;
 	case '>':
 		s++;
 		break;
 	default:
 		ret = 'a';
 		while (s < es && !strchr(whitespace, *s) && !strchr(symbols, *s))
-		  s++;
+			s++;
 		break;
 	}
 
@@ -310,6 +363,17 @@ parseline(char **ps, char *es)
 {
 	struct cmd *cmd;
 	cmd = parsepipe(ps, es);
+
+	while (peek(ps, es, "&")) {
+		gettoken(ps, es, 0, 0);
+		cmd = backcmd(cmd);
+	}
+
+	if (peek(ps, es, ";")) {
+		gettoken(ps, es, 0, 0);
+		cmd = listcmd(cmd, parseline(ps, es));
+	}
+
 	return cmd;
 }
 
@@ -332,9 +396,9 @@ parseredirs(struct cmd *cmd, char **ps, char *es)
 	int tok;
 	char *q, *eq;
 
-	while(peek(ps, es, "<>")){
+	while (peek(ps, es, "<>")) {
 		tok = gettoken(ps, es, 0, 0);
-		if(gettoken(ps, es, &q, &eq) != 'a') {
+		if (gettoken(ps, es, &q, &eq) != 'a') {
 			fprintf(stderr, "missing file for redirection\n");
 			exit(-1);
 		}
@@ -365,10 +429,10 @@ parseexec(char **ps, char *es)
 	argc = 0;
 	ret = parseredirs(ret, ps, es);
 
-	while (!peek(ps, es, "|")) {
-		if((tok=gettoken(ps, es, &q, &eq)) == 0)
+	while (!peek(ps, es, "|&;")) {
+		if ((tok = gettoken(ps, es, &q, &eq)) == 0)
 			break;
-		if(tok != 'a') {
+		if (tok != 'a') {
 			fprintf(stderr, "syntax error\n");
 			exit(-1);
 		}
