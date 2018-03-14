@@ -9,6 +9,9 @@
 #include <sys/wait.h>
 
 #define MAXARGS 10
+#define MAXCMDLEN 32
+
+#define PATH "/bin"
 
 // All commands have at least a type. Have looked at the type, the code
 // typically casts the *cmd to some specific cmd type.
@@ -36,7 +39,7 @@ struct pipecmd {
 };
 
 int fork1(void);  // Fork but exits on failure.
-struct cmd *parsecmd(char*);
+struct cmd *parsecmd(char *);
 
 // Execute cmd.  Never returns.
 void
@@ -46,36 +49,41 @@ runcmd(struct cmd *cmd)
 	struct execcmd *ecmd;
 	struct pipecmd *pcmd;
 	struct redircmd *rcmd;
+	char temp[MAXCMDLEN];
 
 	if(cmd == 0)
-	_exit(0);
+		_exit(0);
 
 	switch(cmd->type){
 	default:
-	fprintf(stderr, "unknown runcmd\n");
-	_exit(-1);
+		fprintf(stderr, "unknown runcmd\n");
+		_exit(-1);
 
 	case ' ':
-	ecmd = (struct execcmd*)cmd;
-	if(ecmd->argv[0] == 0)
-	  _exit(0);
-	fprintf(stderr, "exec not implemented\n");
-	// Your code here ...
-	break;
+		ecmd = (struct execcmd *)cmd;
+		if (ecmd->argv[0] == 0)
+			_exit(0);
+
+		sprintf(temp, "%s/%s", PATH, ecmd->argv[0]);
+		execv(temp, ecmd->argv);
+
+		/* only return if an error has have occurred */
+		fprintf(stderr, "exec failed\n");
+		break;
 
 	case '>':
 	case '<':
-	rcmd = (struct redircmd*)cmd;
-	fprintf(stderr, "redir not implemented\n");
-	// Your code here ...
-	runcmd(rcmd->cmd);
-	break;
+		rcmd = (struct redircmd*)cmd;
+		fprintf(stderr, "redir not implemented\n");
+		// Your code here ...
+		runcmd(rcmd->cmd);
+		break;
 
 	case '|':
-	pcmd = (struct pipecmd*)cmd;
-	fprintf(stderr, "pipe not implemented\n");
-	// Your code here ...
-	break;
+		pcmd = (struct pipecmd*)cmd;
+		fprintf(stderr, "pipe not implemented\n");
+		// Your code here ...
+		break;
 	}    
 	_exit(0);
 }
@@ -128,7 +136,7 @@ fork1(void)
 	return pid;
 }
 
-struct cmd*
+struct cmd *
 execcmd(void)
 {
 	struct execcmd *cmd;
@@ -139,7 +147,7 @@ execcmd(void)
 	return (struct cmd*)cmd;
 }
 
-struct cmd*
+struct cmd *
 redircmd(struct cmd *subcmd, char *file, int type)
 {
 	struct redircmd *cmd;
@@ -154,7 +162,7 @@ redircmd(struct cmd *subcmd, char *file, int type)
 	return (struct cmd*)cmd;
 }
 
-struct cmd*
+struct cmd *
 pipecmd(struct cmd *left, struct cmd *right)
 {
 	struct pipecmd *cmd;
@@ -179,32 +187,36 @@ gettoken(char **ps, char *es, char **q, char **eq)
 	int ret;
 
 	s = *ps;
-	while(s < es && strchr(whitespace, *s))
-	s++;
+	while (s < es && strchr(whitespace, *s))
+		s++;
+
 	if(q)
-	*q = s;
+		*q = s;
+
 	ret = *s;
-	switch(*s){
+	switch (*s) {
 	case 0:
-	break;
+		break;
 	case '|':
 	case '<':
-	s++;
-	break;
+		s++;
+		break;
 	case '>':
-	s++;
-	break;
+		s++;
+		break;
 	default:
-	ret = 'a';
-	while(s < es && !strchr(whitespace, *s) && !strchr(symbols, *s))
-	  s++;
-	break;
+		ret = 'a';
+		while (s < es && !strchr(whitespace, *s) && !strchr(symbols, *s))
+		  s++;
+		break;
 	}
-	if(eq)
-	*eq = s;
 
-	while(s < es && strchr(whitespace, *s))
-	s++;
+	if (eq)
+		*eq = s;
+
+	while (s < es && strchr(whitespace, *s))
+		s++;
+
 	*ps = s;
 	return ret;
 }
@@ -227,8 +239,8 @@ struct cmd *parseexec(char**, char*);
 
 // make a copy of the characters in the input buffer, starting from s through es.
 // null-terminate the copy to make it a string.
-char 
-*mkcopy(char *s, char *es)
+char *
+mkcopy(char *s, char *es)
 {
 	int n = es - s;
 	char *c = malloc(n+1);
@@ -238,7 +250,7 @@ char
 	return c;
 }
 
-struct cmd*
+struct cmd *
 parsecmd(char *s)
 {
 	char *es;
@@ -247,14 +259,15 @@ parsecmd(char *s)
 	es = s + strlen(s);
 	cmd = parseline(&s, es);
 	peek(&s, es, "");
+
 	if (s != es) {
-	fprintf(stderr, "leftovers: %s\n", s);
-	exit(-1);
+		fprintf(stderr, "leftovers: %s\n", s);
+		exit(-1);
 	}
 	return cmd;
 }
 
-struct cmd*
+struct cmd *
 parseline(char **ps, char *es)
 {
 	struct cmd *cmd;
@@ -262,7 +275,7 @@ parseline(char **ps, char *es)
 	return cmd;
 }
 
-struct cmd*
+struct cmd *
 parsepipe(char **ps, char *es)
 {
 	struct cmd *cmd;
