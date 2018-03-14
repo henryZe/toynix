@@ -12,6 +12,7 @@
 #define MAXCMDLEN 32
 
 #define PATH "/bin"
+#define USR_PATH "/usr/bin"
 
 // All commands have at least a type. Have looked at the type, the code
 // typically casts the *cmd to some specific cmd type.
@@ -67,6 +68,9 @@ runcmd(struct cmd *cmd)
 		sprintf(temp, "%s/%s", PATH, ecmd->argv[0]);
 		execv(temp, ecmd->argv);
 
+		sprintf(temp, "%s/%s", USR_PATH, ecmd->argv[0]);
+		execv(temp, ecmd->argv);
+
 		/* only return if an error has have occurred */
 		fprintf(stderr, "exec failed\n");
 		break;
@@ -86,8 +90,36 @@ runcmd(struct cmd *cmd)
 
 	case '|':
 		pcmd = (struct pipecmd*)cmd;
-		fprintf(stderr, "pipe not implemented\n");
-		// Your code here ...
+		pipe(p);
+
+		/* child process */
+		if (fork() == 0) {
+			/* close std-output */
+			close(1);
+			/* set p[1] as std-output */
+			dup(p[1]);
+			close(p[0]);
+			close(p[1]);
+
+			runcmd(pcmd->left);
+		}
+
+		/* child process */
+		if (fork() == 0) {
+			/* close std-input */
+			close(0);
+			/* set p[0] as std-input */
+			dup(p[0]);
+			close(p[0]);
+			close(p[1]);
+
+			runcmd(pcmd->right);
+		}
+
+		close(p[0]);
+		close(p[1]);
+		wait(NULL);		/* wait child process */
+		wait(NULL);		/* wait child process */
 		break;
 	}    
 
