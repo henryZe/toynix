@@ -73,9 +73,14 @@ runcmd(struct cmd *cmd)
 
 	case '>':
 	case '<':
-		rcmd = (struct redircmd*)cmd;
-		fprintf(stderr, "redir not implemented\n");
-		// Your code here ...
+		rcmd = (struct redircmd *)cmd;
+
+		close(rcmd->fd);
+		if (open(rcmd->file, rcmd->flags, 0644) < 0) {
+			fprintf(stderr, "open %s failed\n", rcmd->file);
+			_exit(-1);
+		}
+
 		runcmd(rcmd->cmd);
 		break;
 
@@ -85,6 +90,7 @@ runcmd(struct cmd *cmd)
 		// Your code here ...
 		break;
 	}    
+
 	_exit(0);
 }
 
@@ -157,7 +163,7 @@ redircmd(struct cmd *subcmd, char *file, int type)
 	cmd->type = type;
 	cmd->cmd = subcmd;
 	cmd->file = file;
-	cmd->flags = (type == '<') ?  O_RDONLY : O_WRONLY|O_CREAT|O_TRUNC;
+	cmd->flags = (type == '<') ? O_RDONLY : O_RDWR | O_CREAT | O_TRUNC;
 	cmd->fd = (type == '<') ? 0 : 1;
 	return (struct cmd*)cmd;
 }
