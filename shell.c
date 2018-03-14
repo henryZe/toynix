@@ -68,7 +68,7 @@ runcmd(struct cmd *cmd)
 	if(cmd == 0)
 		_exit(0);
 
-	switch(cmd->type){
+	switch (cmd->type) {
 	default:
 		fprintf(stderr, "unknown runcmd\n");
 		_exit(-1);
@@ -78,9 +78,11 @@ runcmd(struct cmd *cmd)
 		if (ecmd->argv[0] == 0)
 			_exit(0);
 
+		/* find bin in PATH */
 		sprintf(temp, "%s/%s", PATH, ecmd->argv[0]);
 		execv(temp, ecmd->argv);
 
+		/* or find bin in USR_PATH */
 		sprintf(temp, "%s/%s", USR_PATH, ecmd->argv[0]);
 		execv(temp, ecmd->argv);
 
@@ -105,7 +107,7 @@ runcmd(struct cmd *cmd)
 		pcmd = (struct pipecmd*)cmd;
 		pipe(p);
 
-		/* child process */
+		/* writer child process */
 		if (fork() == 0) {
 			/* close std-output */
 			close(1);
@@ -117,7 +119,7 @@ runcmd(struct cmd *cmd)
 			runcmd(pcmd->left);
 		}
 
-		/* child process */
+		/* reader child process */
 		if (fork() == 0) {
 			/* close std-input */
 			close(0);
@@ -137,6 +139,7 @@ runcmd(struct cmd *cmd)
 
 	case '&':
 		bcmd = (struct backcmd *)cmd;
+		/* shell no need to wait this child process */
 		if (fork1() == 0)
 			runcmd(bcmd->cmd);
 		break;
@@ -224,7 +227,7 @@ redircmd(struct cmd *subcmd, char *file, int type)
 	cmd->cmd = subcmd;
 	cmd->file = file;
 	cmd->flags = (type == '<') ? O_RDONLY : O_RDWR | O_CREAT | O_TRUNC;
-	cmd->fd = (type == '<') ? 0 : 1;
+	cmd->fd = (type == '<') ? 0 : 1;	/* replace input or output by file */
 	return (struct cmd *)cmd;
 }
 
