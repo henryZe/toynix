@@ -13,6 +13,7 @@ KERN_SRCFILES := \
 			$(KERNDIR)/monitor.c \
 			$(KERNDIR)/kdebug.c \
 			$(KERNDIR)/panic.c \
+			$(KERNDIR)/env.c \
 			$(KERNDIR)/pmap.c \
 			$(KERNDIR)/kclock.c \
 			$(LIBDIR)/printfmt.c \
