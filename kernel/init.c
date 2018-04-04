@@ -29,9 +29,9 @@ init(void)
 	mem_init();
 
 	env_init();
-	//trap_init();
+	trap_init();
 
-	//ENV_CREATE(user_hello, ENV_TYPE_USER);
+	ENV_CREATE(user_hello, ENV_TYPE_USER);
 
 	// We only have one user environment for now, so just run it.
 	env_run(&envs[0]);
