@@ -4,6 +4,8 @@
 #include <kernel/console.h>
 #include <kernel/monitor.h>
 #include <kernel/pmap.h>
+#include <kernel/env.h>
+#include <kernel/trap.h>
 
 void
 init(void)
@@ -22,13 +24,15 @@ init(void)
 	* Can't call printf until after we do this!
 	*/
 	cons_init();
-
 	cprintf("Enter toynix...\n");
 
 	mem_init();
 
-	// Drop into the kernel monitor.
-	while (1)
-		monitor(NULL);
-}
+	env_init();
+	//trap_init();
 
+	//ENV_CREATE(user_hello, ENV_TYPE_USER);
+
+	// We only have one user environment for now, so just run it.
+	env_run(&envs[0]);
+}
