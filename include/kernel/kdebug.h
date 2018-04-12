@@ -1,5 +1,8 @@
 #ifndef KERN_KDEBUG_H
 #define KERN_KDEBUG_H
+#ifndef JOS_KERNEL
+# error "This is a JOS kernel header; user programs should not #include it"
+#endif
 
 #include <types.h>
 

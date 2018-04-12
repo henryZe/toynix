@@ -3,6 +3,7 @@ INCDIR := include
 BOOTDIR := boot
 KERNDIR := kernel
 LIBDIR := lib
+USRDIR := user
 
 CC	:= gcc -pipe
 AS	:= as
@@ -36,9 +37,6 @@ CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 &
 # Common linker flags
 LDFLAGS := -m elf_i386
 
-# Linker flags for JOS user programs
-ULDFLAGS := -T user/user.ld
-
 GCC_LIB := $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
 
 # Make sure that 'all' is the first target
@@ -49,6 +47,8 @@ USER_CFLAGS := $(CFLAGS) -DJOS_USER -gstabs
 
 # Include Makefrags for subdirectories
 include $(BOOTDIR)/Makefrag
+include $(LIBDIR)/Makefrag
+include $(USRDIR)/Makefrag
 include $(KERNDIR)/Makefrag
 
 clean:

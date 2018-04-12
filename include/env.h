@@ -4,7 +4,7 @@
 #define INC_ENV_H
 
 #include <types.h>
-#include <kernel/trap.h>
+#include <trap.h>
 #include <memlayout.h>
 
 typedef int32_t envid_t;

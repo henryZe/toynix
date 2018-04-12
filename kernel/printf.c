@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-
 static void
 putch(int ch, int *cnt)
 {
