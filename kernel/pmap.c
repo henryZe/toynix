@@ -203,6 +203,8 @@ mem_init(void)
 				(sizeof(struct Env) * NENV),
 				PADDR(envs), PTE_U);
 
+	cprintf("UENVS 0x%x paddr 0x%x\n", UENVS, PADDR(envs));
+
 	//////////////////////////////////////////////////////////////////////
 	// Use the physical memory that 'bootstack' refers to as the kernel
 	// stack.  The kernel stack grows down from virtual address KSTACKTOP.

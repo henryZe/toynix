@@ -8,8 +8,8 @@
 
 #include <env.h>
 
-static struct Env *envs;		// All environments
-static struct Env *curenv;		// The current env
+extern struct Env *envs;		// All environments
+extern struct Env *curenv;	// The current env
 
 // Global descriptor table.
 //

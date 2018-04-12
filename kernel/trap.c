@@ -1,6 +1,18 @@
+#include <x86.h>
 #include <mmu.h>
+#include <memlayout.h>
+#include <kernel/env.h>
 
 static struct Taskstate ts;
+
+/*
+ * Interrupt descriptor table.  (Must be built at run time because
+ * shifted function addresses can't be represented in relocation records.)
+ */
+struct Gatedesc idt[256] = { { 0 } };
+struct Pseudodesc idt_pd = {
+	sizeof(idt) - 1, (uint32_t)idt
+};
 
 // Initialize and load the per-CPU TSS and IDT
 void
@@ -28,10 +40,8 @@ trap_init_percpu(void)
 void
 trap_init(void)
 {
-	extern struct Segdesc gdt[];
-
 	// LAB 3: Your code here.
 
-	// Per-CPU setup 
+	// Per-CPU setup
 	trap_init_percpu();
 }

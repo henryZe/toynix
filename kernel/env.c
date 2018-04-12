@@ -2,18 +2,14 @@
 #include <string.h>
 #include <error.h>
 #include <elf.h>
-
-/*
-#include <inc/mmu.h>
-#include <inc/assert.h>
-*/
 #include <kernel/env.h>
 #include <kernel/pmap.h>
-//#include <kernel/trap.h>
 #include <kernel/monitor.h>
 
 #define ENVGENSHIFT	12		// >= LOGNENV
 
+struct Env *envs = NULL;		// All environments
+struct Env *curenv = NULL;		// The current env
 static struct Env *env_free_list;	// Free environment list, linked by Env->env_link.
 
 struct Pseudodesc gdt_pd = {
