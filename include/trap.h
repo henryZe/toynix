@@ -1,5 +1,5 @@
-#ifndef KINC_TRAP_H
-#define KINC_TRAP_H
+#ifndef INC_TRAP_H
+#define INC_TRAP_H
 
 #include <types.h>
 
@@ -72,4 +72,4 @@ struct Trapframe {
 	uint16_t tf_padding4;
 } __attribute__((packed));
 
-#endif /* !KINC_TRAP_H */
+#endif /* !INC_TRAP_H */

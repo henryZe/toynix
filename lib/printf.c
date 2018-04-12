@@ -1,5 +1,6 @@
 #include <stdarg.h>
 #include <stdio.h>
+#include <lib.h>
 
 // Collect up to 256 characters into a buffer
 // and perform ONE system call to print all of them,
