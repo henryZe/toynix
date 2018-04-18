@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <syscall.h>
 #include <kernel/env.h>
+#include <kernel/pmap.h>
 
 // Print a string to the system console.
 // The string is exactly 'len' characters long.
