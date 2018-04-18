@@ -14,6 +14,7 @@ KERN_SRCFILES := \
 			$(KERNDIR)/kdebug.c \
 			$(KERNDIR)/panic.c \
 			$(KERNDIR)/env.c \
+			$(KERNDIR)/trapentry.S \
 			$(KERNDIR)/trap.c \
 			$(KERNDIR)/pmap.c \
 			$(KERNDIR)/kclock.c \

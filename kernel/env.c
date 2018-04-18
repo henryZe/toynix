@@ -320,13 +320,13 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 	return 0;
 }
 
-//
-// Allocates a new env with env_alloc, loads the named elf
-// binary into it with load_icode, and sets its env_type.
-// This function is ONLY called during kernel initialization,
-// before running the first user-mode environment.
-// The new env's parent ID is set to 0.
-//
+/*
+ * Allocates a new env with env_alloc, loads the named elf
+ * binary into it with load_icode, and sets its env_type.
+ * This function is ONLY called during kernel initialization,
+ * before running the first user-mode environment.
+ * The new env's parent ID is set to 0.
+ */
 void
 env_create(uint8_t *binary, enum EnvType type)
 {
@@ -341,33 +341,33 @@ env_create(uint8_t *binary, enum EnvType type)
 	env->env_type = type;
 }
 
-//
-// Restores the register values in the Trapframe with the 'iret' instruction.
-// This exits the kernel and starts executing some environment's code.
-//
-// This function does not return.
-//
+/*
+ * Restores the register values in the Trapframe with the 'iret' instruction.
+ * This exits the kernel and starts executing some environment's code.
+ *
+ * This function does not return.
+ */
 void
 env_pop_tf(struct Trapframe *tf)
 {
 	asm volatile(
-		"\tmovl %0,%%esp\n" /* move tf arg to esp */
-		"\tpopal\n" /* popl PushRegs to registers */
+		"\tmovl %0, %%esp\n"		/* move tf arg to esp */
+		"\tpopal\n"					/* popl PushRegs to registers */
 		"\tpopl %%es\n"
 		"\tpopl %%ds\n"
-		"\taddl $0x8,%%esp\n" /* skip tf_trapno and tf_errcode */
-		"\tiret\n" /* popl %%eip */
+		"\taddl $0x8, %%esp\n"		/* skip tf_trapno and tf_errcode */
+		"\tiret\n"					/* popl %%eip */
 		: : "g" (tf) : "memory");
 
-	panic("iret failed");  /* mostly to placate the compiler */
+	panic("iret failed");			/* mostly to placate the compiler */
 }
 
-//
-// Context switch from curenv to env e.
-// Note: if this is the first call to env_run, curenv is NULL.
-//
-// This function does not return.
-//
+/*
+ * Context switch from curenv to env e.
+ * Note: if this is the first call to env_run, curenv is NULL.
+ *
+ * This function does not return.
+ */
 void
 env_run(struct Env *e)
 {
@@ -402,9 +402,9 @@ env_run(struct Env *e)
 	env_pop_tf(&e->env_tf);
 }
 
-//
-// Frees env e and all memory it uses.
-//
+/*
+ * Frees env e and all memory it uses.
+ */
 void
 env_free(struct Env *e)
 {
@@ -455,9 +455,9 @@ env_free(struct Env *e)
 	env_free_list = e;
 }
 
-//
-// Frees environment e.
-//
+/*
+ * Frees environment e.
+ */
 void
 env_destroy(struct Env *e)
 {

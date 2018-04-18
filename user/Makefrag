@@ -3,6 +3,7 @@ USR_LDFLAGS := $(LDFLAGS) -T $(USRDIR)/user.ld -nostdlib
 
 USER_SRCFILES := \
 			$(USRDIR)/hello.c \
+			$(USRDIR)/divzero.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 
