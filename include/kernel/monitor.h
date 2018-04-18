@@ -20,5 +20,7 @@ int mon_backtrace(int argc, char **argv, struct Trapframe *tf);
 int mon_showmapping(int argc, char **argv, struct Trapframe *tf);
 int mon_setaddrmode(int argc, char **argv, struct Trapframe *tf);
 int mon_dump(int argc, char **argv, struct Trapframe *tf);
+int mon_continue(int argc, char **argv, struct Trapframe *tf);
+int mon_si(int argc, char **argv, struct Trapframe *tf);
 
 #endif	// !KERN_MONITOR_H

@@ -9,6 +9,7 @@
 #include <kernel/kdebug.h>
 #include <kernel/pmap.h>
 #include <kernel/trap.h>
+#include <kernel/env.h>
 
 #define CMDBUF_SIZE	80	// enough for one VGA text line
 
@@ -26,6 +27,8 @@ static struct Command commands[] = {
 	{ "showmapping", "Display the physical page info of specified va region mapping", mon_showmapping },
 	{ "setaddrmode", "Set the permissions of any mapping in the address space", mon_setaddrmode },
 	{ "dump", "Dump the contents of a range of memory given either a virtual or physical address range", mon_dump },
+	{ "continue", "Continue the program from the break point", mon_continue },
+	{ "si", "Run instructions by single-step", mon_si },
 };
 
 /***** Implementations of basic kernel monitor commands *****/
@@ -326,6 +329,25 @@ mon_dump(int argc, char **argv, struct Trapframe *tf)
 		cprintf("\n");
 	}
 
+	return 0;
+}
+
+int
+mon_continue(int argc, char **argv, struct Trapframe *tf)
+{
+	env_run(curenv);
+	return 0;
+}
+
+int
+mon_si(int argc, char **argv, struct Trapframe *tf)
+{
+	uint32_t eflags;
+
+	eflags = read_eflags();
+	write_eflags(eflags | FL_TF);
+
+	env_run(curenv);
 	return 0;
 }
 
