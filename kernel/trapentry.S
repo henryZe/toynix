@@ -63,7 +63,6 @@
 	TRAPHANDLER(traphandler_17, T_ALIGN);
 	TRAPHANDLER_NOEC(traphandler_18, T_MCHK);
 	TRAPHANDLER_NOEC(traphandler_19, T_SIMDERR);
-
 	TRAPHANDLER_NOEC(traphandler_48, T_SYSCALL);
 
 alltraps:
