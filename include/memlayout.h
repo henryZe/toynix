@@ -162,8 +162,6 @@ extern volatile pte_t uvpt[];     // VA of "virtual page table"
 extern volatile pde_t uvpd[];     // VA of current page directory
 #endif
 
-#include <list.h>
-
 /*
  * Page descriptor structures, mapped at UPAGES.
  * Read/write to the kernel, read-only to user programs.
@@ -176,7 +174,7 @@ extern volatile pde_t uvpd[];     // VA of current page directory
  */
 struct PageInfo {
 	// Next page on the free list.
-	struct list_head pp_link;
+	struct PageInfo *pp_link;
 
 	// pp_ref is the count of pointers (usually in page table entries)
 	// to this page, for pages allocated using page_alloc.
@@ -184,7 +182,6 @@ struct PageInfo {
 	// boot_alloc do not have valid reference count fields.
 
 	uint16_t pp_ref;
-	uint8_t order;
 };
 
 #endif /* !__ASSEMBLER__ */

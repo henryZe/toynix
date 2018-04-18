@@ -54,8 +54,7 @@ void	mem_init(void);
 
 void	page_init(void);
 struct PageInfo *page_alloc(int alloc_flags);
-#define page_free pages_free
-void	pages_free(struct PageInfo *pp);
+void	page_free(struct PageInfo *pp);
 int	page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm);
 void	page_remove(pde_t *pgdir, void *va);
 struct PageInfo *page_lookup(pde_t *pgdir, void *va, pte_t **pte_store);
