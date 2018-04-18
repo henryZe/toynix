@@ -381,7 +381,7 @@ monitor(struct Trapframe *tf)
 	cprintf("Welcome to the Toynix kernel monitor!\n");
 	cprintf("Type 'help' for a list of commands.\n");
 
-	if (tf != NULL)
+	if (tf)
 		print_trapframe(tf);
 
 	while (1) {

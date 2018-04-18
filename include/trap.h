@@ -1,7 +1,9 @@
 #ifndef INC_TRAP_H
 #define INC_TRAP_H
 
+#ifndef __ASSEMBLER__
 #include <types.h>
+#endif
 
 // Trap numbers
 // These are processor defined:
@@ -41,6 +43,7 @@
 #define IRQ_IDE         14
 #define IRQ_ERROR       19
 
+#ifndef __ASSEMBLER__
 struct PushRegs {
 	/* registers as pushed by pusha */
 	uint32_t reg_edi;
@@ -71,5 +74,5 @@ struct Trapframe {
 	uint16_t tf_ss;
 	uint16_t tf_padding4;
 } __attribute__((packed));
-
+#endif
 #endif /* !INC_TRAP_H */

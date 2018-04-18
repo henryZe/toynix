@@ -7,6 +7,9 @@
  * it under the terms of the MIT License.
  */
 
+#include <memlayout.h>
+#include <trap.h>
+
 /* TRAPHANDLER defines a globally-visible function for handling a trap.
  * It pushes a trap number onto the stack, then jumps to _alltraps.
  * Use TRAPHANDLER for traps where the CPU automatically pushes an error code.
@@ -22,8 +25,8 @@
 	.type name, @function;	/* symbol type is function */			\
 	.align 2;				/* align function definition */			\
 	name:					/* function starts here */				\
-		pushl $(num);												\
-		jmp _alltraps
+		pushl $(num);		/* push trap num */						\
+		jmp alltraps
 
 /* Use TRAPHANDLER_NOEC for traps where the CPU doesn't push an error code.
  * It pushes a 0 in place of the error code, so the trap frame has the same
@@ -36,15 +39,59 @@
 	name:							\
 		pushl $0;					\
 		pushl $(num);				\
-		jmp _alltraps
+		jmp alltraps
 
 .text
-
 /*
  * Generating entry points for the different traps.
  */
+	TRAPHANDLER_NOEC(traphandler_0, T_DIVIDE);
+	TRAPHANDLER_NOEC(traphandler_1, T_DEBUG);
+	TRAPHANDLER_NOEC(traphandler_2, T_NMI);
+	TRAPHANDLER_NOEC(traphandler_3, T_BRKPT);
+	TRAPHANDLER_NOEC(traphandler_4, T_OFLOW);
+	TRAPHANDLER_NOEC(traphandler_5, T_BOUND);
+	TRAPHANDLER_NOEC(traphandler_6, T_ILLOP);
+	TRAPHANDLER_NOEC(traphandler_7, T_DEVICE);
+	TRAPHANDLER(traphandler_8, T_DBLFLT);
+	TRAPHANDLER(traphandler_10, T_TSS);
+	TRAPHANDLER(traphandler_11, T_SEGNP);
+	TRAPHANDLER(traphandler_12, T_STACK);
+	TRAPHANDLER(traphandler_13, T_GPFLT);
+	TRAPHANDLER(traphandler_14, T_PGFLT);
+	TRAPHANDLER_NOEC(traphandler_16, T_FPERR);
+	TRAPHANDLER(traphandler_17, T_ALIGN);
+	TRAPHANDLER_NOEC(traphandler_18, T_MCHK);
+	TRAPHANDLER_NOEC(traphandler_19, T_SIMDERR);
 
-_alltraps:
+	TRAPHANDLER_NOEC(traphandler_48, T_SYSCALL);
 
+alltraps:
+/*
+ * generate struct Trapframe
+ *
+ * +--------------------+ KSTACKTOP
+ * | 0x00000 | old SS   |     " - 4
+ * |      old ESP       |     " - 8
+ * |     old EFLAGS     |     " - 12
+ * | 0x00000 | old CS   |     " - 16
+ * |      old EIP       |     " - 20
+ * |     error code     |     " - 24 <---- ESP
+ * +--------------------+
+ * |      trap num      |     " - 28
+ * +--------------------+
+ */
+	pushl %ds
+	pushl %es
+	pushal
 
+	/* Switch to kernel data segment */
+	movl $GD_KD, %eax
+	movw %ax, %ds
+	movw %ax, %es
 
+	/* pass the argument Trapframe pointer */
+	pushl %esp
+	call trap
+
+1:	jmp 1b

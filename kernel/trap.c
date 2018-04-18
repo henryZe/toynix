@@ -3,6 +3,8 @@
 #include <memlayout.h>
 #include <assert.h>
 #include <kernel/env.h>
+#include <kernel/monitor.h>
+#include <kernel/syscall.h>
 
 static struct Taskstate ts;
 
@@ -18,7 +20,8 @@ static struct Trapframe *last_tf;
  */
 struct Gatedesc idt[256] = { { 0 } };
 struct Pseudodesc idt_pd = {
-	sizeof(idt) - 1, (uint32_t)idt
+	sizeof(idt) - 1,
+	(uint32_t)idt
 };
 
 // Initialize and load the per-CPU TSS and IDT
@@ -32,7 +35,7 @@ trap_init_percpu(void)
 	ts.ts_iomb = sizeof(struct Taskstate);
 
 	// Initialize the TSS slot of the gdt.
-	gdt[GD_TSS0 >> 3] = SEG16(STS_T32A, (uint32_t) (&ts),
+	gdt[GD_TSS0 >> 3] = SEG16(STS_T32A, (uint32_t)(&ts),
 					sizeof(struct Taskstate) - 1, 0);
 	gdt[GD_TSS0 >> 3].sd_s = 0;
 
@@ -44,10 +47,50 @@ trap_init_percpu(void)
 	lidt(&idt_pd);
 }
 
+void traphandler_0(void);
+void traphandler_1(void);
+void traphandler_2(void);
+void traphandler_3(void);
+void traphandler_4(void);
+void traphandler_5(void);
+void traphandler_6(void);
+void traphandler_7(void);
+void traphandler_8(void);
+void traphandler_10(void);
+void traphandler_11(void);
+void traphandler_12(void);
+void traphandler_13(void);
+void traphandler_14(void);
+void traphandler_16(void);
+void traphandler_17(void);
+void traphandler_18(void);
+void traphandler_19(void);
+void traphandler_48(void);
+
 void
 trap_init(void)
 {
-	// LAB 3: Your code here.
+	// trap
+	SETGATE(idt[T_DIVIDE], 1, GD_KT, traphandler_0, 3);
+	SETGATE(idt[T_DEBUG], 1, GD_KT, traphandler_1, 3);
+	SETGATE(idt[T_NMI], 1, GD_KT, traphandler_2, 3);
+	SETGATE(idt[T_BRKPT], 1, GD_KT, traphandler_3, 3);
+	SETGATE(idt[T_OFLOW], 1, GD_KT, traphandler_4, 3);
+	SETGATE(idt[T_BOUND], 1, GD_KT, traphandler_5, 3);
+	SETGATE(idt[T_ILLOP], 1, GD_KT, traphandler_6, 3);
+	SETGATE(idt[T_DEVICE], 1, GD_KT, traphandler_7, 3);
+	SETGATE(idt[T_DBLFLT], 1, GD_KT, traphandler_8, 3);
+	SETGATE(idt[T_TSS], 1, GD_KT, traphandler_10, 3);
+	SETGATE(idt[T_SEGNP], 1, GD_KT, traphandler_11, 3);
+	SETGATE(idt[T_STACK], 1, GD_KT, traphandler_12, 3);
+	SETGATE(idt[T_GPFLT], 1, GD_KT, traphandler_13, 3);
+	SETGATE(idt[T_PGFLT], 1, GD_KT, traphandler_14, 3);
+	SETGATE(idt[T_FPERR], 1, GD_KT, traphandler_16, 3);
+	SETGATE(idt[T_ALIGN], 1, GD_KT, traphandler_17, 3);
+	SETGATE(idt[T_MCHK], 1, GD_KT, traphandler_18, 3);
+	SETGATE(idt[T_SIMDERR], 1, GD_KT, traphandler_19, 3);
+
+	SETGATE(idt[T_SYSCALL], 1, GD_KT, traphandler_48, 3);
 
 	// Per-CPU setup
 	trap_init_percpu();
@@ -138,20 +181,68 @@ print_trapframe(struct Trapframe *tf)
 	}
 }
 
+void
+page_fault_handler(struct Trapframe *tf)
+{
+	uint32_t fault_va;
+
+	// Read processor's CR2 register to find the faulting address
+	fault_va = rcr2();
+
+	// Handle kernel-mode page faults.
+	if (!(tf->tf_cs && 0x3))
+		panic("kernel fault va %08x ip %08x\n",
+				fault_va, tf->tf_eip);
+
+	// We've already handled kernel-mode exceptions, so if we get here,
+	// the page fault happened in user mode.
+	// Destroy the environment that caused the fault.
+	cprintf("[%08x] user fault va %08x ip %08x\n",
+			curenv->env_id, fault_va, tf->tf_eip);
+
+	print_trapframe(tf);
+	env_destroy(curenv);
+}
+
 static void
 trap_dispatch(struct Trapframe *tf)
 {
+	int32_t ret;
+
 	// Handle processor exceptions.
+	switch (tf->tf_trapno) {
+	case T_PGFLT:
+		page_fault_handler(tf);
+		break;
 
+	case T_BRKPT:
+	case T_DEBUG:
+		monitor(tf);
+		break;
 
+	case T_SYSCALL:
+		ret = syscall(
+				tf->tf_regs.reg_eax,
+				tf->tf_regs.reg_edx,
+				tf->tf_regs.reg_ecx,
+				tf->tf_regs.reg_ebx,
+				tf->tf_regs.reg_edi,
+				tf->tf_regs.reg_esi);
+		tf->tf_regs.reg_eax = ret;
+		break;
 
-	// Unexpected trap: The user process or the kernel has a bug.
-	print_trapframe(tf);
-	if (tf->tf_cs == GD_KT)
-		panic("unhandled trap in kernel");
-	else {
-		env_destroy(curenv);		// exit user_env
-		return;
+	default:
+		// Unexpected trap: The user process or the kernel has a bug.
+		print_trapframe(tf);
+		if (tf->tf_cs == GD_KT)
+			panic("unhandled trap in kernel");
+		else {
+			cprintf("unhandled trap in user\n");
+
+			/* exit user_env */
+			env_destroy(curenv);
+			return;
+		}
 	}
 }
 

@@ -18,6 +18,7 @@ KERN_SRCFILES := \
 			$(KERNDIR)/trap.c \
 			$(KERNDIR)/pmap.c \
 			$(KERNDIR)/kclock.c \
+			$(KERNDIR)/syscall.c \
 			$(LIBDIR)/printfmt.c \
 			$(LIBDIR)/string.c \
 			$(LIBDIR)/readline.c \
