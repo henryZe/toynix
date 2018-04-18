@@ -4,6 +4,54 @@
 #include <types.h>
 #include <error.h>
 #include <assert.h>
+#include <syscall.h>
+#include <kernel/env.h>
+
+// Print a string to the system console.
+// The string is exactly 'len' characters long.
+// Destroys the environment on memory errors.
+static int
+sys_cputs(const char *s, size_t len)
+{
+	// Check that the user has permission to read memory [s, s+len).
+	// Destroy the environment if not.
+	user_mem_assert(curenv, s, len, 0);
+	
+	// Print the string supplied by the user.
+	cprintf("%.*s", len, s);
+
+	return 0;
+}
+
+// Returns the current environment's envid.
+static envid_t
+sys_getenvid(void)
+{
+	return curenv->env_id;
+}
+
+// Destroy a given environment (possibly the currently running environment).
+//
+// Returns 0 on success, < 0 on error.  Errors are:
+//	-E_BAD_ENV if environment envid doesn't currently exist,
+//		or the caller doesn't have permission to change envid.
+static int
+sys_env_destroy(envid_t envid)
+{
+	int ret;
+	struct Env *env;
+
+	if ((ret = envid2env(envid, &env, 1)) < 0)
+		return ret;
+
+	if (env == curenv)
+		cprintf("[%08x] exiting gracefully\n", curenv->env_id);
+	else
+		cprintf("[%08x] destroying %08x\n", curenv->env_id, env->env_id);
+
+	env_destroy(env);
+	return 0;
+}
 
 int32_t
 syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
@@ -11,11 +59,16 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 {
 	// Call the function corresponding to the 'syscallno' parameter.
 	// Return any appropriate return value.
-	// LAB 3: Your code here.
-
-	panic("syscall not implemented");
-
 	switch (syscallno) {
+	case SYS_cputs:
+		return sys_cputs((const char *)a1, a2);
+
+	case SYS_getenvid:
+		return sys_getenvid();
+
+	case SYS_env_destroy:
+		return sys_env_destroy(a1);
+
 	default:
 		return -E_INVAL;
 	}
