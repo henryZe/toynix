@@ -45,6 +45,9 @@ all:
 KERN_CFLAGS := $(CFLAGS) -DJOS_KERNEL -gstabs
 USER_CFLAGS := $(CFLAGS) -DJOS_USER -gstabs
 
+$(OBJDIR)/.vars.%:
+	echo "$($*)" | cmp -s $@ || echo "$($*)" > $@
+
 # Include Makefrags for subdirectories
 include $(BOOTDIR)/Makefrag
 include $(LIBDIR)/Makefrag
@@ -107,3 +110,19 @@ qemu-nox-gdb: $(IMAGES) pre-qemu
 	@echo "*** Now run 'make gdb'." 1>&2
 	@echo "***"
 	$(QEMU) -nographic $(QEMUOPTS) -S
+
+# For test runs
+prep-%:
+	$(MAKE) "INIT_CFLAGS=${INIT_CFLAGS} -DTEST=`case $* in *_*) echo $*;; *) echo user_$*;; esac`" $(IMAGES)
+
+run-%-nox-gdb: prep-% pre-qemu
+	$(QEMU) -nographic $(QEMUOPTS) -S
+
+run-%-gdb: prep-% pre-qemu
+	$(QEMU) $(QEMUOPTS) -S
+
+run-%-nox: prep-% pre-qemu
+	$(QEMU) -nographic $(QEMUOPTS)
+
+run-%: prep-% pre-qemu
+	$(QEMU) $(QEMUOPTS)

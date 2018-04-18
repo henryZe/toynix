@@ -47,6 +47,10 @@ $(OBJDIR)/$(KERNDIR)/%.o: $(LIBDIR)/%.c
 	@mkdir -p $(@D)
 	$(CC) -nostdinc $(KERN_CFLAGS) -c -o $@ $<
 
+# Special flags for kernel/init
+$(OBJDIR)/$(KERNDIR)/init.o: override KERN_CFLAGS+=$(INIT_CFLAGS)
+$(OBJDIR)/$(KERNDIR)/init.o: $(OBJDIR)/.vars.INIT_CFLAGS
+
 # How to build the kernel itself
 $(OBJDIR)/$(KERNDIR)/kernel: $(KERN_OBJFILES) $(KERNDIR)/kernel.ld $(KERN_BINFILES)
 	@echo + ld[KERN] $@
