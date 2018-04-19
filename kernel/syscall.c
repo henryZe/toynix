@@ -7,6 +7,7 @@
 #include <syscall.h>
 #include <kernel/env.h>
 #include <kernel/pmap.h>
+#include <kernel/console.h>
 
 // Print a string to the system console.
 // The string is exactly 'len' characters long.
@@ -22,6 +23,14 @@ sys_cputs(const char *s, size_t len)
 	cprintf("%.*s", len, s);
 
 	return 0;
+}
+
+// Read a character from the system console without blocking.
+// Returns the character, or 0 if there is no input waiting.
+static int
+sys_cgetc(void)
+{
+	return cons_getc();
 }
 
 // Returns the current environment's envid.
@@ -63,6 +72,9 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 	switch (syscallno) {
 	case SYS_cputs:
 		return sys_cputs((const char *)a1, a2);
+
+	case SYS_cgetc:
+		return sys_cgetc();
 
 	case SYS_getenvid:
 		return sys_getenvid();

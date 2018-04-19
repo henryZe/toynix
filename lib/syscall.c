@@ -44,6 +44,12 @@ sys_cputs(const char *s, size_t len)
 	syscall(SYS_cputs, 0, (uint32_t)s, len, 0, 0, 0);
 }
 
+int
+sys_cgetc(void)
+{
+	return syscall(SYS_cgetc, 0, 0, 0, 0, 0, 0);
+}
+
 envid_t
 sys_getenvid(void)
 {

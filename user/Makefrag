@@ -11,6 +11,7 @@ USER_SRCFILES := \
 			$(USRDIR)/faultwrite.c \
 			$(USRDIR)/faultwritek.c \
 			$(USRDIR)/breakpoint.c \
+			$(USRDIR)/testbss.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 
