@@ -12,6 +12,9 @@ USER_SRCFILES := \
 			$(USRDIR)/faultwritek.c \
 			$(USRDIR)/breakpoint.c \
 			$(USRDIR)/testbss.c \
+			$(USRDIR)/buggyhello.c \
+			$(USRDIR)/buggyhello2.c \
+			$(USRDIR)/evilhello.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 

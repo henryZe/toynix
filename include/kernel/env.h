@@ -9,7 +9,7 @@
 #include <env.h>
 
 extern struct Env *envs;		// All environments
-extern struct Env *curenv;	// The current env
+extern struct Env *curenv;		// The current env
 extern struct Segdesc gdt[];
 
 void	env_init(void);

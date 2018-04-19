@@ -203,6 +203,7 @@ region_alloc(struct Env *e, void *va, size_t len)
 {
 	int i, ret;
 	struct PageInfo *p = NULL;
+	void *end = va + len;
 
 	// (But only if you need it for load_icode.)
 	//
@@ -213,10 +214,10 @@ region_alloc(struct Env *e, void *va, size_t len)
 	if ((unsigned long)va & (PGSIZE - 1))
 		va = ROUNDDOWN(va, PGSIZE);
 
-	if (len & (PGSIZE - 1))
-		len = ROUNDUP(len, PGSIZE);
+	if ((unsigned long)end & (PGSIZE - 1))
+		end = ROUNDUP(end, PGSIZE);
 
-	for (i = 0; i < (len >> PGSHIFT); i++) {
+	while (va < end) {
 		p = page_alloc(0);
 		if (!p)
 			panic("page_alloc failed\n");

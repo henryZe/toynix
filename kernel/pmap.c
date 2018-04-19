@@ -604,9 +604,50 @@ static uintptr_t user_mem_check_addr;
 int
 user_mem_check(struct Env *env, const void *va, size_t len, int perm)
 {
-	// LAB 3: Your code here.
+	const void *start = va;
+	const void *end = va + len;
+	pte_t *cur_pte;
+
+	if ((unsigned long)start & (PGSIZE - 1))
+		start = ROUNDDOWN(start, PGSIZE);
+
+	if ((unsigned long)end & (PGSIZE - 1))
+		end = ROUNDUP(end, PGSIZE);
+
+	while (start < end) {
+		cur_pte = pgdir_walk(env->env_pgdir, start, 0);
+		if (!cur_pte) {
+			cprintf("%s: page not present\n", __func__);
+			goto ERR;
+		}
+
+		if (!(*cur_pte & PTE_P)) {
+			cprintf("%s: page not present\n", __func__);
+			goto ERR;
+		}
+
+		if ((*cur_pte & perm) != perm) {
+			cprintf("%s: page permission err\n", __func__);
+			goto ERR;
+		}
+
+		if ((unsigned long)start >= ULIM) {
+			cprintf("%s: not user page\n", __func__);
+			goto ERR;
+		}
+
+		start += PGSIZE;
+	}
 
 	return 0;
+
+ERR:
+	if (start == ROUNDDOWN(va, PGSIZE))
+		user_mem_check_addr = (uintptr_t)va;
+	else
+		user_mem_check_addr = (uintptr_t)start;
+
+	return -E_FAULT;
 }
 
 //
