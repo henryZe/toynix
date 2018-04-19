@@ -2,7 +2,9 @@
 #include <string.h>
 #include <memlayout.h>
 #include <assert.h>
+#include <kernel/env.h>
 #include <kernel/kdebug.h>
+#include <kernel/pmap.h>
 
 extern const struct Stab __STAB_BEGIN__[];	// Beginning of stabs table
 extern const struct Stab __STAB_END__[];	// End of stabs table
@@ -137,7 +139,8 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 
 		// Make sure this memory is valid.
 		// Return -1 if it is not.  Hint: Call user_mem_check.
-		// LAB 3: Your code here.
+		if (user_mem_check(curenv, usd, sizeof(struct user_stab_data), 0) < 0)
+			return -1;
 
 		stabs = usd->stabs;
 		stab_end = usd->stab_end;
@@ -145,7 +148,11 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 		stabstr_end = usd->stabstr_end;
 
 		// Make sure the STABS and string table memory is valid.
-		// LAB 3: Your code here.
+		if (user_mem_check(curenv, stabs, stab_end - stabs, 0) < 0)
+			return -1;
+
+		if (user_mem_check(curenv, stabstr, stabstr_end - stabstr, 0) < 0)
+			return -1;
 	}
 
 	// String table validity checks

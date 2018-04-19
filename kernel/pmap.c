@@ -608,6 +608,8 @@ user_mem_check(struct Env *env, const void *va, size_t len, int perm)
 	const void *end = va + len;
 	pte_t *cur_pte;
 
+	perm |= PTE_U;
+
 	if ((unsigned long)start & (PGSIZE - 1))
 		start = ROUNDDOWN(start, PGSIZE);
 
