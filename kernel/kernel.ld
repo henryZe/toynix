@@ -7,7 +7,7 @@ ENTRY(_start)
 
 SECTIONS
 {
-	/* Link the kernel at this address: "." means the current address */
+	/* set entry address; Link the kernel at this address: "." means the current address */
 	. = 0xF0100000;
 
 	/* AT(...) gives the load address of this section, which tells
