@@ -186,6 +186,7 @@ mem_init(void)
 	boot_map_region(kern_pgdir, UPAGES,
 				(sizeof(struct PageInfo) * npages),
 				PADDR(pages), PTE_U);
+	cprintf("UPAGES 0x%x paddr 0x%x\n", UPAGES, PADDR(pages));
 
 	//////////////////////////////////////////////////////////////////////
 	// Map the 'envs' array read-only by the user at linear address UENVS
@@ -196,25 +197,7 @@ mem_init(void)
 	boot_map_region(kern_pgdir, UENVS,
 				(sizeof(struct Env) * NENV),
 				PADDR(envs), PTE_U);
-
 	cprintf("UENVS 0x%x paddr 0x%x\n", UENVS, PADDR(envs));
-
-	//////////////////////////////////////////////////////////////////////
-	// Use the physical memory that 'bootstack' refers to as the kernel
-	// stack.  The kernel stack grows down from virtual address KSTACKTOP.
-	// We consider the entire range from [KSTACKTOP-PTSIZE, KSTACKTOP)
-	// to be the kernel stack, but break this into two pieces:
-	//     * [KSTACKTOP-KSTKSIZE, KSTACKTOP) -- backed by physical memory
-	//     * [KSTACKTOP-PTSIZE, KSTACKTOP-KSTKSIZE) -- not backed; so if
-	//       the kernel overflows its stack, it will fault rather than
-	//       overwrite memory.  Known as a "guard page".
-	//     Permissions: kernel RW, user NONE
-	boot_map_region(kern_pgdir, (KSTACKTOP - KSTKSIZE),
-					KSTKSIZE, PADDR(bootstack), PTE_W);
-
-	cprintf("UPAGES 0x%x paddr 0x%x\n", UPAGES, PADDR(pages));
-	cprintf("KSTACKTOP 0x%x KSTK_START 0x%x paddr 0x%x\n",
-		KSTACKTOP, (KSTACKTOP - KSTKSIZE), PADDR(bootstack));
 
 	//////////////////////////////////////////////////////////////////////
 	// Map all of physical memory at KERNBASE.
@@ -287,6 +270,8 @@ mem_init_mp(void)
 	for (i = 0; i < NCPU; i++) {
 		kstacktop = KSTACKTOP - i * (KSTKSIZE + KSTKGAP);
 		boot_map_region(kern_pgdir, kstacktop - KSTKSIZE, KSTKSIZE, PADDR(percpu_kstacks[i]), PTE_W);
+		cprintf("KSTACKTOP_%d 0x%x - 0x%x paddr 0x%x\n",
+			i, kstacktop - KSTKSIZE, kstacktop, PADDR(percpu_kstacks[i]));
 	}
 }
 
@@ -370,10 +355,8 @@ page_alloc(int alloc_flags)
 	struct PageInfo *pp;
 
 	pp = page_free_list;
-	if (!pp) {
-		warn("%e", E_NO_MEM);
+	if (!pp)
 		goto out;
-	}
 
 	page_free_list = page_free_list->pp_link;
 	pp->pp_link = NULL;

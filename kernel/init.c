@@ -34,7 +34,7 @@ init(void)
 	env_init();
 	trap_init();
 
-	//mp_init();
+	mp_init();
 	lapic_init();
 
 	//pic_init();
@@ -57,7 +57,7 @@ init(void)
 	// Schedule and run the first user environment!
 	//sched_yield();
 
-	panic("pass throught");
+	while(1);
 }
 
 // While boot_aps is booting a given CPU, it communicates the per-core
