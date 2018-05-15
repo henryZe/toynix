@@ -37,7 +37,7 @@ init(void)
 	mp_init();
 	lapic_init();
 
-	//pic_init();
+	pic_init();
 
 	// Acquire the big kernel lock before waking up APs
 	// Your code here:
@@ -48,16 +48,14 @@ init(void)
 #if defined(TEST)
 	ENV_CREATE(TEST, ENV_TYPE_USER);
 #else
-	//ENV_CREATE(user_divzero, ENV_TYPE_USER);
-	//ENV_CREATE(user_softint, ENV_TYPE_USER);
-	//ENV_CREATE(user_badsegment, ENV_TYPE_USER);
 	ENV_CREATE(user_hello, ENV_TYPE_USER);
 #endif
 
 	// Schedule and run the first user environment!
 	//sched_yield();
 
-	while(1);
+	// We only have one user environment for now, so just run it.
+	env_run(&envs[0]);
 }
 
 // While boot_aps is booting a given CPU, it communicates the per-core
