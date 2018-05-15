@@ -19,6 +19,9 @@ KERN_SRCFILES := \
 			$(KERNDIR)/pmap.c \
 			$(KERNDIR)/kclock.c \
 			$(KERNDIR)/syscall.c \
+			$(KERNDIR)/mpentry.S \
+			$(KERNDIR)/mpconfig.c \
+			$(KERNDIR)/lapic.c \
 			$(LIBDIR)/printfmt.c \
 			$(LIBDIR)/string.c \
 			$(LIBDIR)/readline.c \

@@ -407,7 +407,7 @@ monitor(struct Trapframe *tf)
 		print_trapframe(tf);
 
 	while (1) {
-		buf = readline("K> ");
+		buf = readline("Monitor > ");
 		if (buf != NULL)
 			if (runcmd(buf, tf) < 0)
 				break;
