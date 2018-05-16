@@ -22,6 +22,7 @@ KERN_SRCFILES := \
 			$(KERNDIR)/mpentry.S \
 			$(KERNDIR)/mpconfig.c \
 			$(KERNDIR)/lapic.c \
+			$(KERNDIR)/picirq.c \
 			$(LIBDIR)/printfmt.c \
 			$(LIBDIR)/string.c \
 			$(LIBDIR)/readline.c \

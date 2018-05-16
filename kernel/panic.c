@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <kernel/cpu.h>
 #include <kernel/monitor.h>
 
 /*
@@ -24,7 +25,7 @@ _panic(const char *file, int line, const char *fmt, ...)
 	asm volatile("cli; cld");
 
 	va_start(ap, fmt);
-	cprintf("kernel panic at %s:%d: ", file, line);
+	cprintf("kernel panic on CPU %d at %s:%d: ", cpunum(), file, line);
 	vcprintf(fmt, ap);
 	cprintf("\n");
 	va_end(ap);

@@ -28,9 +28,6 @@
 #define RELOC(x) ((x) - KERNBASE)
 #define MPBOOTPHYS(s) ((s) - mpentry_start + MPENTRY_PADDR)
 
-#define SEG_KCODE 1  // kernel code
-#define SEG_KDATA 2  // kernel data + stack
-
 .code16           
 .globl mpentry_start
 mpentry_start:
