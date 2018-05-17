@@ -34,18 +34,6 @@ trap_init_percpu(void)
 	// running on other CPUs because each CPU has its own kernel stack.
 	// Fix the code so that it works for all CPUs.
 	//
-	// Hints:
-	//   - The macro "thiscpu" always refers to the current CPU's
-	//     struct CpuInfo;
-	//   - The ID of the current CPU is given by cpunum() or
-	//     thiscpu->cpu_id;
-	//   - Use "thiscpu->cpu_ts" as the TSS for the current CPU,
-	//     rather than the global "ts" variable;
-	//   - Use gdt[(GD_TSS0 >> 3) + i] for CPU i's TSS descriptor;
-	//   - You mapped the per-CPU kernel stacks in mem_init_mp()
-	//   - Initialize cpu_ts.ts_iomb to prevent unauthorized environments
-	//     from doing IO (0 is not the correct value!)
-	//
 	// ltr sets a 'busy' flag in the TSS selector, so if you
 	// accidentally load the same TSS on more than one CPU, you'll
 	// get a triple fault.  If you set up an individual CPU's TSS
@@ -164,6 +152,8 @@ static const char *trapname(int trapno)
 
 	if (trapno == T_SYSCALL)
 		return "System call";
+	if (trapno >= IRQ_OFFSET && trapno < IRQ_OFFSET + 16)
+		return "Hardware Interrupt";
 
 	return "(unknown trap)";
 }
@@ -171,7 +161,7 @@ static const char *trapname(int trapno)
 void
 print_trapframe(struct Trapframe *tf)
 {
-	cprintf("TRAP frame at %p\n", tf);
+	cprintf("TRAP frame at %p from CPU %d\n", tf, cpunum());
 	print_regs(&tf->tf_regs);
 	cprintf("  es   0x----%04x\n", tf->tf_es);
 	cprintf("  ds   0x----%04x\n", tf->tf_ds);
@@ -256,6 +246,18 @@ trap_dispatch(struct Trapframe *tf)
 		tf->tf_regs.reg_eax = ret;
 		break;
 
+	case IRQ_OFFSET + IRQ_SPURIOUS:
+		// Handle spurious interrupts
+		// The hardware sometimes raises these because of noise on the
+		// IRQ line or other reasons. We don't care.
+		cprintf("Spurious interrupt on irq %d\n", IRQ_SPURIOUS);
+		print_trapframe(tf);
+		break;
+
+	// Handle clock interrupts. Don't forget to acknowledge the
+	// interrupt using lapic_eoi() before calling the scheduler!
+	// LAB 4: Your code here.
+
 	default:
 		// Unexpected trap: The user process or the kernel has a bug.
 		print_trapframe(tf);
@@ -278,15 +280,26 @@ trap(struct Trapframe *tf)
 	// of GCC rely on DF being clear
 	asm volatile("cld" ::: "cc");
 
+	// Halt the CPU if some other CPU has called panic()
+	extern char *panicstr;
+	if (panicstr)
+		asm volatile("hlt");
+
+	// Re-acqurie the big kernel lock if we were halted in
+	// sched_yield()
+//	if (xchg(&thiscpu->cpu_status, CPU_STARTED) == CPU_HALTED)
+//		lock_kernel();
+
 	// Check that interrupts are disabled. If this assertion
 	// fails, DO NOT be tempted to fix it by inserting a "cli" in
 	// the interrupt path.
 	assert(!(read_eflags() & FL_IF));
 
-	cprintf("Incoming TRAP frame at %p\n", tf);
-
 	if ((tf->tf_cs & 3) == 3) {
 		// Trapped from user mode.
+		// Acquire the big kernel lock before doing any
+		// serious kernel work.
+		// LAB 4: Your code here
 		assert(curenv);
 
 		// Copy trap frame (which is currently on the stack)

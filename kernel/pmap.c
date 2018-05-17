@@ -268,10 +268,14 @@ mem_init_mp(void)
 	uintptr_t kstacktop;
 
 	for (i = 0; i < NCPU; i++) {
+
 		kstacktop = KSTACKTOP - i * (KSTKSIZE + KSTKGAP);
-		boot_map_region(kern_pgdir, kstacktop - KSTKSIZE, KSTKSIZE, PADDR(percpu_kstacks[i]), PTE_W);
+		boot_map_region(kern_pgdir, kstacktop - KSTKSIZE,
+			KSTKSIZE, PADDR(percpu_kstacks[i]), PTE_W);
+
 		cprintf("KSTACKTOP_%d 0x%x - 0x%x paddr 0x%x\n",
-			i, kstacktop - KSTKSIZE, kstacktop, PADDR(percpu_kstacks[i]));
+			i, kstacktop - KSTKSIZE, kstacktop,
+			PADDR(percpu_kstacks[i]));
 	}
 }
 
@@ -612,7 +616,7 @@ mmio_map_region(physaddr_t pa, size_t size)
 
 	va = base;
 	size = ROUNDUP(size, PGSIZE);
-	base = base + size;
+	base += size;
 
 	// Reserve size bytes of virtual memory starting at base and
 	// map physical pages [pa,pa+size) to virtual addresses

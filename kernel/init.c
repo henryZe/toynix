@@ -7,6 +7,7 @@
 #include <kernel/env.h>
 #include <kernel/trap.h>
 #include <kernel/cpu.h>
+#include <kernel/picirq.h>
 
 static void boot_aps(void);
 
@@ -30,13 +31,13 @@ init(void)
 	cprintf("Enter toynix...\n");
 
 	mem_init();
-
 	env_init();
 	trap_init();
 
+	/* config lapicaddr */
 	mp_init();
+	/* map lapic */
 	lapic_init();
-
 	pic_init();
 
 	// Acquire the big kernel lock before waking up APs
@@ -54,8 +55,7 @@ init(void)
 	// Schedule and run the first user environment!
 	//sched_yield();
 
-	// We only have one user environment for now, so just run it.
-	env_run(&envs[0]);
+	while(1);
 }
 
 // While boot_aps is booting a given CPU, it communicates the per-core
@@ -84,6 +84,7 @@ boot_aps(void)
 		mpentry_kstack = percpu_kstacks[c - cpus] + KSTKSIZE;
 		// Start the CPU at mpentry_start
 		lapic_startap(c->cpu_id, PADDR(code));
+
 		// Wait for the CPU to finish some basic setup in mp_main()
 		while (c->cpu_status != CPU_STARTED);
 	}

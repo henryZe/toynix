@@ -45,12 +45,12 @@ mpentry_start:
 	orl		$CR0_PE, %eax
 	movl	%eax, %cr0
 
-	ljmpl	$(GD_KT << 3), $(MPBOOTPHYS(start32))
+	ljmpl	$GD_KT, $(MPBOOTPHYS(start32))
 
 .code32
 start32:
 	# set ds/es/ss as PROT_MODE_DSEG
-	movw    $(GD_KD << 3), %ax
+	movw    $GD_KD, %ax
 	movw    %ax, %ds
 	movw    %ax, %es
 	movw    %ax, %ss

@@ -45,7 +45,14 @@ struct Segdesc gdt[] =
 	[GD_UD >> 3] = SEG(STA_W, 0x0, 0xffffffff, 3),
 
 	// 0x28 - tss, initialized in trap_init_percpu()
-	[GD_TSS0 >> 3] = SEG_NULL
+	[GD_TSS0 >> 3] = SEG_NULL,
+	[(GD_TSS0 >> 3) + 1] = SEG_NULL,
+	[(GD_TSS0 >> 3) + 2] = SEG_NULL,
+	[(GD_TSS0 >> 3) + 3] = SEG_NULL,
+	[(GD_TSS0 >> 3) + 4] = SEG_NULL,
+	[(GD_TSS0 >> 3) + 5] = SEG_NULL,
+	[(GD_TSS0 >> 3) + 6] = SEG_NULL,
+	[(GD_TSS0 >> 3) + 7] = SEG_NULL,
 };
 
 struct Pseudodesc gdt_pd = {
@@ -93,6 +100,7 @@ envid2env(envid_t envid, struct Env **env, bool checkperm)
 void
 env_init_percpu(void)
 {
+	// reload gdt (first load by boot.S and mpentry.S)
 	lgdt(&gdt_pd);
 
 	// The kernel never uses GS or FS, so we leave those set to
