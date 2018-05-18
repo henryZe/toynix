@@ -6,6 +6,7 @@
 #include <kernel/monitor.h>
 #include <kernel/syscall.h>
 #include <kernel/cpu.h>
+#include <kernel/spinlock.h>
 
 /* For debugging, so print_trapframe can distinguish between printing
  * a saved trapframe and printing the current trapframe and print some
@@ -299,7 +300,7 @@ trap(struct Trapframe *tf)
 		// Trapped from user mode.
 		// Acquire the big kernel lock before doing any
 		// serious kernel work.
-		// LAB 4: Your code here
+		lock_kernel();
 		assert(curenv);
 
 		// Copy trap frame (which is currently on the stack)

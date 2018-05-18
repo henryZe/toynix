@@ -5,6 +5,7 @@
 #include <kernel/env.h>
 #include <kernel/pmap.h>
 #include <kernel/monitor.h>
+#include <kernel/spinlock.h>
 
 #define ENVGENSHIFT	12		// >= LOGNENV
 
@@ -478,6 +479,7 @@ env_run(struct Env *e)
 	/* switch address space */
 	lcr3(PADDR(e->env_pgdir));
 
+	unlock_kernel();
 	/* run new env */
 	env_pop_tf(&e->env_tf);
 }
