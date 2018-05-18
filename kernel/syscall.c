@@ -8,6 +8,7 @@
 #include <kernel/env.h>
 #include <kernel/pmap.h>
 #include <kernel/console.h>
+#include <kernel/sched.h>
 
 // Print a string to the system console.
 // The string is exactly 'len' characters long.
@@ -81,6 +82,10 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 
 	case SYS_env_destroy:
 		return sys_env_destroy(a1);
+
+	case SYS_yield:
+		sched_yield();
+		return 0;
 
 	default:
 		return -E_INVAL;
