@@ -15,6 +15,7 @@
 #include <assert.h>
 #include <env.h>
 #include <memlayout.h>
+#include <syscall.h>
 
 #define USED(x)		(void)(x)
 
@@ -39,6 +40,22 @@ int	sys_cgetc(void);
 envid_t	sys_getenvid(void);
 int	sys_env_destroy(envid_t);
 void sys_yield(void);
+int	sys_env_set_status(envid_t envid, int status);
+int	sys_page_alloc(envid_t envid, void *pg, int perm);
+int	sys_page_map(envid_t src_env, void *src_pg,
+		        envid_t dst_env, void *dst_pg, int perm);
+int	sys_page_unmap(envid_t env, void *pg);
+static inline envid_t __attribute__((always_inline))
+sys_exofork(void)
+{
+    envid_t ret;
+
+    asm volatile("int %2"
+                : "=a" (ret)
+                : "a" (SYS_exofork), "i" (T_SYSCALL));
+
+    return ret;
+}
 
 /* File open modes */
 #define	O_RDONLY	0x0000		/* open for reading only */

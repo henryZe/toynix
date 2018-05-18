@@ -71,7 +71,7 @@ bootmain(void)
 	uchar *pa;
 	void (*entry)(void);
 
-	elf = (struct elfhdr *)0x10000;	/* scratch space */
+	elf = (struct elfhdr *)0x10000;	/* just scratch space */
 
 	/* Read 1st page off disk */
 	readseg((uchar *)elf, 4096, 0);

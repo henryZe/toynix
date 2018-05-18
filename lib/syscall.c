@@ -67,3 +67,28 @@ sys_yield(void)
 {
 	syscall(SYS_yield, 0, 0, 0, 0, 0, 0);
 }
+
+int
+sys_env_set_status(envid_t envid, int status)
+{
+	return syscall(SYS_env_set_status, 1, envid, status, 0, 0, 0);
+}
+
+int
+sys_page_alloc(envid_t envid, void *va, int perm)
+{
+	return syscall(SYS_page_alloc, 1, envid, (uint32_t)va, perm, 0, 0);
+}
+
+int
+sys_page_map(envid_t src_env, void *src_va,
+			envid_t dst_env, void *dst_va, int perm)
+{
+	return syscall(SYS_page_map, 1, src_env, (uint32_t)src_va, dst_env, (uint32_t)dst_va, perm);
+}
+
+int
+sys_page_unmap(envid_t envid, void *va)
+{
+	return syscall(SYS_page_unmap, 1, envid, (uint32_t)va, 0, 0, 0);
+}

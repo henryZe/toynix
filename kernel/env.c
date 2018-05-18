@@ -118,6 +118,10 @@ env_init_percpu(void)
 	asm volatile("movw %%ax,%%ss" : : "a" (GD_KD));
 
 	// Load the kernel text segment into CS.
+	/*
+	 *     ljmp $GD_KT, $1
+	 * 1:
+	 */
 	asm volatile("ljmp %0,$1f\n 1:\n" : : "i" (GD_KT));
 
 	// For good measure, clear the local descriptor table (LDT),
