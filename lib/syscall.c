@@ -61,3 +61,9 @@ sys_env_destroy(envid_t envid)
 {
 	return syscall(SYS_env_destroy, 1, envid, 0, 0, 0, 0);
 }
+
+void
+sys_yield(void)
+{
+	syscall(SYS_yield, 0, 0, 0, 0, 0, 0);
+}

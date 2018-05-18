@@ -9,6 +9,7 @@
 #include <kernel/cpu.h>
 #include <kernel/picirq.h>
 #include <kernel/spinlock.h>
+#include <kernel/sched.h>
 
 static void boot_aps(void);
 
@@ -49,13 +50,12 @@ init(void)
 #if defined(TEST)
 	ENV_CREATE(TEST, ENV_TYPE_USER);
 #else
-	ENV_CREATE(user_hello, ENV_TYPE_USER);
+	for (int i = 0; i < 3; i++)
+		ENV_CREATE(user_yield, ENV_TYPE_USER);
 #endif
 
-	// Schedule and run the first user environment!
-	//sched_yield();
-
-	while(1);
+	// Schedule and run the first user environment
+	sched_yield();
 }
 
 // While boot_aps is booting a given CPU, it communicates the per-core
@@ -107,8 +107,5 @@ mp_main(void)
 	// to start running processes on this CPU.  But make sure that
 	// only one CPU can enter the scheduler at a time!
 	lock_kernel();
-//	sched_yield();
-
-	// Remove this after you finish Exercise 6
-	while (1);
+	sched_yield();
 }

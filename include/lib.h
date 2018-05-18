@@ -38,7 +38,7 @@ void sys_cputs(const char *string, size_t len);
 int	sys_cgetc(void);
 envid_t	sys_getenvid(void);
 int	sys_env_destroy(envid_t);
-
+void sys_yield(void);
 
 /* File open modes */
 #define	O_RDONLY	0x0000		/* open for reading only */

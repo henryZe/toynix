@@ -7,6 +7,7 @@
 #include <kernel/syscall.h>
 #include <kernel/cpu.h>
 #include <kernel/spinlock.h>
+#include <kernel/sched.h>
 
 /* For debugging, so print_trapframe can distinguish between printing
  * a saved trapframe and printing the current trapframe and print some
@@ -277,7 +278,7 @@ trap_dispatch(struct Trapframe *tf)
 void
 trap(struct Trapframe *tf)
 {
-	// The environment may have set DF and some versions
+	// The environment may have set DF(10th bit) and some versions
 	// of GCC rely on DF being clear
 	asm volatile("cld" ::: "cc");
 
@@ -288,8 +289,8 @@ trap(struct Trapframe *tf)
 
 	// Re-acqurie the big kernel lock if we were halted in
 	// sched_yield()
-//	if (xchg(&thiscpu->cpu_status, CPU_STARTED) == CPU_HALTED)
-//		lock_kernel();
+	if (xchg(&thiscpu->cpu_status, CPU_STARTED) == CPU_HALTED)
+		lock_kernel();
 
 	// Check that interrupts are disabled. If this assertion
 	// fails, DO NOT be tempted to fix it by inserting a "cli" in
@@ -302,6 +303,13 @@ trap(struct Trapframe *tf)
 		// serious kernel work.
 		lock_kernel();
 		assert(curenv);
+
+		// Garbage collect if current environment is a zombie.
+		if (curenv->env_status == ENV_DYING) {
+			env_free(curenv);
+			curenv = NULL;
+			sched_yield();
+		}
 
 		// Copy trap frame (which is currently on the stack)
 		// into 'curenv->env_tf', so that running the environment
@@ -319,7 +327,11 @@ trap(struct Trapframe *tf)
 	// Dispatch based on what type of trap occurred
 	trap_dispatch(tf);
 
-	// Return to the current environment, which should be running.
-	assert(curenv && curenv->env_status == ENV_RUNNING);
-	env_run(curenv);
+	// If we made it to this point, then no other environment was
+	// scheduled, so we should return to the current environment
+	// if doing so makes sense.
+	if (curenv && curenv->env_status == ENV_RUNNING)
+		env_run(curenv);
+	else
+		sched_yield();
 }

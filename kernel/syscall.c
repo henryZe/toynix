@@ -64,6 +64,12 @@ sys_env_destroy(envid_t envid)
 	return 0;
 }
 
+static void
+sys_yield(void)
+{
+	sched_yield();
+}
+
 int32_t
 syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 		uint32_t a3, uint32_t a4, uint32_t a5)
@@ -84,7 +90,7 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 		return sys_env_destroy(a1);
 
 	case SYS_yield:
-		sched_yield();
+		sys_yield();
 		return 0;
 
 	default:

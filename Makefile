@@ -75,7 +75,7 @@ endif
 
 GDBPORT := $(shell expr `id -u` % 5000 + 25000)
 
-CPUS ?= 4
+CPUS ?= 2
 
 QEMUOPTS = -m 256 -drive file=$(OBJDIR)/$(KERNDIR)/kernel.img,index=0,media=disk,format=raw -serial mon:stdio -gdb tcp::$(GDBPORT)
 QEMUOPTS += $(shell if $(QEMU) -nographic -help | grep -q '^-D '; then echo '-D qemu.log'; fi)
