@@ -262,7 +262,7 @@ read_tsc(void)
 }
 
 static inline uint32_t
-xchg(uint32_t *addr, uint32_t newval)
+xchg(volatile uint32_t *addr, uint32_t newval)
 {
 	uint32_t result;
 

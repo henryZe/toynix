@@ -24,6 +24,7 @@ KERN_SRCFILES := \
 			$(KERNDIR)/lapic.c \
 			$(KERNDIR)/picirq.c \
 			$(KERNDIR)/spinlock.c \
+			$(KERNDIR)/sched.c \
 			$(LIBDIR)/printfmt.c \
 			$(LIBDIR)/string.c \
 			$(LIBDIR)/readline.c \
