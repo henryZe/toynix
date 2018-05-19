@@ -89,6 +89,7 @@ envid2env(envid_t envid, struct Env **env, bool checkperm)
 	// If checkperm is set, the specified environment
 	// must be either the current environment
 	// or an immediate child of the current environment.
+	/* only itself or its parent can destroy env */
 	if (checkperm && e != curenv && e->env_parent_id != curenv->env_id) {
 		*env = NULL;
 		return -E_BAD_ENV;
@@ -185,7 +186,7 @@ env_setup_vm(struct Env *e)
 	e->env_pgdir = page2kva(p);
 
 	for (i = PDX(UTOP); i < NPDENTRIES; i++) {
-		/* only concern about mapped page tables */
+		/* copy from kern_pgdir, only concern about mapped page tables */
 		if (!(kern_pgdir[i] & PTE_P))
 			continue;
 
