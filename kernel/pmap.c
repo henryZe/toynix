@@ -505,6 +505,7 @@ boot_map_region_by_hugepage(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t 
 // RETURNS:
 //   0 on success
 //   -E_NO_MEM, if page table couldn't be allocated
+/* page_map */
 int
 page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 {
@@ -540,6 +541,7 @@ out:
 // but should not be used by most callers.
 //
 // Return NULL if there is no page mapped at va.
+/* va2page: va -> pa, pa -> page */
 struct PageInfo *
 page_lookup(pde_t *pgdir, void *va, pte_t **pte_store)
 {
@@ -569,6 +571,7 @@ page_lookup(pde_t *pgdir, void *va, pte_t **pte_store)
 //     (if such a PTE exists)
 //   - The TLB must be invalidated if you remove an entry from
 //     the page table.
+/* page_unmap */
 void
 page_remove(pde_t *pgdir, void *va)
 {

@@ -96,6 +96,117 @@ sys_exofork(void)
 	return env->env_id;
 }
 
+/*
+ * Sets the status of a specified environment to ENV_RUNNABLE or ENV_NOT_RUNNABLE.
+ * This system call is typically used to mark a new environment ready to run,
+ * once its address space and register state has been fully initialized.
+ */
+static int
+sys_env_set_status(envid_t envid, int status)
+{
+	struct Env *env;
+
+	if (status != ENV_NOT_RUNNABLE && status != ENV_RUNNABLE)
+		return -E_INVAL;
+
+	if (envid2env(envid, &env, 1) < 0)
+		return -E_BAD_ENV;
+
+	env->env_status = status;
+	return 0;
+}
+
+/*
+ * Allocates a page of physical memory
+ * and maps it at a given virtual address
+ * in a given environment's address space.
+ */
+static int
+sys_page_alloc(envid_t envid, void *va, int perm)
+{
+	int ret;
+	struct Env *env;
+	struct PageInfo *page;
+
+	if (envid2env(envid, &env, 1) < 0)
+		return -E_BAD_ENV;
+
+	if (((uint32_t)va % PGSIZE) || ((uint32_t)va >= UTOP))
+		return -E_INVAL;
+
+	page = page_alloc(ALLOC_ZERO);
+	if (!page)
+		return -E_NO_MEM;
+
+	ret = page_insert(env->env_pgdir, page, va, perm);
+	if (ret < 0) {
+		page_free(page);
+		return ret;
+	}
+
+	return 0;
+}
+
+/*
+ * Copy a page mapping (not the contents of a page!)
+ * from one environment's address space to another,
+ * leaving a memory sharing arrangement in place
+ * so that the new and the old mappings both refer to
+ * the same page of physical memory.
+ */
+static int
+sys_page_map(envid_t srcenv_id, void *src,
+			envid_t dtsenv_id, void *dst, int perm)
+{
+	struct Env *src_env, *dst_env;
+	struct PageInfo *page;
+	pte_t *pte;
+	int ret;
+
+	if (((uint32_t)src % PGSIZE) || ((uint32_t)src >= UTOP))
+		return -E_INVAL;
+
+	if (((uint32_t)dst % PGSIZE) || ((uint32_t)dst >= UTOP))
+		return -E_INVAL;
+
+	if ((envid2env(srcenv_id, &src_env, 1) < 0) ||
+		(envid2env(dtsenv_id, &dst_env, 1) < 0))
+		return -E_BAD_ENV;
+
+	page = page_lookup(src_env->env_pgdir, src, &pte);
+	if (!page)
+		return -E_INVAL;
+
+	if ((~(*pte) & PTE_W) && (perm & PTE_W))
+		return -E_INVAL;
+
+	ret = page_insert(dst_env->env_pgdir, page, dst, perm);
+	if (ret < 0)
+		return ret;
+
+	return 0;
+}
+
+/*
+ * Unmap a page mapped at a given virtual address in a given environment.
+ */
+static int
+sys_page_unmap(envid_t envid, void *va)
+{
+	int ret;
+	struct Env *env;
+	struct PageInfo *page;
+
+	if (envid2env(envid, &env, 1) < 0)
+		return -E_BAD_ENV;
+
+	if (((uint32_t)va % PGSIZE) || ((uint32_t)va >= UTOP))
+		return -E_INVAL;
+
+	page_remove(env->env_pgdir, va);
+	return 0;
+}
+
 int32_t
 syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 		uint32_t a3, uint32_t a4, uint32_t a5)
@@ -123,16 +234,16 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 		return sys_exofork();
 
 	case SYS_env_set_status:
-		return ;
+		return sys_env_set_status(a1, a2);
 
 	case SYS_page_alloc:
-		return ;
+		return sys_page_alloc(a1, (void *)a2, a3);
 
 	case SYS_page_map:
-		return ;
+		return sys_page_map(a1, (void *)a2, a3, (void *)a4, a5);
 
 	case SYS_page_unmap:
-		return ;
+		return sys_page_unmap(a1, (void *)a2);
 
 	default:
 		return -E_INVAL;
