@@ -77,14 +77,14 @@ sys_env_set_status(envid_t envid, int status)
 int
 sys_page_alloc(envid_t envid, void *va, int perm)
 {
-	return syscall(SYS_page_alloc, 1, envid, (uint32_t)va, perm, 0, 0);
+	return syscall(SYS_page_alloc, 1, envid, (uint32_t)va, perm | PTE_U, 0, 0);
 }
 
 int
 sys_page_map(envid_t src_env, void *src_va,
 			envid_t dst_env, void *dst_va, int perm)
 {
-	return syscall(SYS_page_map, 1, src_env, (uint32_t)src_va, dst_env, (uint32_t)dst_va, perm);
+	return syscall(SYS_page_map, 1, src_env, (uint32_t)src_va, dst_env, (uint32_t)dst_va, perm | PTE_U);
 }
 
 int

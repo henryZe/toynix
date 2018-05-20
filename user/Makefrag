@@ -16,6 +16,7 @@ USER_SRCFILES := \
 			$(USRDIR)/buggyhello2.c \
 			$(USRDIR)/evilhello.c \
 			$(USRDIR)/yield.c \
+			$(USRDIR)/dumbfork.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 
