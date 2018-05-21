@@ -54,6 +54,9 @@ struct Env {
 
 	// Address space
 	pde_t *env_pgdir;			// Kernel virtual address of page dir
+
+	// Exception handling
+	void *env_pgfault_upcall;	// Page fault upcall entry point
 };
 
 #endif // !INC_ENV_H

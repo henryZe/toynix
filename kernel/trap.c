@@ -8,6 +8,7 @@
 #include <kernel/cpu.h>
 #include <kernel/spinlock.h>
 #include <kernel/sched.h>
+#include <kernel/pmap.h>
 
 /* For debugging, so print_trapframe can distinguish between printing
  * a saved trapframe and printing the current trapframe and print some
@@ -213,6 +214,50 @@ page_fault_handler(struct Trapframe *tf)
 
 	// We've already handled kernel-mode exceptions, so if we get here,
 	// the page fault happened in user mode.
+	//
+	// Call the environment's page fault upcall, if one exists.  Set up a
+	// page fault stack frame on the user exception stack (below
+	// UXSTACKTOP), then branch to curenv->env_pgfault_upcall.
+	//
+	// The page fault upcall might cause another page fault, in which case
+	// we branch to the page fault upcall recursively, pushing another
+	// page fault stack frame on top of the user exception stack.
+	//
+	// It is convenient for our code which returns from a page fault
+	// (lib/pfentry.S) to have one word of scratch space at the top of the
+	// trap-time stack; it allows us to more easily restore the eip/esp. In
+	// the non-recursive case, we don't have to worry about this because
+	// the top of the regular user stack is free.  In the recursive case,
+	// this means we have to leave an extra word between the current top of
+	// the exception stack and the new stack frame because the exception
+	// stack _is_ the trap-time stack.
+	if (curenv->env_pgfault_upcall) {
+		uintptr_t esp;
+		struct UTrapframe *utf;
+
+		if (tf->tf_esp > (UXSTACKTOP - PGSIZE) && tf->tf_esp < UXSTACKTOP)
+			/* trap-time already in exception stack */
+			esp = tf->tf_esp - 4 - sizeof(struct UTrapframe);
+		else
+			/* first time trap into exception stack */
+			esp = UXSTACKTOP - sizeof(struct UTrapframe);
+
+		user_mem_assert(curenv, (void *)esp, sizeof(struct UTrapframe), PTE_W);
+
+		utf = (struct UTrapframe *)esp;
+		utf->utf_fault_va = fault_va;
+		utf->utf_err = tf->tf_err;
+		utf->utf_regs = tf->tf_regs;
+		utf->utf_eip = tf->tf_eip;
+		utf->utf_eflags = tf->tf_eflags;
+		utf->utf_esp = tf->tf_esp;
+
+		tf->tf_esp = esp;
+		tf->tf_eip = (uintptr_t)curenv->env_pgfault_upcall;
+
+		env_run(curenv);
+	}
+
 	// Destroy the environment that caused the fault.
 	cprintf("[%08x] user fault va %08x ip %08x\n",
 			curenv->env_id, fault_va, tf->tf_eip);

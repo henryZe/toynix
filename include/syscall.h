@@ -13,6 +13,7 @@ enum {
 	SYS_page_alloc,
 	SYS_page_map,
 	SYS_page_unmap,
+	SYS_env_set_pgfault_upcall,
 	NUM_SYSCALLS
 };
 

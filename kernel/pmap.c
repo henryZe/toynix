@@ -669,7 +669,7 @@ user_mem_check(struct Env *env, const void *va, size_t len, int perm)
 	const void *end = va + len;
 	pte_t *cur_pte;
 
-	perm |= PTE_U;
+	perm |= PTE_P;
 
 	if ((unsigned long)start & (PGSIZE - 1))
 		start = ROUNDDOWN(start, PGSIZE);
@@ -723,7 +723,7 @@ ERR:
 void
 user_mem_assert(struct Env *env, const void *va, size_t len, int perm)
 {
-	if (user_mem_check(env, va, len, perm | PTE_U) < 0) {
+	if (user_mem_check(env, va, len, perm | PTE_U | PTE_P) < 0) {
 		cprintf("[%08x] user_mem_check assertion failure for "
 			"va %08x\n", env->env_id, user_mem_check_addr);
 		env_destroy(env);	// may not return
