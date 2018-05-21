@@ -8,6 +8,8 @@ LIB_SRCFILES :=	\
 			$(LIBDIR)/printf.c \
 			$(LIBDIR)/readline.c \
 			$(LIBDIR)/string.c \
+			$(LIBDIR)/pgfault.c \
+			$(LIBDIR)/pfentry.S \
 
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.c, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_SRCFILES))
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.S, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_OBJFILES))

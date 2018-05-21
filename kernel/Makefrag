@@ -25,8 +25,8 @@ KERN_SRCFILES := \
 			$(KERNDIR)/picirq.c \
 			$(KERNDIR)/spinlock.c \
 			$(KERNDIR)/sched.c \
-			$(LIBDIR)/printfmt.c \
 			$(LIBDIR)/string.c \
+			$(LIBDIR)/printfmt.c \
 			$(LIBDIR)/readline.c \
 
 # Binary program images to embed within the kernel.

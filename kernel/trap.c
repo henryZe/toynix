@@ -258,7 +258,7 @@ page_fault_handler(struct Trapframe *tf)
 		env_run(curenv);
 	}
 
-	// Destroy the environment that caused the fault.
+	/* Or destroy the environment that caused the fault. */
 	cprintf("[%08x] user fault va %08x ip %08x\n",
 			curenv->env_id, fault_va, tf->tf_eip);
 
