@@ -18,5 +18,6 @@ void
 umain(int argc, char **argv)
 {
 	set_pgfault_handler(handler);
+	/* In fact, it would trap in kernel instead of user space */
 	sys_cputs((char *)0xDEADBEEF, 4);
 }

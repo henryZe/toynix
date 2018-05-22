@@ -107,9 +107,7 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 		if (ret < 0)
 			cprintf("debuginfo not found location of eip\n");
 
-		cprintf("ebp[%08x] n_ebp[%08x] eip[%08x] ",
-			ebp, *(unsigned long *)ebp, eip);
-		cprintf("\n%s: %d, %.*s + 0x%x, %d arg(s)",
+		cprintf("%s: %d, %.*s + 0x%x, %d arg(s)",
 			info.eip_file, info.eip_line,
 			info.eip_fn_namelen, info.eip_fn_name,
 			eip - info.eip_fn_addr,
