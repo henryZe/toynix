@@ -20,6 +20,7 @@ USER_SRCFILES := \
 			$(USRDIR)/faultdie.c \
 			$(USRDIR)/faultalloc.c \
 			$(USRDIR)/faultallocbad.c \
+			$(USRDIR)/forktree.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 

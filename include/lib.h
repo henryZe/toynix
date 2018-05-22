@@ -37,6 +37,12 @@ char *readline(const char *buf);
 // pgfault.c
 void set_pgfault_handler(void (*handler)(struct UTrapframe *utf));
 
+// pfentry.S
+void _pgfault_upcall(void);
+
+// fork.c
+envid_t fork(void);
+
 // syscall.c
 void sys_cputs(const char *string, size_t len);
 int	sys_cgetc(void);

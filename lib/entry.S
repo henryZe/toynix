@@ -11,6 +11,7 @@
 	.globl uvpt
 	.set uvpt, UVPT
 	.globl uvpd
+	# uvpd = uvpt[PGNUM(uvpt)];
 	.set uvpd, (UVPT + (UVPT >> 12) * 4)
 
 
