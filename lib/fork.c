@@ -24,7 +24,7 @@ pgfault(struct UTrapframe *utf)
 	 * If not, panic.
 	 */
 	if (!(err & FEC_WR) || !(uvpt[PGNUM(addr)] & PTE_COW))
-		panic("%s err: %x", __func__, err);
+		panic("%s addr: %x err: %x", __func__, addr, err);
 
 	// Allocate a new page, map it at a temporary location (PFTEMP),
 	// copy the data from the old page to the new page, then move the new
@@ -67,9 +67,12 @@ duppage(envid_t dst_env, unsigned pn)
 		panic("sys_page_map: %e", ret);
 
 	/* remap self for setting PTE_COW */
-	/* (Exercise: Why do we need to mark ours
-	copy-on-write again if it was already copy-on-write at the beginning of
-	this function?) */
+	/*
+	 * Q: Why do we need to mark ours copy-on-write again
+	 * if it was already copy-on-write at the beginning of this function?
+	 *
+	 * A: For increasing page reference count by (sys_page_map -> page_insert).
+	 */
 	ret = sys_page_map(0, (void *)(pn << PGSHIFT), 0, (void *)(pn << PGSHIFT), perm);
 	if (ret < 0)
 		panic("sys_page_map: %e", ret);
@@ -98,6 +101,13 @@ fork(void)
 		return 0;
 	}
 
+	/*
+	 * Set _pgfault_upcall call back function for parent.
+	 * Must be set in the first because dup stack later
+	 * would cause page fault.
+	 */
+	set_pgfault_handler(pgfault);
+
 	/* only dup-page from 0 to USTACKTOP */
 	for (va = 0; va < USTACKTOP; va += PGSIZE) {
 		if ((uvpd[PDX(va)] & PTE_P) &&
@@ -109,6 +119,7 @@ fork(void)
 		}
 	}
 
+	/* allocate page for child exception stack */
 	ret = sys_page_alloc(envid, (void *)(UXSTACKTOP - PGSIZE), PTE_W);
 	if (ret < 0)
 		panic("fork: %e", ret);
@@ -117,9 +128,6 @@ fork(void)
 	ret = sys_env_set_pgfault_upcall(envid, _pgfault_upcall);
 	if (ret < 0)
 		panic("fork: %e", ret);
-	
-	/* set page fault call back function */
-	set_pgfault_handler(pgfault);
 
 	ret = sys_env_set_status(envid, ENV_RUNNABLE);
 	if (ret < 0)
