@@ -7,9 +7,11 @@
 #endif
 
 #include <env.h>
+#include <kernel/cpu.h>
+
+#define curenv (thiscpu->cpu_env)
 
 extern struct Env *envs;		// All environments
-extern struct Env *curenv;		// The current env
 extern struct Segdesc gdt[];
 
 void env_init(void);

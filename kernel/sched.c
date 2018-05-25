@@ -9,7 +9,8 @@
 void sched_halt(void);
 
 // Choose a user environment to run and run it.
-void sched_yield(void)
+void
+sched_yield(void)
 {
 	struct Env *idle;
 	int i, j;

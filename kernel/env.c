@@ -11,7 +11,6 @@
 #define ENVGENSHIFT	12		// >= LOGNENV
 
 struct Env *envs = NULL;		// All environments
-struct Env *curenv = NULL;		// The current env
 static struct Env *env_free_list;	// Free environment list, linked by Env->env_link.
 
 // Global descriptor table.
@@ -29,7 +28,7 @@ static struct Env *env_free_list;	// Free environment list, linked by Env->env_l
 // definition of gdt specifies the Descriptor Privilege Level (DPL)
 // of that descriptor: 0 for kernel and 3 for user.
 //
-struct Segdesc gdt[] =
+struct Segdesc gdt[NCPU + 5] =
 {
 	// 0x0 - unused (always faults -- for trapping NULL far pointers)
 	SEG_NULL,
@@ -46,15 +45,9 @@ struct Segdesc gdt[] =
 	// 0x20 - user data segment
 	[GD_UD >> 3] = SEG(STA_W, 0x0, 0xffffffff, 3),
 
-	// 0x28 - tss, initialized in trap_init_percpu()
+	// Per-CPU TSS descriptors (starting from GD_TSS0) are initialized
+	// in trap_init_percpu()
 	[GD_TSS0 >> 3] = SEG_NULL,
-	[(GD_TSS0 >> 3) + 1] = SEG_NULL,
-	[(GD_TSS0 >> 3) + 2] = SEG_NULL,
-	[(GD_TSS0 >> 3) + 3] = SEG_NULL,
-	[(GD_TSS0 >> 3) + 4] = SEG_NULL,
-	[(GD_TSS0 >> 3) + 5] = SEG_NULL,
-	[(GD_TSS0 >> 3) + 6] = SEG_NULL,
-	[(GD_TSS0 >> 3) + 7] = SEG_NULL,
 };
 
 struct Pseudodesc gdt_pd = {
@@ -399,7 +392,7 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 	e->env_tf.tf_cs = GD_UT | 3;
 	/* Set tf_eip in load_icode function later. */
 
-	// Enable interrupts while in user mode.
+	/* Enable interrupts while in user mode. */
 	e->env_tf.tf_eflags |= FL_IF;
 
 	// Clear the page fault handler until user installs one.
@@ -443,6 +436,9 @@ env_create(uint8_t *binary, enum EnvType type)
 void
 env_pop_tf(struct Trapframe *tf)
 {
+	// Record the CPU we are running on for user-space debugging
+	curenv->env_cpunum = cpunum();
+
 	asm volatile(
 		"\tmovl %0, %%esp\n"		/* move tf arg to esp */
 		"\tpopal\n"					/* popl PushRegs to registers */

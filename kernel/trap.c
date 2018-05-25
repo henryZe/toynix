@@ -305,6 +305,13 @@ trap_dispatch(struct Trapframe *tf)
 		tf->tf_regs.reg_eax = ret;
 		break;
 
+	case IRQ_OFFSET + IRQ_TIMER:
+		// Handle clock interrupts. Don't forget to acknowledge the
+		// interrupt using lapic_eoi() before calling the scheduler.
+		lapic_eoi();
+		sched_yield();
+		break;
+
 	case IRQ_OFFSET + IRQ_SPURIOUS:
 		// Handle spurious interrupts
 		// The hardware sometimes raises these because of noise on the
@@ -339,6 +346,8 @@ trap(struct Trapframe *tf)
 {
 	// The environment may have set DF(10th bit) and some versions
 	// of GCC rely on DF being clear
+	/* disable interrupt when enter trap */
+	//asm volatile("cli; cld" ::: "cc");
 	asm volatile("cld" ::: "cc");
 
 	// Halt the CPU if some other CPU has called panic()

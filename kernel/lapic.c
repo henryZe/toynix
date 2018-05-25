@@ -112,6 +112,14 @@ cpunum(void)
 	return 0;
 }
 
+// Acknowledge interrupt.
+void
+lapic_eoi(void)
+{
+	if (lapic)
+		lapicw(EOI, 0);
+}
+
 // Spin for a given number of microseconds.
 // On real hardware would want to tune this dynamically.
 static void
