@@ -81,6 +81,12 @@ void traphandler_17(void);
 void traphandler_18(void);
 void traphandler_19(void);
 void traphandler_48(void);
+void irqhandler_0(void);
+void irqhandler_1(void);
+void irqhandler_4(void);
+void irqhandler_7(void);
+void irqhandler_14(void);
+void irqhandler_19(void);
 
 void
 trap_init(void)
@@ -88,6 +94,7 @@ trap_init(void)
 	// trap
 	SETGATE(idt[T_DIVIDE], 1, GD_KT, traphandler_0, 0);
 	SETGATE(idt[T_DEBUG], 1, GD_KT, traphandler_1, 0);
+	SETGATE(idt[T_NMI], 0, GD_KT, traphandler_2, 0);
 	SETGATE(idt[T_BRKPT], 1, GD_KT, traphandler_3, 3);
 	SETGATE(idt[T_OFLOW], 1, GD_KT, traphandler_4, 0);
 	SETGATE(idt[T_BOUND], 1, GD_KT, traphandler_5, 0);
@@ -103,10 +110,15 @@ trap_init(void)
 	SETGATE(idt[T_ALIGN], 1, GD_KT, traphandler_17, 0);
 	SETGATE(idt[T_MCHK], 1, GD_KT, traphandler_18, 0);
 	SETGATE(idt[T_SIMDERR], 1, GD_KT, traphandler_19, 0);
+	SETGATE(idt[T_SYSCALL], 0, GD_KT, traphandler_48, 3);
 
 	// interrupt
-	SETGATE(idt[T_NMI], 0, GD_KT, traphandler_2, 0);
-	SETGATE(idt[T_SYSCALL], 0, GD_KT, traphandler_48, 3);
+	SETGATE(idt[IRQ_OFFSET + IRQ_TIMER], 0, GD_KT, irqhandler_0, 3);
+	SETGATE(idt[IRQ_OFFSET + IRQ_KBD], 0, GD_KT, irqhandler_1, 3);
+	SETGATE(idt[IRQ_OFFSET + IRQ_SERIAL], 0, GD_KT, irqhandler_4, 3);
+	SETGATE(idt[IRQ_OFFSET + IRQ_SPURIOUS], 0, GD_KT, irqhandler_7, 3);
+	SETGATE(idt[IRQ_OFFSET + IRQ_IDE], 0, GD_KT, irqhandler_14, 3);
+	SETGATE(idt[IRQ_OFFSET + IRQ_ERROR], 0, GD_KT, irqhandler_19, 3);
 
 	// Per-CPU setup
 	trap_init_percpu();

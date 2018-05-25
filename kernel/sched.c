@@ -46,7 +46,6 @@ void sched_yield(void)
 
 // Halt this CPU when there is nothing to do. Wait until the
 // timer interrupt wakes it up. This function never returns.
-//
 void
 sched_halt(void)
 {
@@ -84,8 +83,7 @@ sched_halt(void)
 		"movl %0, %%esp\n"	// push ts_esp0 (stack top) to esp
 		"pushl $0\n"		// push 0 as eip
 		"pushl $0\n"		// push 0 as ebp
-		// Uncomment the following line after completing exercise 13
-		//"sti\n"
+		"sti\n"				// restore interrupt
 		"1:\n"
 		"hlt\n"				// halt this cpu and wait for interrupt
 		"jmp 1b\n"

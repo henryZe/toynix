@@ -397,8 +397,13 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 	e->env_tf.tf_ss = GD_UD | 3;
 	e->env_tf.tf_esp = USTACKTOP;
 	e->env_tf.tf_cs = GD_UT | 3;
-	// You will set e->env_tf.tf_eip later.
-	// Set tf_eip in load_icode func.
+	/* Set tf_eip in load_icode function later. */
+
+	// Enable interrupts while in user mode.
+	e->env_tf.tf_eflags |= FL_IF;
+
+	// Clear the page fault handler until user installs one.
+	e->env_pgfault_upcall = NULL;
 
 	// Turn out the first entry of env_free_list
 	env_free_list = e->env_link;
@@ -444,7 +449,7 @@ env_pop_tf(struct Trapframe *tf)
 		"\tpopl %%es\n"
 		"\tpopl %%ds\n"
 		"\taddl $0x8, %%esp\n"		/* skip tf_trapno and tf_errcode */
-		"\tiret\n"					/* popl %%eip */
+		"\tiret\n"					/* popl %%eip; popl %%cs; popfl */
 		: : "g" (tf) : "memory");
 
 	panic("iret failed");			/* mostly to placate the compiler */
