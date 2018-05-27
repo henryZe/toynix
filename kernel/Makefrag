@@ -58,7 +58,7 @@ $(OBJDIR)/$(KERNDIR)/init.o: override KERN_CFLAGS+=$(INIT_CFLAGS)
 $(OBJDIR)/$(KERNDIR)/init.o: $(OBJDIR)/.vars.INIT_CFLAGS
 
 # How to build the kernel itself
-$(OBJDIR)/$(KERNDIR)/kernel: $(KERN_OBJFILES) $(KERNDIR)/kernel.ld $(KERN_BINFILES)
+$(OBJDIR)/$(KERNDIR)/kernel: $(KERN_OBJFILES) $(KERN_BINFILES) $(KERNDIR)/kernel.ld
 	@echo + ld[KERN] $@
 	$(LD) -o $@ $(KERN_LDFLAGS) $(KERN_OBJFILES) $(GCC_LIB) -b binary $(KERN_BINFILES)
 	$(OBJDUMP) -S $@ > $@.asm

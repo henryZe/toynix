@@ -7,9 +7,9 @@ USER_SRCFILES := \
 			$(USRDIR)/badsegment.c \
 			$(USRDIR)/softint.c \
 			$(USRDIR)/faultread.c \
-			$(USRDIR)/faultreadk.c \
+			$(USRDIR)/faultreadkernel.c \
 			$(USRDIR)/faultwrite.c \
-			$(USRDIR)/faultwritek.c \
+			$(USRDIR)/faultwritekernel.c \
 			$(USRDIR)/breakpoint.c \
 			$(USRDIR)/testbss.c \
 			$(USRDIR)/buggyhello.c \
