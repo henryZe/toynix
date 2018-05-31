@@ -69,7 +69,7 @@ check_regs(struct regs* a, const char *an, struct regs* b,
 }
 
 static void
-pgfault(struct UTrapframe *utf)
+fault_regs_pgfault(struct UTrapframe *utf)
 {
 	int ret;
 
@@ -87,13 +87,13 @@ pgfault(struct UTrapframe *utf)
 	// Map UTEMP so the write succeeds
 	ret = sys_page_alloc(0, UTEMP, PTE_W);
 	if (ret < 0)
-		panic("sys_page_alloc: %e", r);
+		panic("sys_page_alloc: %e", ret);
 }
 
 void
 umain(int argc, char **argv)
 {
-	set_pgfault_handler(pgfault);
+	set_pgfault_handler(fault_regs_pgfault);
 
 	asm volatile(
 		"\tpushl %%eax\n"
@@ -133,7 +133,7 @@ umain(int argc, char **argv)
 		// since we saved it
 		"\tpushl %%eax\n"
 		"\tpushfl\n"
-		"\tpopl %%eax\n"	
+		"\tpopl %%eax\n"
 		/* after->eflags */
 		"\tmov %%eax, %1+0x24\n"
 		"\tpopl %%eax\n"

@@ -79,7 +79,7 @@ sched_halt(void)
 	unlock_kernel();
 
 	// Reset stack pointer, enable interrupts and then halt.
-	asm volatile (
+	asm volatile(
 		"movl $0, %%ebp\n"	// reset ebp
 		"movl %0, %%esp\n"	// push ts_esp0 (stack top) to esp
 		"pushl $0\n"		// push 0 as eip

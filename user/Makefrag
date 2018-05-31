@@ -22,6 +22,11 @@ USER_SRCFILES := \
 			$(USRDIR)/faultallocbad.c \
 			$(USRDIR)/forktree.c \
 			$(USRDIR)/spin.c \
+			$(USRDIR)/faultregs.c \
+			$(USRDIR)/faultnostack.c \
+			$(USRDIR)/faultbadhandler.c \
+			$(USRDIR)/faultevilhandler.c \
+			$(USRDIR)/stresssched.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 
