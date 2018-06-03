@@ -58,6 +58,12 @@ struct Env {
 
 	// Exception handling
 	void *env_pgfault_upcall;	// Page fault upcall entry point
+
+	bool env_ipc_recving;		// Env is blocked receiving
+	void *env_ipc_dstva;		// VA at which to map received page
+	uint32_t env_ipc_value;		// Data value send to us
+	envid_t env_ipc_from;		// envid of the sender
+	int env_ipc_perm;			// Perm of page mapping received
 };
 
 #endif // !INC_ENV_H

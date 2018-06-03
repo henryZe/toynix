@@ -323,7 +323,10 @@ page_init(void)
 
 	for (i = 0; i < npages; i++) {
 		if ((i == 0) || (i == PGNUM(MPENTRY_PADDR))) {
-			/* for reserving zero page & MPENTRY_PADDR page for mpentry.S */
+			/*
+			 * For reserving zero page and
+			 * MPENTRY_PADDR page for mpentry.S.
+			 */
 			pages[i].pp_ref = 1;
 
 		} else if ((i >= npages_basemem) && \
@@ -598,6 +601,7 @@ page_remove(pde_t *pgdir, void *va)
 void
 tlb_invalidate(pde_t *pgdir, void *va)
 {
+	/* Invalidate the entry only if we're modifying the current address space. */
 	if (!curenv || curenv->env_pgdir == pgdir)
 		invlpg(va);
 }
@@ -908,6 +912,7 @@ check_kern_pgdir(void)
 		assert(check_va2pa(pgdir, KERNBASE + i) == i);
 
 	// check kernel stack
+	// (updated in lab 4 to check per-CPU kernel stacks)
 	for (n = 0; n < NCPU; n++) {
 		uint32_t base = KSTACKTOP - (KSTKSIZE + KSTKGAP) * (n + 1);
 

@@ -14,6 +14,8 @@ enum {
 	SYS_page_map,
 	SYS_page_unmap,
 	SYS_env_set_pgfault_upcall,
+	SYS_ipc_try_send,
+	SYS_ipc_recv,
 	NUM_SYSCALLS
 };
 

@@ -163,3 +163,10 @@ lapic_startap(uint8_t apicid, uint32_t addr)
 		microdelay(200);
 	}
 }
+
+void
+lapic_ipi(int vector)
+{
+	lapicw(ICRLO, OTHERS | FIXED | vector);
+	while (lapic[ICRLO] & DELIVS);
+}

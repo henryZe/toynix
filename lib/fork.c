@@ -66,8 +66,8 @@ duppage(envid_t dst_env, unsigned pn)
 	if (ret < 0)
 		panic("sys_page_map: %e", ret);
 
-	/* remap self for setting PTE_COW */
-	/*
+	/* remap self for setting PTE_COW
+	 *
 	 * Q: Why do we need to mark ours copy-on-write again
 	 * if it was already copy-on-write at the beginning of this function?
 	 *

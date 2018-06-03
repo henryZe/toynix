@@ -4,6 +4,8 @@
 # error "This is a JOS kernel header; user programs should not #include it"
 #endif
 
+#define MAX_IRQS	16		// Number of IRQs
+
 // I/O Addresses of the two 8259A programmable interrupt controllers
 #define IO_PIC1		0x20	// Master (IRQs 0-7)
 #define IO_PIC2		0xA0	// Slave (IRQs 8-15)

@@ -65,6 +65,7 @@ sys_env_destroy(envid_t envid)
 	return 0;
 }
 
+// Deschedule current environment and pick a different one to run.
 static void
 sys_yield(void)
 {
@@ -79,6 +80,10 @@ sys_yield(void)
  * In the parent, sys_exofork will return the envid_t of the newly created environment
  * (or a negative error code if the environment allocation failed).
  * In the child, however, it will return 0.
+ *
+ * Returns envid of new environment, or < 0 on error.  Errors are:
+ *     -E_NO_FREE_ENV if no free environment is available.
+ *     -E_NO_MEM on memory exhaustion.
  */
 static int
 sys_exofork(void)
@@ -97,9 +102,15 @@ sys_exofork(void)
 }
 
 /*
- * Sets the status of a specified environment to ENV_RUNNABLE or ENV_NOT_RUNNABLE.
+ * Sets the status of a specified environment to
+ * ENV_RUNNABLE or ENV_NOT_RUNNABLE.
  * This system call is typically used to mark a new environment ready to run,
  * once its address space and register state has been fully initialized.
+ *
+ *  Returns 0 on success, < 0 on error.  Errors are:
+ *  -E_BAD_ENV if environment envid doesn't currently exist,
+ *      or the caller doesn't have permission to change envid.
+ *  -E_INVAL if status is not a valid status for an environment.
  */
 static int
 sys_env_set_status(envid_t envid, int status)
@@ -117,9 +128,21 @@ sys_env_set_status(envid_t envid, int status)
 }
 
 /*
- * Allocates a page of physical memory
- * and maps it at a given virtual address
- * in a given environment's address space.
+ * Allocate a page of memory and map it at 'va' with permission
+ * 'perm' in the address space of 'envid'.
+ * The page's contents are set to 0.
+ * If a page is already mapped at 'va', that page is unmapped as a
+ * side effect.
+ *
+ * perm -- PTE_U | PTE_P must be set, PTE_AVAIL | PTE_W may or may not be set,
+ * 		but no other bits may be set.
+ *
+ * Return 0 on success, < 0 on error.	Errors are:
+ * 	-E_BAD_ENV if environment envid doesn't currently exist,
+ * 			or the caller doesn't have permission to change envid.
+ * 	-E_INVAL if va >= UTOP, or va is not page-aligned.
+ * 	-E_NO_MEM if there's no memory to allocate the new page,
+ * 			or to allocate any necessary page tables.
  */
 static int
 sys_page_alloc(envid_t envid, void *va, int perm)
@@ -138,7 +161,7 @@ sys_page_alloc(envid_t envid, void *va, int perm)
 	if (!page)
 		return -E_NO_MEM;
 
-	ret = page_insert(env->env_pgdir, page, va, perm);
+	ret = page_insert(env->env_pgdir, page, va, perm | PTE_U);
 	if (ret < 0) {
 		page_free(page);
 		return ret;
@@ -148,11 +171,22 @@ sys_page_alloc(envid_t envid, void *va, int perm)
 }
 
 /*
- * Copy a page mapping (not the contents of a page!)
- * from one environment's address space to another,
- * leaving a memory sharing arrangement in place
- * so that the new and the old mappings both refer to
- * the same page of physical memory.
+ * Map the page of memory at 'srcva' in srcenvid's address space
+ * at 'dstva' in dstenvid's address space with permission 'perm'.
+ * Perm has the same restrictions as in sys_page_alloc, except
+ * that it also must not grant write access to a read-only
+ * page.
+ *
+ * Return 0 on success, < 0 on error.  Errors are:
+ *     -E_BAD_ENV if srcenvid and/or dstenvid doesn't currently exist,
+ *             or the caller doesn't have permission to change one of them.
+ *     -E_INVAL if srcva >= UTOP or srcva is not page-aligned,
+ *             or dstva >= UTOP or dstva is not page-aligned.
+ *     -E_INVAL is srcva is not mapped in srcenvid's address space.
+ *     -E_INVAL if perm is inappropriate (see sys_page_alloc).
+ *     -E_INVAL if (perm & PTE_W), but srcva is read-only in srcenvid's
+ *             address space.
+ *     -E_NO_MEM if there's no memory to allocate any necessary page tables.
  */
 static int
 sys_page_map(envid_t srcenv_id, void *src,
@@ -177,10 +211,11 @@ sys_page_map(envid_t srcenv_id, void *src,
 	if (!page)
 		return -E_INVAL;
 
+	/* src va is read-only but attempt set perm PTE_W */
 	if ((~(*pte) & PTE_W) && (perm & PTE_W))
 		return -E_INVAL;
 
-	ret = page_insert(dst_env->env_pgdir, page, dst, perm);
+	ret = page_insert(dst_env->env_pgdir, page, dst, perm | PTE_U);
 	if (ret < 0)
 		return ret;
 
@@ -188,7 +223,13 @@ sys_page_map(envid_t srcenv_id, void *src,
 }
 
 /*
- * Unmap a page mapped at a given virtual address in a given environment.
+ * Unmap the page of memory at 'va' in the address space of 'envid'.
+ * If no page is mapped, the function silently succeeds.
+ *
+ * Return 0 on success, < 0 on error.  Errors are:
+ *     -E_BAD_ENV if environment envid doesn't currently exist,
+ *             or the caller doesn't have permission to change envid.
+ *     -E_INVAL if va >= UTOP, or va is not page-aligned.
  */
 static int
 sys_page_unmap(envid_t envid, void *va)
@@ -207,6 +248,17 @@ sys_page_unmap(envid_t envid, void *va)
 	return 0;
 }
 
+/*
+ * Set the page fault upcall for 'envid' by modifying the corresponding struct
+ * Env's 'env_pgfault_upcall' field.  When 'envid' causes a page fault, the
+ * kernel will push a fault record onto the exception stack, then branch to
+ * 'func'.
+ *
+ * Returns 0 on success, < 0 on error.  Errors are:
+ *     -E_BAD_ENV if environment envid doesn't currently exist,
+ *             or the caller doesn't have permission to change envid.
+ *     -E_INVAL if upcall func is invalid.
+ */
 static int
 sys_env_set_pgfault_upcall(envid_t envid, void *upcall)
 {
@@ -222,6 +274,72 @@ sys_env_set_pgfault_upcall(envid_t envid, void *upcall)
 	return 0;
 }
 
+// Try to send 'value' to the target env 'envid'.
+// If srcva < UTOP, then also send page currently mapped at 'srcva',
+// so that receiver gets a duplicate mapping of the same page.
+//
+// The send fails with a return value of -E_IPC_NOT_RECV if the
+// target is not blocked, waiting for an IPC.
+//
+// The send also can fail for the other reasons listed below.
+//
+// Otherwise, the send succeeds, and the target's ipc fields are
+// updated as follows:
+//    env_ipc_recving is set to 0 to block future sends;
+//    env_ipc_from is set to the sending envid;
+//    env_ipc_value is set to the 'value' parameter;
+//    env_ipc_perm is set to 'perm' if a page was transferred, 0 otherwise.
+// The target environment is marked runnable again, returning 0
+// from the paused sys_ipc_recv system call.  (Hint: does the
+// sys_ipc_recv function ever actually return?)
+//
+// If the sender wants to send a page but the receiver isn't asking for one,
+// then no page mapping is transferred, but no error occurs.
+// The ipc only happens when no errors occur.
+//
+// Returns 0 on success, < 0 on error.
+// Errors are:
+//	-E_BAD_ENV if environment envid doesn't currently exist.
+//		(No need to check permissions.)
+//	-E_IPC_NOT_RECV if envid is not currently blocked in sys_ipc_recv,
+//		or another environment managed to send first.
+//	-E_INVAL if srcva < UTOP but srcva is not page-aligned.
+//	-E_INVAL if srcva < UTOP and perm is inappropriate
+//		(see sys_page_alloc).
+//	-E_INVAL if srcva < UTOP but srcva is not mapped in the caller's
+//		address space.
+//	-E_INVAL if (perm & PTE_W), but srcva is read-only in the
+//		current environment's address space.
+//	-E_NO_MEM if there's not enough memory to map srcva in envid's
+//		address space.
+static int
+sys_ipc_try_send(envid_t envid, uint32_t value,
+					void *srcva, unsigned perm)
+{
+	// LAB 4: Your code here.
+	panic("sys_ipc_try_send not implemented");
+}
+
+// Block until a value is ready.  Record that you want to receive
+// using the env_ipc_recving and env_ipc_dstva fields of struct Env,
+// mark yourself not runnable, and then give up the CPU.
+//
+// If 'dstva' is < UTOP, then you are willing to receive a page of data.
+// 'dstva' is the virtual address at which the sent page should be mapped.
+//
+// This function only returns on error, but the system call will eventually
+// return 0 on success.
+// Return < 0 on error.  Errors are:
+//	-E_INVAL if dstva < UTOP but dstva is not page-aligned.
+static int
+sys_ipc_recv(void *dstva)
+{
+	// LAB 4: Your code here.
+	panic("sys_ipc_recv not implemented");
+	return 0;
+}
+
+// Dispatches to the correct kernel function, passing the arguments.
 int32_t
 syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 		uint32_t a3, uint32_t a4, uint32_t a5)

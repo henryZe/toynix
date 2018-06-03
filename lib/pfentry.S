@@ -32,7 +32,7 @@
 .global _pgfault_upcall
 _pgfault_upcall:
 	// Call the C page fault handler.
-	pushl	%esp		// push function argument: pointer to UTF
+	pushl	%esp		// push function argument: pointer to UTF (located in Exception Stack)
 	movl	_pgfault_handler, %eax
 	call	*%eax
 	addl	$4, %esp	// pop function argument
@@ -64,7 +64,7 @@ _pgfault_upcall:
 	// ways as registers become unavailable as scratch space.
 
 	/* sizeof(struct UTrapframe) = 52 */
-	movl	48(%esp), %eax	// Temp0 = UTrapframe->esp
+	movl	48(%esp), %eax	// Temp0 = UTrapframe->esp = trap-time esp
 	subl	$4, %eax		// Temp0 -= 4
 	movl	%eax, 48(%esp)	// UTrapframe->esp = Temp0 (scratch space for pushing eip)
 

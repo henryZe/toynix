@@ -40,7 +40,7 @@ duppage(envid_t dst_env, void *addr)
 	memmove(UTEMP, addr, PGSIZE);
 
 	/* unmap UTEMP */
-	if ((r = sys_page_unmap(dst_env, UTEMP)) < 0)
+	if ((r = sys_page_unmap(0, UTEMP)) < 0)
 		panic("sys_page_unmap: %e", r);
 }
 

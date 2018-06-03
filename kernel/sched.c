@@ -30,7 +30,7 @@ sched_yield(void)
 	// no runnable environments, simply drop through to the code
 	// below to halt the cpu.
 	idle = curenv;
-	i = idle? (ENVX(idle->env_id) + 1): 0;
+	i = idle ? (ENVX(idle->env_id) + 1) % NENV : 0;
 
 	for (j = 0; j < NENV; j++, i = (i + 1) % NENV) {
 		if (envs[i].env_status == ENV_RUNNABLE)

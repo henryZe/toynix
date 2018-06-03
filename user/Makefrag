@@ -16,6 +16,7 @@ USER_SRCFILES := \
 			$(USRDIR)/buggyhello2.c \
 			$(USRDIR)/evilhello.c \
 			$(USRDIR)/yield.c \
+			$(USRDIR)/idle.c \
 			$(USRDIR)/dumbfork.c \
 			$(USRDIR)/faultdie.c \
 			$(USRDIR)/faultalloc.c \

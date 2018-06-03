@@ -9,6 +9,7 @@
 #include <kernel/spinlock.h>
 #include <kernel/sched.h>
 #include <kernel/pmap.h>
+#include <kernel/picirq.h>
 
 /* For debugging, so print_trapframe can distinguish between printing
  * a saved trapframe and printing the current trapframe and print some
@@ -167,7 +168,7 @@ static const char *trapname(int trapno)
 
 	if (trapno == T_SYSCALL)
 		return "System call";
-	if (trapno >= IRQ_OFFSET && trapno < IRQ_OFFSET + 16)
+	if (trapno >= IRQ_OFFSET && trapno < IRQ_OFFSET + MAX_IRQS)
 		return "Hardware Interrupt";
 
 	return "(unknown trap)";
@@ -220,9 +221,9 @@ page_fault_handler(struct Trapframe *tf)
 	fault_va = rcr2();
 
 	// Handle kernel-mode page faults.
-	if (!(tf->tf_cs && 0x3))
-		panic("kernel fault va %08x ip %08x\n",
-				fault_va, tf->tf_eip);
+	if ((tf->tf_cs & 0x3) != 0x3)
+		panic("kernel fault va %08x ip %08x tf->tf_cs %08x\n",
+				fault_va, tf->tf_eip, tf->tf_cs);
 
 	// We've already handled kernel-mode exceptions, so if we get here,
 	// the page fault happened in user mode.
@@ -243,19 +244,49 @@ page_fault_handler(struct Trapframe *tf)
 	// this means we have to leave an extra word between the current top of
 	// the exception stack and the new stack frame because the exception
 	// stack _is_ the trap-time stack.
+	//
+	// If there's no page fault upcall, the environment didn't allocate a
+	// page for its exception stack or can't write to it, or the exception
+	// stack overflows, then destroy the environment that caused the fault.
+	//
 	if (curenv->env_pgfault_upcall) {
 		uintptr_t esp;
 		struct UTrapframe *utf;
 
-		if (tf->tf_esp > (UXSTACKTOP - PGSIZE) && tf->tf_esp < UXSTACKTOP)
-			/* trap-time already in exception stack */
+		if (tf->tf_esp >= (UXSTACKTOP - PGSIZE) && tf->tf_esp < UXSTACKTOP)
+			/*
+			 * trap-time UTrapframe already in exception stack
+			 *
+			 * In non-recursive case:
+			 * Regular Stack & Exception Stack status
+			 *
+			 * |-------------------|         |-------------------|
+			 * | Regular Stack     |         | Exception Stack 1 |
+			 * |-------------------|         |-------------------|
+			 * | trap-time eip     |
+			 * |-------------------|
+			 */
 			esp = tf->tf_esp - 4 - sizeof(struct UTrapframe);
 		else
-			/* first time trap into exception stack */
+			/*
+			 * first time trap into exception stack
+			 *
+			 * In recursive case:
+			 * Exception Stack status
+			 *
+			 * |-----------------------|
+			 * | Exception Stack n     |
+			 * |-----------------------|
+			 * | trap-time eip         |
+			 * |-----------------------|
+			 * | Exception Stack (n+1) |
+			 * |-----------------------|
+			 */
 			esp = UXSTACKTOP - sizeof(struct UTrapframe);
 
 		user_mem_assert(curenv, (void *)esp, sizeof(struct UTrapframe), PTE_W);
 
+		/* push UTrapframe into exception stack */
 		utf = (struct UTrapframe *)esp;
 		utf->utf_fault_va = fault_va;
 		utf->utf_err = tf->tf_err;
@@ -264,6 +295,7 @@ page_fault_handler(struct Trapframe *tf)
 		utf->utf_eflags = tf->tf_eflags;
 		utf->utf_esp = tf->tf_esp;
 
+		/* restore env to _pgfault_upcall and set stack as Exception Stack */
 		tf->tf_esp = esp;
 		tf->tf_eip = (uintptr_t)curenv->env_pgfault_upcall;
 
@@ -320,17 +352,13 @@ trap_dispatch(struct Trapframe *tf)
 		print_trapframe(tf);
 		break;
 
-	// Handle clock interrupts. Don't forget to acknowledge the
-	// interrupt using lapic_eoi() before calling the scheduler!
-	// LAB 4: Your code here.
-
 	default:
 		// Unexpected trap: The user process or the kernel has a bug.
 		print_trapframe(tf);
-		if (tf->tf_cs == GD_KT)
+		if (tf->tf_cs == GD_KT) {
 			/* GD_KT | 0 */
 			panic("unhandled trap in kernel");
-		else {
+		} else {
 			/* GD_UT | 3 */
 			cprintf("unhandled trap in user\n");
 
@@ -347,7 +375,6 @@ trap(struct Trapframe *tf)
 	// The environment may have set DF(10th bit) and some versions
 	// of GCC rely on DF being clear
 	/* disable interrupt when enter trap */
-	//asm volatile("cli; cld" ::: "cc");
 	asm volatile("cld" ::: "cc");
 
 	// Halt the CPU if some other CPU has called panic()

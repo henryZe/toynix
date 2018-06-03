@@ -36,10 +36,13 @@ init(void)
 	env_init();
 	trap_init();
 
+	/* multiprocessor initialization functions */
 	/* config lapicaddr */
 	mp_init();
 	/* map lapic */
 	lapic_init();
+
+	/* multitasking initialization functions */
 	pic_init();
 
 	// Acquire the big kernel lock before waking up APs
@@ -50,7 +53,7 @@ init(void)
 #if defined(TEST)
 	ENV_CREATE(TEST, ENV_TYPE_USER);
 #else
-	ENV_CREATE(user_spin, ENV_TYPE_USER);
+	ENV_CREATE(user_idle, ENV_TYPE_USER);
 #endif
 
 	// Schedule and run the first user environment
@@ -79,7 +82,7 @@ boot_aps(void)
 		if (c == cpus + cpunum())  // We've started already.
 			continue;
 
-		// Tell mpentry.S what stack to use 
+		// Tell mpentry.S what stack to use
 		mpentry_kstack = percpu_kstacks[c - cpus] + KSTKSIZE;
 		// Start the CPU at mpentry_start
 		lapic_startap(c->cpu_id, PADDR(code));
