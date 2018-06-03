@@ -399,7 +399,10 @@ trap(struct Trapframe *tf)
 		lock_kernel();
 		assert(curenv);
 
-		// Garbage collect if current environment is a zombie.
+		/*
+		 * Garbage collect when next time-interrupt comes
+		 * if current environment is a zombie.
+		 */
 		if (curenv->env_status == ENV_DYING) {
 			env_free(curenv);
 			curenv = NULL;
