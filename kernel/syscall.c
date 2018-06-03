@@ -371,8 +371,8 @@ sys_ipc_recv(void *dstva)
 	curenv->env_ipc_recving = true;
 	curenv->env_ipc_dstva = dstva;
 
+	/* not return from here */
 	sched_yield();
-	return 0;
 }
 
 // Dispatches to the correct kernel function, passing the arguments.
@@ -416,6 +416,12 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 
 	case SYS_env_set_pgfault_upcall:
 		return sys_env_set_pgfault_upcall(a1, (void *)a2);
+
+	case SYS_ipc_try_send:
+		return sys_ipc_try_send(a1, a2, (void *)a3, a4);
+
+	case SYS_ipc_recv:
+		return sys_ipc_recv((void *)a1);
 
 	default:
 		return -E_INVAL;
