@@ -334,7 +334,7 @@ sys_ipc_try_send(envid_t envid, uint32_t value,
 		if (ret < 0)
 			return ret;
 
-		env->env_ipc_perm = perm | PTE_U;
+		env->env_ipc_perm = perm | PTE_U | PTE_P;
 	} else {
 		env->env_ipc_perm = 0;
 	}

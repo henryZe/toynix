@@ -11,6 +11,7 @@ LIB_SRCFILES :=	\
 			$(LIBDIR)/pgfault.c \
 			$(LIBDIR)/pfentry.S \
 			$(LIBDIR)/fork.c \
+			$(LIBDIR)/ipc.c \
 
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.c, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_SRCFILES))
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.S, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_OBJFILES))
