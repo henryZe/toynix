@@ -343,7 +343,6 @@ sys_ipc_try_send(envid_t envid, uint32_t value,
 	env->env_ipc_from = curenv->env_id;
 	env->env_ipc_recving = false;
 
-	env->env_tf.tf_regs.reg_eax = 0;	/* return 0 from receiver */
 	env->env_status = ENV_RUNNABLE;
 
 	return 0;
@@ -366,12 +365,13 @@ sys_ipc_recv(void *dstva)
 	if (((uint32_t)dstva % PGSIZE) || ((uint32_t)dstva >= UTOP))
 		return -E_INVAL;
 
-	curenv->env_status = ENV_NOT_RUNNABLE;
-
 	curenv->env_ipc_recving = true;
 	curenv->env_ipc_dstva = dstva;
 
-	/* not return from here */
+	curenv->env_tf.tf_regs.reg_eax = 0;	/* return 0 from receiver */
+	curenv->env_status = ENV_NOT_RUNNABLE;
+
+	/* not return */
 	sched_yield();
 }
 

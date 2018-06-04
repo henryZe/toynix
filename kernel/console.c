@@ -469,8 +469,7 @@ getchar(void)
 {
 	int c;
 
-	while ((c = cons_getc()) == 0)
-		sched_yield();
+	while ((c = cons_getc()) == 0);
 	return c;
 }
 
