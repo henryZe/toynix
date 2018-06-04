@@ -221,9 +221,10 @@ page_fault_handler(struct Trapframe *tf)
 	fault_va = rcr2();
 
 	// Handle kernel-mode page faults.
-	if ((tf->tf_cs & 0x3) != 0x3)
+	if ((tf->tf_cs & 0x3) != 0x3) {
 		panic("kernel fault va %08x ip %08x tf->tf_cs %08x\n",
 				fault_va, tf->tf_eip, tf->tf_cs);
+	}
 
 	// We've already handled kernel-mode exceptions, so if we get here,
 	// the page fault happened in user mode.
@@ -382,8 +383,7 @@ trap(struct Trapframe *tf)
 	if (panicstr)
 		asm volatile("hlt");
 
-	// Re-acqurie the big kernel lock if we were halted in
-	// sched_yield()
+	// Re-acqurie the big kernel lock if we were halted in sched_yield()
 	if (xchg(&thiscpu->cpu_status, CPU_STARTED) == CPU_HALTED)
 		lock_kernel();
 

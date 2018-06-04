@@ -531,7 +531,7 @@ page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 out:
 	/* link page to page table entry */
 	*pt_entry = (page2pa(pp) | PTE_P | perm);
-	pgdir[PDX(va)] |= perm;
+	pgdir[PDX(va)] |= perm | PTE_P;
 
 	return 0;
 }

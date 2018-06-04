@@ -83,7 +83,7 @@ envid2env(envid_t envid, struct Env **env, bool checkperm)
 	// must be either the current environment
 	// or an immediate child of the current environment.
 	/* only itself or its parent can destroy env */
-	if (checkperm && e != curenv && e->env_parent_id != curenv->env_id) {
+	if (checkperm && (e != curenv) && (e->env_parent_id != curenv->env_id)) {
 		*env = NULL;
 		return -E_BAD_ENV;
 	}

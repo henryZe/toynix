@@ -13,7 +13,7 @@
 // If the system call fails, then store 0 in *fromenv and *perm (if
 //	they're nonnull) and return the error.
 // Otherwise, return the value sent by the sender
-int32_t
+int
 ipc_recv(envid_t *from_env_store, void *pg, int *perm_store)
 {
 	int ret;
@@ -36,18 +36,13 @@ ipc_recv(envid_t *from_env_store, void *pg, int *perm_store)
 // This function keeps trying until it succeeds.
 // It should panic() on any error other than -E_IPC_NOT_RECV.
 void
-ipc_send(envid_t to_env, uint32_t val, void *pg, int perm)
+ipc_send(envid_t to_env, int val, void *pg, int perm)
 {
 	int ret;
 
-	while (1) {
-		ret = sys_ipc_try_send(to_env, val, pg, perm);
-		if (!ret)
-			break;
-
-		if (ret < 0)
-			if (ret != -E_IPC_NOT_RECV)
-				panic("%s: %e", __func__, ret);
+	while ((ret = sys_ipc_try_send(to_env, val, pg, perm)) < 0) {
+		if (ret != -E_IPC_NOT_RECV)
+			panic("%s: %e", __func__, ret);
 
 		sys_yield();
 	}

@@ -313,11 +313,13 @@ sys_env_set_pgfault_upcall(envid_t envid, void *upcall)
 //	-E_NO_MEM if there's not enough memory to map srcva in envid's
 //		address space.
 static int
-sys_ipc_try_send(envid_t envid, uint32_t value,
+sys_ipc_try_send(envid_t envid, int value,
 					void *srcva, unsigned perm)
 {
 	struct Env *env;
 	int ret;
+	struct PageInfo *page;
+	pte_t *pte;
 
 	if (((uint32_t)srcva % PGSIZE) || ((uint32_t)srcva >= UTOP))
 		return -E_INVAL;
@@ -330,7 +332,17 @@ sys_ipc_try_send(envid_t envid, uint32_t value,
 		return -E_IPC_NOT_RECV;
 
 	if (env->env_ipc_dstva && srcva) {
-		ret = sys_page_map(0, srcva, envid, env->env_ipc_dstva, perm | PTE_U);
+		/* va2page */
+		page = page_lookup(curenv->env_pgdir, srcva, &pte);
+		if (!page)
+			return -E_INVAL;
+
+		/* check permission */
+		if ((~(*pte) & PTE_W) && (perm & PTE_W))
+			return -E_INVAL;
+
+		/* page map */
+		ret = page_insert(env->env_pgdir, page, env->env_ipc_dstva, perm | PTE_U);
 		if (ret < 0)
 			return ret;
 

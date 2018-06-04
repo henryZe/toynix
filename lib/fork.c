@@ -24,7 +24,7 @@ pgfault(struct UTrapframe *utf)
 	 * If not, panic.
 	 */
 	if (!(err & FEC_WR) || !(uvpt[PGNUM(addr)] & PTE_COW))
-		panic("%s addr: %x err: %x", __func__, addr, err);
+		panic("%s addr: %x err: %x pte %x", __func__, addr, err, uvpt[PGNUM(addr)]);
 
 	// Allocate a new page, map it at a temporary location (PFTEMP),
 	// copy the data from the old page to the new page, then move the new
