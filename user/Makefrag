@@ -28,6 +28,7 @@ USER_SRCFILES := \
 			$(USRDIR)/faultbadhandler.c \
 			$(USRDIR)/faultevilhandler.c \
 			$(USRDIR)/stresssched.c \
+			$(USRDIR)/sendpage.c \
 			$(USRDIR)/pingpong.c \
 			$(USRDIR)/primes.c \
 
