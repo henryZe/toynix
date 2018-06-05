@@ -16,13 +16,13 @@ toy kernel
 ## Todu List
 
 * High Priority
-  1. IPC mechanism
-  2. File System
+  1. File System
+  2. mini shell
   3. Network Stack
 
 * Medium Priority
-  1. fine-gained lock instead of global kernel lock
-    a. page allocator
-    b. console driver
-    c. scheduler
-    d. IPC state
+  1. fine-gained lock instead of global kernel lock  
+    a. page allocator  
+    b. console driver  
+    c. scheduler  
+    d. IPC state  
