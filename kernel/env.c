@@ -399,7 +399,7 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 	e->env_pgfault_upcall = NULL;
 
 	// Also clear the IPC receiving flag
-	e->env_ipc_recving = 0;
+	e->env_ipc_recving = false;
 
 	// Turn out the first entry of env_free_list
 	env_free_list = e->env_link;
@@ -474,7 +474,7 @@ env_run(struct Env *e)
 	// Step 2: Use env_pop_tf() to restore the environment's
 	//	   registers and drop into user mode in the
 	//	   environment.
-	if (curenv)
+	if (curenv && (curenv->env_status == ENV_RUNNING))
 		curenv->env_status = ENV_RUNNABLE;
 
 	curenv = e;

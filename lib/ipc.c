@@ -41,8 +41,12 @@ ipc_send(envid_t to_env, int val, void *pg, int perm)
 	int ret;
 
 	while ((ret = sys_ipc_try_send(to_env, val, pg, perm)) < 0) {
-		if (ret != -E_IPC_NOT_RECV)
-			panic("%s: %e", __func__, ret);
+		if (ret != -E_IPC_NOT_RECV) {
+			if (ret == -E_BAD_ENV)
+				panic("%s: %e %x", __func__, ret, to_env);
+			else
+				panic("%s: %e", __func__, ret);
+		}
 
 		sys_yield();
 	}
