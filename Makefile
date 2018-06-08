@@ -4,6 +4,7 @@ BOOTDIR := boot
 KERNDIR := kernel
 LIBDIR := lib
 USRDIR := user
+FSDIR := fs
 
 CC	:= gcc -pipe
 AS	:= as
@@ -14,9 +15,8 @@ OBJDUMP	:= objdump
 NM	:= nm
 
 # Native commands
-NCC	:= gcc $(CC_VER) -pipe
 NATIVE_CFLAGS := $(CFLAGS) $(DEFS) $(LABDEFS) -I$(INCDIR) -MD -Wall
-TAR	:= gtar
+TAR := gtar
 PERL := perl
 
 # Compiler flags
@@ -60,6 +60,7 @@ include $(BOOTDIR)/Makefrag
 include $(LIBDIR)/Makefrag
 include $(USRDIR)/Makefrag
 include $(KERNDIR)/Makefrag
+include $(FSDIR)/Makefrag
 
 clean:
 	rm -rf $(OBJDIR) .gdbinit jos.in qemu.log
@@ -88,6 +89,8 @@ QEMUOPTS = -m 256 -drive file=$(OBJDIR)/$(KERNDIR)/kernel.img,index=0,media=disk
 QEMUOPTS += $(shell if $(QEMU) -nographic -help | grep -q '^-D '; then echo '-D qemu.log'; fi)
 IMAGES = $(OBJDIR)/$(KERNDIR)/kernel.img
 QEMUOPTS += -smp $(CPUS)
+QEMUOPTS += -drive file=$(OBJDIR)/fs/fs.img,index=1,media=disk,format=raw
+IMAGES += $(OBJDIR)/fs/fs.img
 QEMUOPTS += $(QEMUEXTRA)
 
 # debug bootloader, or debug kernel in default

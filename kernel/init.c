@@ -50,11 +50,17 @@ init(void)
 	// Starting non-boot CPUs
 	boot_aps();
 
+	// Start fs.
+	ENV_CREATE(fs_fs, ENV_TYPE_FS);
+
 #if defined(TEST)
 	ENV_CREATE(TEST, ENV_TYPE_USER);
 #else
 	ENV_CREATE(user_primes, ENV_TYPE_USER);
 #endif
+
+	// Should not be necessary - drains keyboard because interrupt has given up.
+	kbd_intr();
 
 	// Schedule and run the first user environment
 	sched_yield();

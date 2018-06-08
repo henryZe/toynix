@@ -10,7 +10,7 @@ toy kernel
   > Run the kernel with debug mode
 * make gdb
   > Run gdb and auto-link target QEMU
-* find . -name "*" | xargs cat | wc -l
+* find . -name "*.[ch]" | xargs cat | wc -l
   > calculate code lines
 
 ## Todu List

@@ -39,8 +39,9 @@ $(OBJDIR)/$(USRDIR)/%.o: $(USRDIR)/%.c
 	@mkdir -p $(@D)
 	$(CC) -nostdinc $(USER_CFLAGS) -c -o $@ $<
 
-$(OBJDIR)/$(USRDIR)/%: $(OBJDIR)/$(USRDIR)/%.o $(OBJDIR)/$(LIBDIR)/libtoynix.a $(USRDIR)/user.ld
+$(OBJDIR)/$(USRDIR)/%: $(OBJDIR)/$(USRDIR)/%.o $(OBJDIR)/$(LIBDIR)/entry.o $(OBJDIR)/$(LIBDIR)/libtoynix.a $(USRDIR)/user.ld
 	@echo + ld[USER] $@
-	$(LD) -o $@ $(USR_LDFLAGS) $@.o -L$(OBJDIR)/$(LIBDIR) -ltoynix $(GCC_LIB)
-	$(OBJDUMP) -S $@ > $@.asm
-	$(NM) -n $@ > $@.sym
+	$(LD) -o $@.debug $(USR_LDFLAGS) $(OBJDIR)/$(LIBDIR)/entry.o $@.o -L$(OBJDIR)/$(LIBDIR) -ltoynix $(GCC_LIB)
+	$(OBJDUMP) -S $@.debug > $@.asm
+	$(NM) -n $@.debug > $@.sym
+	$(OBJCOPY) -R .stab -R .stabstr --add-gnu-debuglink=$(basename $@.debug) $@.debug $@

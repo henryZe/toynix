@@ -1,0 +1,40 @@
+FSOFILES := \
+
+USERAPPS := \
+		$(OBJDIR)/$(USRDIR)/init \
+
+FSIMGTXTFILES := \
+
+FSIMGFILES := $(FSIMGTXTFILES) $(USERAPPS)
+
+# Compile FS object files
+$(OBJDIR)/$(FSDIR)/%.o: $(FSDIR)/%.c $(FSDIR)/fs.h $(INCDIR)/lib.h $(OBJDIR)/.vars.USER_CFLAGS
+	@echo + cc[USER] $<
+	@mkdir -p $(@D)
+	$(CC) -nostdinc $(USER_CFLAGS) -c -o $@ $<
+
+# FS environment
+$(OBJDIR)/$(FSDIR)/fs: $(FSOFILES) $(OBJDIR)/$(LIBDIR)/entry.o $(OBJDIR)/$(LIBDIR)/libtoynix.a $(USRDIR)/user.ld
+	@echo + ld $@
+	mkdir -p $(@D)
+	$(LD) -o $@ $(USR_LDFLAGS) \
+		$(OBJDIR)/$(LIBDIR)/entry.o $(FSOFILES) \
+		-L$(OBJDIR)/$(LIBDIR) -ltoynix $(GCC_LIB)
+	$(OBJDUMP) -S $@ > $@.asm
+
+# How to build the file system image
+$(OBJDIR)/$(FSDIR)/fsformat: $(FSDIR)/fsformat.c
+	@echo + mk $(OBJDIR)/$(FSDIR)/fsformat
+	mkdir -p $(@D)
+	$(CC) $(NATIVE_CFLAGS) -o $(OBJDIR)/$(FSDIR)/fsformat $(FSDIR)/fsformat.c
+
+$(OBJDIR)/$(FSDIR)/clean-fs.img: $(OBJDIR)/$(FSDIR)/fsformat $(FSIMGFILES)
+	@echo + mk $(OBJDIR)/$(FSDIR)/clean-fs.img
+	mkdir -p $(@D)
+	$(OBJDIR)/$(FSDIR)/fsformat $(OBJDIR)/$(FSDIR)/clean-fs.img 1024 $(FSIMGFILES)
+
+$(OBJDIR)/$(FSDIR)/fs.img: $(OBJDIR)/$(FSDIR)/clean-fs.img
+	@echo + cp $(OBJDIR)/$(FSDIR)/clean-fs.img $@
+	cp $< $@
+
+all: $(OBJDIR)/$(FSDIR)/fs.img
