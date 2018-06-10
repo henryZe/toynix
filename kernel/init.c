@@ -56,7 +56,7 @@ init(void)
 #if defined(TEST)
 	ENV_CREATE(TEST, ENV_TYPE_USER);
 #else
-	ENV_CREATE(user_primes, ENV_TYPE_USER);
+	ENV_CREATE(user_hello, ENV_TYPE_USER);
 #endif
 
 	// Should not be necessary - drains keyboard because interrupt has given up.

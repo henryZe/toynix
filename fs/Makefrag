@@ -28,6 +28,7 @@ $(OBJDIR)/$(FSDIR)/fsformat: $(FSDIR)/fsformat.c
 	mkdir -p $(@D)
 	$(CC) $(NATIVE_CFLAGS) -o $(OBJDIR)/$(FSDIR)/fsformat $(FSDIR)/fsformat.c
 
+# Generate image of 4MB (1024 * BLKSIZE)
 $(OBJDIR)/$(FSDIR)/clean-fs.img: $(OBJDIR)/$(FSDIR)/fsformat $(FSIMGFILES)
 	@echo + mk $(OBJDIR)/$(FSDIR)/clean-fs.img
 	mkdir -p $(@D)

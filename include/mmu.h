@@ -146,7 +146,9 @@
 
 #else	// not __ASSEMBLER__
 
+#ifndef FS_FORMAT_TOOL
 #include <types.h>
+#endif
 
 // Segment Descriptors
 struct Segdesc {

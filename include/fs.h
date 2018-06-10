@@ -3,8 +3,10 @@
 #ifndef INC_FS_H
 #define INC_FS_H
 
+#ifndef FS_FORMAT_TOOL
 #include <types.h>
 #include <mmu.h>
+#endif
 
 // File nodes (both in-memory and on-disk)
 

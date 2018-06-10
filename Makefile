@@ -15,7 +15,7 @@ OBJDUMP	:= objdump
 NM	:= nm
 
 # Native commands
-NATIVE_CFLAGS := $(CFLAGS) $(DEFS) $(LABDEFS) -I$(INCDIR) -MD -Wall
+NATIVE_CFLAGS := $(CFLAGS) $(DEFS) $(LABDEFS) -I. -MD -Wall
 TAR := gtar
 PERL := perl
 
