@@ -59,8 +59,8 @@ $(OBJDIR)/.vars.%: FORCE
 include $(BOOTDIR)/Makefrag
 include $(LIBDIR)/Makefrag
 include $(USRDIR)/Makefrag
-include $(KERNDIR)/Makefrag
 include $(FSDIR)/Makefrag
+include $(KERNDIR)/Makefrag
 
 clean:
 	rm -rf $(OBJDIR) .gdbinit jos.in qemu.log

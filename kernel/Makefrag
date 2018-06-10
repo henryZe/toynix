@@ -5,29 +5,29 @@ KERN_LDFLAGS := $(LDFLAGS) -T $(KERNDIR)/kernel.ld -nostdlib
 # We also snatch the use of a couple handy source files
 # from the lib directory, to avoid gratuitous code duplication.
 KERN_SRCFILES := \
-			$(KERNDIR)/entry.S \
-			$(KERNDIR)/entry_pgdir.c \
-			$(KERNDIR)/init.c \
-			$(KERNDIR)/console.c \
-			$(KERNDIR)/printf.c \
-			$(KERNDIR)/monitor.c \
-			$(KERNDIR)/kdebug.c \
-			$(KERNDIR)/panic.c \
-			$(KERNDIR)/env.c \
-			$(KERNDIR)/trapentry.S \
-			$(KERNDIR)/trap.c \
-			$(KERNDIR)/pmap.c \
-			$(KERNDIR)/kclock.c \
-			$(KERNDIR)/syscall.c \
-			$(KERNDIR)/mpentry.S \
-			$(KERNDIR)/mpconfig.c \
-			$(KERNDIR)/lapic.c \
-			$(KERNDIR)/picirq.c \
-			$(KERNDIR)/spinlock.c \
-			$(KERNDIR)/sched.c \
-			$(LIBDIR)/string.c \
-			$(LIBDIR)/printfmt.c \
-			$(LIBDIR)/readline.c \
+		$(KERNDIR)/entry.S \
+		$(KERNDIR)/entry_pgdir.c \
+		$(KERNDIR)/init.c \
+		$(KERNDIR)/console.c \
+		$(KERNDIR)/printf.c \
+		$(KERNDIR)/monitor.c \
+		$(KERNDIR)/kdebug.c \
+		$(KERNDIR)/panic.c \
+		$(KERNDIR)/env.c \
+		$(KERNDIR)/trapentry.S \
+		$(KERNDIR)/trap.c \
+		$(KERNDIR)/pmap.c \
+		$(KERNDIR)/kclock.c \
+		$(KERNDIR)/syscall.c \
+		$(KERNDIR)/mpentry.S \
+		$(KERNDIR)/mpconfig.c \
+		$(KERNDIR)/lapic.c \
+		$(KERNDIR)/picirq.c \
+		$(KERNDIR)/spinlock.c \
+		$(KERNDIR)/sched.c \
+		$(LIBDIR)/string.c \
+		$(LIBDIR)/printfmt.c \
+		$(LIBDIR)/readline.c \
 
 # Binary program images to embed within the kernel.
 KERN_OBJFILES := $(patsubst $(KERNDIR)/%.c, $(OBJDIR)/$(KERNDIR)/%.o, $(KERN_SRCFILES))
@@ -35,7 +35,9 @@ KERN_OBJFILES := $(patsubst $(KERNDIR)/%.S, $(OBJDIR)/$(KERNDIR)/%.o, $(KERN_OBJ
 KERN_OBJFILES := $(patsubst $(LIBDIR)/%.c, $(OBJDIR)/$(KERNDIR)/%.o, $(KERN_OBJFILES))
 
 # Binary program images to embed within the kernel.
-KERN_BINFILES := $(patsubst %.o, %, $(USER_OBJFILES))
+KERN_BINFILES := \
+		$(patsubst %.o, %, $(USER_OBJFILES)) \
+		$(OBJDIR)/$(FSDIR)/fs \
 
 # How to build kernel object files
 $(OBJDIR)/$(KERNDIR)/%.o: $(KERNDIR)/%.c

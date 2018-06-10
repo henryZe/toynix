@@ -2,35 +2,35 @@
 USR_LDFLAGS := $(LDFLAGS) -T $(USRDIR)/user.ld -nostdlib
 
 USER_SRCFILES := \
-			$(USRDIR)/hello.c \
-			$(USRDIR)/divzero.c \
-			$(USRDIR)/badsegment.c \
-			$(USRDIR)/softint.c \
-			$(USRDIR)/faultread.c \
-			$(USRDIR)/faultreadkernel.c \
-			$(USRDIR)/faultwrite.c \
-			$(USRDIR)/faultwritekernel.c \
-			$(USRDIR)/breakpoint.c \
-			$(USRDIR)/testbss.c \
-			$(USRDIR)/buggyhello.c \
-			$(USRDIR)/buggyhello2.c \
-			$(USRDIR)/evilhello.c \
-			$(USRDIR)/yield.c \
-			$(USRDIR)/idle.c \
-			$(USRDIR)/dumbfork.c \
-			$(USRDIR)/faultdie.c \
-			$(USRDIR)/faultalloc.c \
-			$(USRDIR)/faultallocbad.c \
-			$(USRDIR)/forktree.c \
-			$(USRDIR)/spin.c \
-			$(USRDIR)/faultregs.c \
-			$(USRDIR)/faultnostack.c \
-			$(USRDIR)/faultbadhandler.c \
-			$(USRDIR)/faultevilhandler.c \
-			$(USRDIR)/stresssched.c \
-			$(USRDIR)/sendpage.c \
-			$(USRDIR)/pingpong.c \
-			$(USRDIR)/primes.c \
+		$(USRDIR)/hello.c \
+		$(USRDIR)/divzero.c \
+		$(USRDIR)/badsegment.c \
+		$(USRDIR)/softint.c \
+		$(USRDIR)/faultread.c \
+		$(USRDIR)/faultreadkernel.c \
+		$(USRDIR)/faultwrite.c \
+		$(USRDIR)/faultwritekernel.c \
+		$(USRDIR)/breakpoint.c \
+		$(USRDIR)/testbss.c \
+		$(USRDIR)/buggyhello.c \
+		$(USRDIR)/buggyhello2.c \
+		$(USRDIR)/evilhello.c \
+		$(USRDIR)/yield.c \
+		$(USRDIR)/idle.c \
+		$(USRDIR)/dumbfork.c \
+		$(USRDIR)/faultdie.c \
+		$(USRDIR)/faultalloc.c \
+		$(USRDIR)/faultallocbad.c \
+		$(USRDIR)/forktree.c \
+		$(USRDIR)/spin.c \
+		$(USRDIR)/faultregs.c \
+		$(USRDIR)/faultnostack.c \
+		$(USRDIR)/faultbadhandler.c \
+		$(USRDIR)/faultevilhandler.c \
+		$(USRDIR)/stresssched.c \
+		$(USRDIR)/sendpage.c \
+		$(USRDIR)/pingpong.c \
+		$(USRDIR)/primes.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 

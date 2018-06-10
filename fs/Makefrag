@@ -1,14 +1,15 @@
 FSOFILES := \
+		$(OBJDIR)/$(FSDIR)/serv.o \
 
 USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/init \
 
 FSIMGTXTFILES := \
 
-FSIMGFILES := $(FSIMGTXTFILES) $(USERAPPS)
+FSIMGFILES := $(USERAPPS) $(FSIMGTXTFILES)
 
 # Compile FS object files
-$(OBJDIR)/$(FSDIR)/%.o: $(FSDIR)/%.c $(FSDIR)/fs.h $(INCDIR)/lib.h $(OBJDIR)/.vars.USER_CFLAGS
+$(OBJDIR)/$(FSDIR)/%.o: $(FSDIR)/%.c $(OBJDIR)/.vars.USER_CFLAGS
 	@echo + cc[USER] $<
 	@mkdir -p $(@D)
 	$(CC) -nostdinc $(USER_CFLAGS) -c -o $@ $<
