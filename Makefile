@@ -85,12 +85,13 @@ GDBPORT := $(shell expr `id -u` % 5000 + 25000)
 
 CPUS ?= 1
 
+# disk 0: kernel.img, disk 1: fs.img
 QEMUOPTS = -m 256 -drive file=$(OBJDIR)/$(KERNDIR)/kernel.img,index=0,media=disk,format=raw -serial mon:stdio -gdb tcp::$(GDBPORT)
 QEMUOPTS += $(shell if $(QEMU) -nographic -help | grep -q '^-D '; then echo '-D qemu.log'; fi)
 IMAGES = $(OBJDIR)/$(KERNDIR)/kernel.img
 QEMUOPTS += -smp $(CPUS)
-QEMUOPTS += -drive file=$(OBJDIR)/fs/fs.img,index=1,media=disk,format=raw
-IMAGES += $(OBJDIR)/fs/fs.img
+QEMUOPTS += -drive file=$(OBJDIR)/$(FSDIR)/fs.img,index=1,media=disk,format=raw
+IMAGES += $(OBJDIR)/$(FSDIR)/fs.img
 QEMUOPTS += $(QEMUEXTRA)
 
 # debug bootloader, or debug kernel in default
