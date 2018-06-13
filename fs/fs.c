@@ -124,6 +124,36 @@ skip_slash(const char *p)
 	return p;
 }
 
+// Try to find a file named "name" in dir.  If so, set *file to it.
+//
+// Returns 0 and sets *file on success, < 0 on error.  Errors are:
+//	-E_NOT_FOUND if the file is not found
+static int
+dir_lookup(struct File *dir, const char *name, struct File **file)
+{
+	int ret;
+	uint32_t i, j, nblock;
+	char *blk;
+	struct File *file;
+
+	// Search dir for name.
+	// We maintain the invariant that the size of a directory-file
+	// is always a multiple of the file system's block size.
+	assert((dir->f_size % BLKSIZE) == 0);
+	nblock = dir->f_size / BLKSIZE;
+	for (i = 0; i < nblock; i++) {
+		ret = file_get_block(dir, i, &blk);
+		if (ret < 0)
+			return ret;
+		
+		file = (struct File *)blk;
+		for (j = 0; j < BLKFILES; j++) {
+			if (strcmp(file[j].f_name, name) == 0)
+		}
+
+	}
+}
+
 // Evaluate a path name, starting at the root.
 // On success, set *pf to the file we found
 // and set *pdir to the directory the file is in.
