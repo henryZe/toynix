@@ -128,7 +128,7 @@ lpt_putc(int c)
 
 /***** Text-mode CGA/VGA display output *****/
 
-static unsigned addr_6845;
+static unsigned int addr_6845;
 static uint16_t *crt_buf;
 static uint16_t crt_pos;
 
@@ -137,13 +137,13 @@ cga_init(void)
 {
 	volatile uint16_t *cp;
 	uint16_t was;
-	unsigned pos;
+	unsigned int pos;
 
-	cp = (uint16_t*) (KERNBASE + CGA_BUF);
+	cp = (uint16_t *)(KERNBASE + CGA_BUF);
 	was = *cp;
 	*cp = (uint16_t) 0xA55A;
 	if (*cp != 0xA55A) {
-		cp = (uint16_t*) (KERNBASE + MONO_BUF);
+		cp = (uint16_t *) (KERNBASE + MONO_BUF);
 		addr_6845 = MONO_BASE;
 	} else {
 		*cp = was;
@@ -156,7 +156,7 @@ cga_init(void)
 	outb(addr_6845, 15);
 	pos |= inb(addr_6845 + 1);
 
-	crt_buf = (uint16_t*) cp;
+	crt_buf = (uint16_t *)cp;
 	crt_pos = pos;
 }
 
@@ -226,8 +226,7 @@ cga_putc(int c)
 
 #define E0ESC		(1<<6)
 
-static uint8_t shiftcode[256] =
-{
+static uint8_t shiftcode[256] = {
 	[0x1D] = CTL,
 	[0x2A] = SHIFT,
 	[0x36] = SHIFT,
@@ -236,15 +235,13 @@ static uint8_t shiftcode[256] =
 	[0xB8] = ALT
 };
 
-static uint8_t togglecode[256] =
-{
+static uint8_t togglecode[256] = {
 	[0x3A] = CAPSLOCK,
 	[0x45] = NUMLOCK,
 	[0x46] = SCROLLLOCK
 };
 
-static uint8_t normalmap[256] =
-{
+static uint8_t normalmap[256] = {
 	NO,   0x1B, '1',  '2',  '3',  '4',  '5',  '6',	// 0x00
 	'7',  '8',  '9',  '0',  '-',  '=',  '\b', '\t',
 	'q',  'w',  'e',  'r',  't',  'y',  'u',  'i',	// 0x10
@@ -264,8 +261,7 @@ static uint8_t normalmap[256] =
 	[0xD2] = KEY_INS,	      [0xD3] = KEY_DEL
 };
 
-static uint8_t shiftmap[256] =
-{
+static uint8_t shiftmap[256] = {
 	NO,   033,  '!',  '@',  '#',  '$',  '%',  '^',	// 0x00
 	'&',  '*',  '(',  ')',  '_',  '+',  '\b', '\t',
 	'Q',  'W',  'E',  'R',  'T',  'Y',  'U',  'I',	// 0x10
@@ -287,8 +283,7 @@ static uint8_t shiftmap[256] =
 
 #define C(x) (x - '@')
 
-static uint8_t ctlmap[256] =
-{
+static uint8_t ctlmap[256] = {
 	NO,      NO,      NO,      NO,      NO,      NO,      NO,      NO,
 	NO,      NO,      NO,      NO,      NO,      NO,      NO,      NO,
 	C('Q'),  C('W'),  C('E'),  C('R'),  C('T'),  C('Y'),  C('U'),  C('I'),

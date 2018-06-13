@@ -107,9 +107,10 @@ opendisk(const char *name)
 
 	diskpos = diskmap;
 
-	/* for bootloader */
+	/* block0 for boot sector, partition table */
 	alloc(BLKSIZE);
 
+	/* block1 for superblock */
 	super = alloc(BLKSIZE);
 	super->s_magic = FS_MAGIC;
 	super->s_nblocks = nblocks;
@@ -229,9 +230,9 @@ finishdisk(void)
 {
 	int ret, i;
 	for (i = 0; i < blockof(diskpos); ++i)
-		bitmap[i/32] &= ~(1 << (i % 32));
+		bitmap[i / 32] &= ~(1 << (i % 32));
 
-	/* wait for sync memory */
+	/* wait for sync whole memory */
 	ret = msync(diskmap, nblocks * BLKSIZE, MS_SYNC);
 	if (ret < 0)
 		panic("msync: %s", strerror(errno));

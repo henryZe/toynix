@@ -1,6 +1,9 @@
 FSOFILES := \
-		$(OBJDIR)/$(FSDIR)/serv.o \
+		$(OBJDIR)/$(FSDIR)/ide.o \
 		$(OBJDIR)/$(FSDIR)/block_cache.o \
+		$(OBJDIR)/$(FSDIR)/fs.o \
+		$(OBJDIR)/$(FSDIR)/test.o \
+		$(OBJDIR)/$(FSDIR)/serv.o \
 
 USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/init \
