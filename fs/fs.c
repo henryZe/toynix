@@ -114,6 +114,16 @@ fs_init(void)
 	check_bitmap();
 }
 
+// skip over slashes
+static const char *
+skip_slash(const char *p)
+{
+	while (*p == '/')
+		p++;
+
+	return p;
+}
+
 // Evaluate a path name, starting at the root.
 // On success, set *pf to the file we found
 // and set *pdir to the directory the file is in.
@@ -129,7 +139,31 @@ walk_path(const char *path, struct File **pdir,
 	struct File *dir, *file;
 	int ret;
 
-	
+	//if (*path != '/')
+	//	return -E_BAD_PATH;
+	path = skip_slash(path);
+	file = &super->s_root;
+	dir = NULL;
+	name[0] = 0;
+
+	if (pdir)
+		*pdir = NULL;
+	*pfile = NULL;
+
+	while (*path != '\0') {
+		dir = file;
+		p = path;
+
+		while (*path != '/' && *path != '\0')
+			path++;
+
+		if (path - p >= MAXNAMELEN)
+			return -E_BAD_PATH;
+
+		memmove(name, p, path - p);
+		name[path - p] = '\0';
+		path = skip_slash(path);
+	}
 }
 
 // --------------------------------------------------------------
