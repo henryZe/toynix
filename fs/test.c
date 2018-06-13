@@ -1,6 +1,6 @@
 #include <x86.h>
 #include <string.h>
-#include <fs.h>
+#include <fs/fs.h>
 #include <lib.h>
 
 static char *msg = "This is the NEW message of the day!\n\n";

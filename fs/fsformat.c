@@ -230,6 +230,7 @@ finishdisk(void)
 {
 	int ret, i;
 	for (i = 0; i < blockof(diskpos); ++i)
+		/* clear block-free bit */
 		bitmap[i / 32] &= ~(1 << (i % 32));
 
 	/* wait for sync whole memory */

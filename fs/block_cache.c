@@ -14,7 +14,39 @@ diskaddr(uint32_t blockno)
 // Fault any disk block that is read in to memory by
 // loading it from disk.
 static void
-bc_pgfault(struct )
+bc_pgfault(struct UTrapframe *utf)
+{
+	void *addr = (void *)utf->utf_fault_va;
+	uint32_t blockno = ((uint32_t)addr - DISKMAP) / BLKSIZE;
+	int ret;
+
+	// Check that the fault was within the block cache region
+	if (addr < (void *)DISKMAP || addr >= (void *)(DISKMAP + DISKSIZE))
+		panic("page fault in FS: eip %08x, va %08x, err %04x",
+		      utf->utf_eip, addr, utf->utf_err);
+
+	// Sanity check the block number
+	if (super && blockno >= super->s_nblocks)
+		panic("reading non-existent block %08x\n", blockno);
+
+	// Allocate a page in the disk map region, read the contents
+	// of the block from the disk into that page.
+	// Hint: first round addr to page boundary. fs/ide.c has code to read
+	// the disk.
+	//
+	// LAB 5: you code here:
+
+	// Clear the dirty bit for the disk block page since we just read the
+	// block from disk
+	ret = sys_page_map(0, addr, 0, addr, uvpt[PGNUM(addr)] & PTE_SYSCALL);
+	if (ret < 0)
+		panic("in bc_pgfault, sys_page_map: %e", ret);
+
+	// Check that the block we read was allocated.
+	// (exercise for the reader: why do we do this *after* reading the block in?)
+	if (bitmap && block_is_free(blockno))
+		panic("reading free block %08x\n", blockno);
+}
 
 // Flush the contents of the block containing VA out to disk if
 // necessary, then clear the PTE_D bit using sys_page_map.
@@ -60,14 +92,14 @@ check_bc(void)
 	assert(strcmp(diskaddr(1), "OOPS!\n") == 0);
 
 	// fix it
-	memmove(diskaddr(1), &backup, sizeof backup);
+	memmove(diskaddr(1), &backup, sizeof(backup));
 	flush_block(diskaddr(1));
 
 	// Now repeat the same experiment, but pass an unaligned address to
 	// flush_block.
 
 	// back up super block
-	memmove(&backup, diskaddr(1), sizeof backup);
+	memmove(&backup, diskaddr(1), sizeof(backup));
 
 	// smash it
 	strcpy(diskaddr(1), "OOPS!\n");
@@ -88,7 +120,7 @@ check_bc(void)
 	assert(strcmp(diskaddr(1), "OOPS!\n") == 0);
 
 	// fix it
-	memmove(diskaddr(1), &backup, sizeof backup);
+	memmove(diskaddr(1), &backup, sizeof(backup));
 	flush_block(diskaddr(1));
 
 	cprintf("block cache is good\n");

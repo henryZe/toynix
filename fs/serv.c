@@ -1,6 +1,6 @@
 #include <lib.h>
 #include <x86.h>
-#include <fs.h>
+#include <fs/fs.h>
 
 // Max number of open files in the file system at once
 #define MAXOPEN		1024

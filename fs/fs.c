@@ -36,6 +36,37 @@ block_is_free(uint32_t blockno)
 	return 0;
 }
 
+// Mark a block free in the bitmap
+void
+free_block(uint32_t blockno)
+{
+	// Blockno zero is the null pointer of block numbers.
+	if (blockno == 0)
+		panic("attempt to free zero block");
+
+	bitmap[blockno / 32] |= 1 << (blockno % 32);
+}
+
+// Search the bitmap for a free block and allocate it.  When you
+// allocate a block, immediately flush the changed bitmap block
+// to disk.
+//
+// Return block number allocated on success,
+// -E_NO_DISK if we are out of blocks.
+//
+// Hint: use free_block as an example for manipulating the bitmap.
+int
+alloc_block(void)
+{
+	// The bitmap consists of one or more blocks.  A single bitmap block
+	// contains the in-use bits for BLKBITSIZE blocks.  There are
+	// super->s_nblocks blocks in the disk altogether.
+
+	// LAB 5: Your code here.
+	panic("alloc_block not implemented");
+	return -E_NO_DISK;
+}
+
 // Validate the file system bitmap.
 //
 // Check that all reserved blocks -- 0, 1, and the bitmap blocks themselves --
@@ -81,4 +112,34 @@ fs_init(void)
 	// Set "bitmap" to the beginning of the first bitmap block.
 	bitmap = diskaddr(2);
 	check_bitmap();
+}
+
+// Evaluate a path name, starting at the root.
+// On success, set *pf to the file we found
+// and set *pdir to the directory the file is in.
+// If we cannot find the file but find the directory
+// it should be in, set *pdir and copy the final path
+// element into lastelem.
+static int
+walk_path(const char *path, struct File **pdir,
+			struct File **pfile, char *lastelem)
+{
+	const char *p;
+	char name[MAXNAMELEN];
+	struct File *dir, *file;
+	int ret;
+
+	
+}
+
+// --------------------------------------------------------------
+// File operations
+// --------------------------------------------------------------
+
+// Open "path".  On success set *pf to point at the file and return 0.
+// On error return < 0.
+int
+file_open(const char *path, struct File **pfile)
+{
+	return walk_path(path, NULL, pfile, NULL);
 }
