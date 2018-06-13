@@ -163,7 +163,27 @@ walk_path(const char *path, struct File **pdir,
 		memmove(name, p, path - p);
 		name[path - p] = '\0';
 		path = skip_slash(path);
+
+		if (dir->f_type != FTYPE_DIR)
+			return -E_NOT_FOUND;
+
+		ret = dir_lookup(dir, name, &file);
+		if (ret < 0) {
+			if (ret == -E_NOT_FOUND && *path == '\0') {
+				if (pdir)
+					*pdir = dir;
+				if (lastelem)
+					strcpy(lastelem, name);
+				*pfile = NULL;
+			}
+			return ret;
+		}
 	}
+
+	if (pdir)
+		*pdir = dir;
+	*pfile = file;
+	return 0;
 }
 
 // --------------------------------------------------------------
