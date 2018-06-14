@@ -34,9 +34,9 @@ typedef int bool;
 #define MAX_DIR_ENTS 128
 
 struct Dir {
-	struct File *f;
-	struct File *ents;
-	int n;	/* num of files within Dir */
+	struct File *f;		/* point to self-file struct */
+	struct File *ents;	/* point to sub-file struct */
+	int n;				/* num of files within Dir */
 };
 
 uint32_t nblocks;
@@ -81,6 +81,7 @@ alloc(uint32_t bytes)
 	return start;
 }
 
+/* initialize super & bitmap */
 void
 opendisk(const char *name)
 {
@@ -126,6 +127,7 @@ opendisk(const char *name)
 	memset(bitmap, 0xFF, nbitblocks * BLKSIZE);
 }
 
+/* fill dir with file */
 void
 startdir(struct File *file, struct Dir *dout)
 {
@@ -134,6 +136,7 @@ startdir(struct File *file, struct Dir *dout)
 	dout->n = 0;
 }
 
+/* add file named name into d */
 struct File *
 diradd(struct Dir *d, uint32_t type, const char *name)
 {
@@ -219,12 +222,14 @@ finishdir(struct Dir *d)
 {
 	int size = d->n * sizeof(struct File);
 	struct File *start = alloc(size);
+
 	memmove(start, d->ents, size);
 	finishfile(d->f, blockof(start), ROUNDUP(size, BLKSIZE));
 	free(d->ents);
 	d->ents = NULL;
 }
 
+/* update bitmap */
 void
 finishdisk(void)
 {

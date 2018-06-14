@@ -114,6 +114,29 @@ fs_init(void)
 	check_bitmap();
 }
 
+// Find the disk block number slot for the 'filebno'th block in file 'f'.
+// Set '*ppdiskbno' to point to that slot.
+// The slot will be one of the f->f_direct[] entries,
+// or an entry in the indirect block.
+// When 'alloc' is set, this function will allocate an indirect block
+// if necessary.
+//
+// Returns:
+//	0 on success (but note that *ppdiskbno might equal 0).
+//	-E_NOT_FOUND if the function needed to allocate an indirect block, but
+//		alloc was 0.
+//	-E_NO_DISK if there's no space on the disk for an indirect block.
+//	-E_INVAL if filebno is out of range (it's >= NDIRECT + NINDIRECT).
+//
+// Analogy: This is like pgdir_walk for files.
+// Hint: Don't forget to clear any block you allocate.
+static int
+file_block_walk(struct File *f, uint32_t filebno, uint32_t **ppdiskbno, bool alloc)
+{
+	// LAB 5: Your code here.
+	panic("file_block_walk not implemented");
+}
+
 // skip over slashes
 static const char *
 skip_slash(const char *p)
@@ -122,6 +145,21 @@ skip_slash(const char *p)
 		p++;
 
 	return p;
+}
+
+// Set *blk to the address in memory where the filebno'th
+// block of file 'f' would be mapped.
+//
+// Returns 0 on success, < 0 on error.  Errors are:
+//	-E_NO_DISK if a block needed to be allocated but the disk is full.
+//	-E_INVAL if filebno is out of range.
+//
+// Hint: Use file_block_walk and alloc_block.
+int
+file_get_block(struct File *f, uint32_t filebno, char **blk)
+{
+	// LAB 5: Your code here.
+	panic("file_get_block not implemented");
 }
 
 // Try to find a file named "name" in dir.  If so, set *file to it.
@@ -134,7 +172,7 @@ dir_lookup(struct File *dir, const char *name, struct File **file)
 	int ret;
 	uint32_t i, j, nblock;
 	char *blk;
-	struct File *file;
+	struct File *fp;
 
 	// Search dir for name.
 	// We maintain the invariant that the size of a directory-file
@@ -146,12 +184,15 @@ dir_lookup(struct File *dir, const char *name, struct File **file)
 		if (ret < 0)
 			return ret;
 		
-		file = (struct File *)blk;
+		fp = (struct File *)blk;
 		for (j = 0; j < BLKFILES; j++) {
-			if (strcmp(file[j].f_name, name) == 0)
+			if (strcmp(fp[j].f_name, name) == 0) {
+				*file = &fp[j];
+				return 0;
+			}
 		}
-
 	}
+	return -E_NOT_FOUND;
 }
 
 // Evaluate a path name, starting at the root.
@@ -226,4 +267,89 @@ int
 file_open(const char *path, struct File **pfile)
 {
 	return walk_path(path, NULL, pfile, NULL);
+}
+
+// Flush the contents and metadata of file f out to disk.
+// Loop over all the blocks in file.
+// Translate the file block number into a disk block number
+// and then check whether that disk block is dirty.  If so, write it out.
+void
+file_flush(struct File *f)
+{
+	int i;
+	uint32_t *pdiskbno;
+
+	for (i = 0; i < (f->f_size + BLKSIZE - 1) / BLKSIZE; i++) {
+		if (file_block_walk(f, i, &pdiskbno, 0) < 0 ||
+			pdiskbno == NULL || *pdiskbno == 0)
+			continue;
+
+		flush_block(diskaddr(*pdiskbno));
+	}
+
+	flush_block(f);
+	if (f->f_indirect)
+		flush_block(diskaddr(f->f_indirect));
+}
+
+// Remove a block from file f.  If it's not there, just silently succeed.
+// Returns 0 on success, < 0 on error.
+static int
+file_free_block(struct File *f, uint32_t filebno)
+{
+	int ret;
+	uint32_t *ptr;
+
+	ret = file_block_walk(f, filebno, &ptr, 0);
+	if (ret < 0)
+		return ret;
+
+	if (*ptr) {
+		free_block(*ptr);
+		*ptr = 0;
+	}
+
+	return 0;
+}
+
+// Remove any blocks currently used by file 'f',
+// but not necessary for a file of size 'newsize'.
+// For both the old and new sizes, figure out the number of blocks required,
+// and then clear the blocks from new_nblocks to old_nblocks.
+// If the new_nblocks is no more than NDIRECT, and the indirect block has
+// been allocated (f->f_indirect != 0), then free the indirect block too.
+// (Remember to clear the f->f_indirect pointer so you'll know
+// whether it's valid!)
+// Do not change f->f_size.
+static void
+file_truncate_blocks(struct File *f, off_t newsize)
+{
+	int ret;
+	uint32_t bno, old_nblocks, new_nblocks;
+
+	old_nblocks = (f->f_size + BLKSIZE - 1) / BLKSIZE;
+	new_nblocks = (newsize + BLKSIZE - 1) / BLKSIZE;
+
+	for (bno = new_nblocks; bno < old_nblocks; bno++) {
+		ret = file_free_block(f, bno);
+		if (ret < 0)
+			cprintf("warning: file_free_block: %e", ret);
+	}
+
+	if (new_nblocks <= NDIRECT && f->f_indirect) {
+		free_block(f->f_indirect);
+		f->f_indirect = 0;
+	}
+}
+
+// Set the size of file f, truncating or extending as necessary.
+int
+file_set_size(struct File *f, off_t newsize)
+{
+	if (f->f_size > newsize)
+		file_truncate_blocks(f, newsize);
+
+	f->f_size = newsize;
+	flush_block(f);
+	return 0;
 }
