@@ -6,6 +6,7 @@
 
 #include <lib.h>
 #include <x86.h>
+#include <fs/fs.h>
 
 #define IDE_BSY		0x80
 #define IDE_DRDY	0x40
@@ -19,8 +20,9 @@ ide_wait_ready(bool check_error)
 {
 	int ret;
 
-	ret = inb(0x1F7);
-	while ((ret & (IDE_BSY | IDE_DRDY)) != IDE_DRDY);
+	do {
+		ret = inb(0x1F7);
+	} while ((ret & (IDE_BSY | IDE_DRDY)) != IDE_DRDY);
 
 	if (check_error && (ret & (IDE_DF | IDE_ERR)))
 		return -1;
@@ -57,4 +59,59 @@ ide_set_disk(int disk_no)
 		panic("bad disk number");
 
 	diskno = disk_no;
+}
+
+int
+ide_read(uint32_t secno, void *dst, size_t nsecs)
+{
+	int ret;
+
+	assert(nsecs <= 256);
+
+	ide_wait_ready(0);
+
+	outb(0x1F2, nsecs);
+	outb(0x1F3, secno & 0xFF);
+	outb(0x1F4, (secno >> 8) & 0xFF);
+	outb(0x1F5, (secno >> 16) & 0xFF);
+	outb(0x1F6, 0xE0 | ((diskno&1)<<4) | ((secno>>24)&0x0F));
+	outb(0x1F7, 0x20);	// CMD 0x20 means read sector
+
+	for (; nsecs > 0; nsecs--, dst += SECTSIZE) {
+		ret = ide_wait_ready(1);
+		if (ret < 0)
+			return ret;
+
+		/* read sector length per operation */
+		insl(0x1F0, dst, SECTSIZE / 4);
+	}
+
+	return 0;
+}
+
+int
+ide_write(uint32_t secno, const void *src, size_t nsecs)
+{
+	int ret;
+
+	assert(nsecs <= 256);
+
+	ide_wait_ready(0);
+
+	outb(0x1F2, nsecs);
+	outb(0x1F3, secno & 0xFF);
+	outb(0x1F4, (secno >> 8) & 0xFF);
+	outb(0x1F5, (secno >> 16) & 0xFF);
+	outb(0x1F6, 0xE0 | ((diskno&1)<<4) | ((secno>>24)&0x0F));
+	outb(0x1F7, 0x30);	// CMD 0x30 means write sector
+
+	for (; nsecs > 0; nsecs--, src += SECTSIZE) {
+		ret = ide_wait_ready(1);
+		if (ret < 0)
+			return ret;
+
+		outsl(0x1F0, src, SECTSIZE / 4);
+	}
+
+	return 0;
 }

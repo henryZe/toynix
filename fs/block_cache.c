@@ -19,6 +19,7 @@ bc_pgfault(struct UTrapframe *utf)
 	void *addr = (void *)utf->utf_fault_va;
 	uint32_t blockno = ((uint32_t)addr - DISKMAP) / BLKSIZE;
 	int ret;
+	void *block_addr = ROUNDDOWN(addr, PGSIZE);
 
 	// Check that the fault was within the block cache region
 	if (addr < (void *)DISKMAP || addr >= (void *)(DISKMAP + DISKSIZE))
@@ -31,10 +32,18 @@ bc_pgfault(struct UTrapframe *utf)
 
 	// Allocate a page in the disk map region, read the contents
 	// of the block from the disk into that page.
-	// Hint: first round addr to page boundary. fs/ide.c has code to read
-	// the disk.
-	//
-	// LAB 5: you code here:
+	ret = sys_page_alloc(0, block_addr, PTE_SYSCALL);
+	if (ret < 0)
+		panic("%s: sys_page_alloc %e", __func__, ret);
+
+	ret = ide_read(blockno * BLKSECTS, block_addr, BLKSECTS);
+	if (ret < 0)
+		panic("%s: ide_read %e", __func__, ret);
+
+	/* remap block page as non-dirty page */
+	ret = sys_page_map(0, block_addr, 0, block_addr, PTE_SYSCALL);
+	if (ret < 0)
+		panic("%s: sys_page_map %e", __func__, ret);
 
 	// Clear the dirty bit for the disk block page since we just read the
 	// block from disk
