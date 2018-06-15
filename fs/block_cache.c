@@ -11,6 +11,20 @@ diskaddr(uint32_t blockno)
 	return (char *)DISKMAP + blockno * BLKSIZE;
 }
 
+// Is this virtual address mapped?
+bool
+va_is_mapped(void *va)
+{
+	return (uvpd[PDX(va)] & PTE_P) && (uvpt[PGNUM(va)] & PTE_P);
+}
+
+// Is this virtual address dirty?
+bool
+va_is_dirty(void *va)
+{
+	return (uvpt[PGNUM(va)] & PTE_D) != 0;
+}
+
 // Fault any disk block that is read in to memory by
 // loading it from disk.
 static void
@@ -40,14 +54,9 @@ bc_pgfault(struct UTrapframe *utf)
 	if (ret < 0)
 		panic("%s: ide_read %e", __func__, ret);
 
-	/* remap block page as non-dirty page */
-	ret = sys_page_map(0, block_addr, 0, block_addr, PTE_SYSCALL);
-	if (ret < 0)
-		panic("%s: sys_page_map %e", __func__, ret);
-
 	// Clear the dirty bit for the disk block page since we just read the
 	// block from disk
-	ret = sys_page_map(0, addr, 0, addr, uvpt[PGNUM(addr)] & PTE_SYSCALL);
+	ret = sys_page_map(0, block_addr, 0, block_addr, uvpt[PGNUM(block_addr)] & PTE_SYSCALL);
 	if (ret < 0)
 		panic("in bc_pgfault, sys_page_map: %e", ret);
 
@@ -61,19 +70,27 @@ bc_pgfault(struct UTrapframe *utf)
 // necessary, then clear the PTE_D bit using sys_page_map.
 // If the block is not in the block cache or is not dirty, does
 // nothing.
-// Hint: Use va_is_mapped, va_is_dirty, and ide_write.
-// Hint: Use the PTE_SYSCALL constant when calling sys_page_map.
-// Hint: Don't forget to round addr down.
 void
 flush_block(void *addr)
 {
+	int ret;
+	void *block_addr = ROUNDDOWN(addr, PGSIZE);
 	uint32_t blockno = ((uint32_t)addr - DISKMAP) / BLKSIZE;
 
 	if (addr < (void *)DISKMAP || addr >= (void *)(DISKMAP + DISKSIZE))
 		panic("flush_block of bad va %08x", addr);
 
-	// LAB 5: Your code here.
-	panic("flush_block not implemented");
+	if (!va_is_mapped(addr) || !va_is_dirty(addr))
+		return;
+
+	ret = ide_write(blockno * BLKSECTS, block_addr, BLKSECTS);
+	if (ret < 0)
+		panic("%s: ide_write %e", __func__, ret);
+
+	/* clear dirty bit */
+	ret = sys_page_map(0, block_addr, 0, block_addr, uvpt[PGNUM(block_addr)] & PTE_SYSCALL);
+	if (ret < 0)
+		panic("%s: sys_page_map %e", __func__, ret);
 }
 
 // Test that the block cache works, by smashing the superblock and
