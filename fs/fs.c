@@ -53,18 +53,26 @@ free_block(uint32_t blockno)
 //
 // Return block number allocated on success,
 // -E_NO_DISK if we are out of blocks.
-//
-// Hint: use free_block as an example for manipulating the bitmap.
 int
 alloc_block(void)
 {
+	int blockno;
+
 	// The bitmap consists of one or more blocks.  A single bitmap block
 	// contains the in-use bits for BLKBITSIZE blocks.  There are
 	// super->s_nblocks blocks in the disk altogether.
+	for (blockno = 0; blockno < super->s_nblocks; blockno++) {
+		if (bitmap[blockno / 32] & (1 << (blockno % 32)))
+			break;
+	}
 
-	// LAB 5: Your code here.
-	panic("alloc_block not implemented");
-	return -E_NO_DISK;
+	if (blockno == super->s_nblocks)
+		return -E_NO_DISK;
+
+	bitmap[blockno / 32] &= ~(1 << (blockno % 32));
+	flush_block(&bitmap[blockno / 32]);
+
+	return blockno;
 }
 
 // Validate the file system bitmap.
@@ -133,8 +141,19 @@ fs_init(void)
 static int
 file_block_walk(struct File *f, uint32_t filebno, uint32_t **ppdiskbno, bool alloc)
 {
-	// LAB 5: Your code here.
-	panic("file_block_walk not implemented");
+	uint32_t blockno;
+
+	if (blockno >= (NINDIRECT + NDIRECT))
+		return -E_INVAL;
+
+	if (filebno < NDIRECT)
+		blockno = f->f_direct[filebno];
+	else
+		blockno = f->f_indirect[filebno - NDIRECT];
+
+
+
+
 }
 
 // skip over slashes
@@ -158,8 +177,9 @@ skip_slash(const char *p)
 int
 file_get_block(struct File *f, uint32_t filebno, char **blk)
 {
-	// LAB 5: Your code here.
-	panic("file_get_block not implemented");
+
+
+
 }
 
 // Try to find a file named "name" in dir.  If so, set *file to it.
@@ -178,6 +198,7 @@ dir_lookup(struct File *dir, const char *name, struct File **file)
 	// We maintain the invariant that the size of a directory-file
 	// is always a multiple of the file system's block size.
 	assert((dir->f_size % BLKSIZE) == 0);
+
 	nblock = dir->f_size / BLKSIZE;
 	for (i = 0; i < nblock; i++) {
 		ret = file_get_block(dir, i, &blk);
@@ -210,8 +231,9 @@ walk_path(const char *path, struct File **pdir,
 	struct File *dir, *file;
 	int ret;
 
-	//if (*path != '/')
-	//	return -E_BAD_PATH;
+	if (*path != '/')
+		return -E_BAD_PATH;
+
 	path = skip_slash(path);
 	file = &super->s_root;
 	dir = NULL;
