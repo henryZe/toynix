@@ -56,7 +56,8 @@ bc_pgfault(struct UTrapframe *utf)
 
 	// Clear the dirty bit for the disk block page since we just read the
 	// block from disk
-	ret = sys_page_map(0, block_addr, 0, block_addr, uvpt[PGNUM(block_addr)] & PTE_SYSCALL);
+	ret = sys_page_map(0, block_addr, 0, block_addr,
+				uvpt[PGNUM(block_addr)] & PTE_SYSCALL);
 	if (ret < 0)
 		panic("in bc_pgfault, sys_page_map: %e", ret);
 

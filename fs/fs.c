@@ -1,6 +1,8 @@
 #include <lib.h>
 #include <fs/fs.h>
 
+#define BLKNO2ADDR(x) (void *)(DISKMAP + x * BLKSIZE)
+
 // --------------------------------------------------------------
 // Super block
 // --------------------------------------------------------------
@@ -69,7 +71,9 @@ alloc_block(void)
 	if (blockno == super->s_nblocks)
 		return -E_NO_DISK;
 
+	/* clean free bit */
 	bitmap[blockno / 32] &= ~(1 << (blockno % 32));
+	/* flush the bitmap back to disk */
 	flush_block(&bitmap[blockno / 32]);
 
 	return blockno;
@@ -135,25 +139,47 @@ fs_init(void)
 //		alloc was 0.
 //	-E_NO_DISK if there's no space on the disk for an indirect block.
 //	-E_INVAL if filebno is out of range (it's >= NDIRECT + NINDIRECT).
-//
-// Analogy: This is like pgdir_walk for files.
-// Hint: Don't forget to clear any block you allocate.
 static int
 file_block_walk(struct File *f, uint32_t filebno, uint32_t **ppdiskbno, bool alloc)
 {
+	int ret;
 	uint32_t blockno;
+	uint32_t *block_addr;
 
-	if (blockno >= (NINDIRECT + NDIRECT))
+	if (!ppdiskbno)
 		return -E_INVAL;
 
-	if (filebno < NDIRECT)
-		blockno = f->f_direct[filebno];
-	else
-		blockno = f->f_indirect[filebno - NDIRECT];
+	if (filebno >= (NINDIRECT + NDIRECT))
+		return -E_INVAL;
 
+	if (filebno < NDIRECT) {
+		*ppdiskbno = &f->f_direct[filebno];
+		return 0;
+	}
 
+	if (!f->f_indirect) {
+		if (!alloc)
+			return -E_NOT_FOUND;
 
+		blockno = alloc_block();
+		if (blockno < 0)
+			return -E_NO_DISK;
 
+		f->f_indirect = blockno;
+		block_addr = BLKNO2ADDR(blockno);
+		ret = sys_page_alloc(0, block_addr, PTE_SYSCALL);
+		if (ret < 0)
+			panic("%s sys_page_alloc %e", __func__, ret);
+
+		/* initialize f->f_indirect block */
+		memset(block_addr, 0, BLKSIZE);
+
+	} else {
+		block_addr = BLKNO2ADDR(f->f_indirect);
+	}
+
+	*ppdiskbno = &block_addr[filebno - NDIRECT];
+	return 0;
 }
 
 // skip over slashes
@@ -172,14 +198,31 @@ skip_slash(const char *p)
 // Returns 0 on success, < 0 on error.  Errors are:
 //	-E_NO_DISK if a block needed to be allocated but the disk is full.
 //	-E_INVAL if filebno is out of range.
-//
-// Hint: Use file_block_walk and alloc_block.
 int
 file_get_block(struct File *f, uint32_t filebno, char **blk)
 {
+	int ret;
+	uint32_t *pdiskbno = NULL;
 
+	ret = file_block_walk(f, filebno, &pdiskbno, 1);
+	if (ret < 0)
+		return ret;
 
+	if (!*pdiskbno) {
+		ret = alloc_block();
+		if (ret < 0)
+			return ret;
 
+		/* set struct File f->f_direct or f->f_indirect */
+		*pdiskbno = ret;
+
+		ret = sys_page_alloc(0, BLKNO2ADDR(*pdiskbno), PTE_SYSCALL);
+		if (ret < 0)
+			panic("%s sys_page_alloc %e", __func__, ret);
+	}
+
+	*blk = BLKNO2ADDR(*pdiskbno);
+	return 0;
 }
 
 // Try to find a file named "name" in dir.  If so, set *file to it.
@@ -191,8 +234,8 @@ dir_lookup(struct File *dir, const char *name, struct File **file)
 {
 	int ret;
 	uint32_t i, j, nblock;
-	char *blk;
 	struct File *fp;
+	char *blk = NULL;
 
 	// Search dir for name.
 	// We maintain the invariant that the size of a directory-file
@@ -372,6 +415,7 @@ file_set_size(struct File *f, off_t newsize)
 		file_truncate_blocks(f, newsize);
 
 	f->f_size = newsize;
+	/* update file meta data */
 	flush_block(f);
 	return 0;
 }

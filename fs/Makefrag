@@ -9,6 +9,7 @@ USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/init \
 
 FSIMGTXTFILES := \
+		$(FSDIR)/newmotd \
 
 FSIMGFILES := $(USERAPPS) $(FSIMGTXTFILES)
 
