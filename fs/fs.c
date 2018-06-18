@@ -334,6 +334,69 @@ file_open(const char *path, struct File **pfile)
 	return walk_path(path, NULL, pfile, NULL);
 }
 
+// Read count bytes from f into buf, starting from seek position
+// offset.  This meant to mimic the standard pread function.
+// Returns the number of bytes read, < 0 on error.
+ssize_t
+file_read(struct File *f, void *buf, size_t count, off_t offset)
+{
+	int ret, bn;
+	off_t pos;
+	char *blk;
+
+	if (offset >= f->f_size)
+		return 0;
+
+	count = MIN(count, f->f_size - offset)
+
+	for (pos = offset; pos < offset + count; ) {
+		ret = file_get_block(f, pos / BLKSIZE, &blk);
+		if (ret < 0)
+			return ret;
+
+		bn = MIN(BLKSIZE - pos % BLKSIZE, offset + count - pos);
+		memmove(buf, blk + pos % BLKSIZE, bn);
+
+		pos += bn;
+		buf += bn;
+	}
+
+	return count;
+}
+
+// Write count bytes from buf into f, starting at seek position
+// offset.  This is meant to mimic the standard pwrite function.
+// Extends the file if necessary.
+// Returns the number of bytes written, < 0 on error.
+int
+file_write(struct File *f, const void *buf, size_t count, off_t offset)
+{
+	int ret, bn;
+	off_t pos;
+	char *blk;
+
+	/* Extend file if necessary */
+	if (offset + count > f->f_size) {
+		ret = file_set_size(f, offset + count);
+		if (ret < 0)
+			return ret;
+	}
+
+	for (pos = offset; pos < offset + count; ) {
+		ret = file_get_block(f, pos / BLKSIZE, &blk);
+		if (ret < 0)
+			return ret;
+
+		bn = MIN(BLKSIZE - pos % BLKSIZE, offset + count - pos);
+		memmove(blk + pos % BLKSIZE, buf, bn);
+
+		pos += bn;
+		buf += bn;
+	}
+
+	return count;
+}
+
 // Flush the contents and metadata of file f out to disk.
 // Loop over all the blocks in file.
 // Translate the file block number into a disk block number
