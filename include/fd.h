@@ -44,7 +44,7 @@ struct Stat {
 	struct Dev *st_dev;
 };
 
-char*	fd2data(struct Fd *fd);
+char *fd2data(struct Fd *fd);
 int	fd2num(struct Fd *fd);
 int	fd_alloc(struct Fd **fd_store);
 int	fd_close(struct Fd *fd, bool must_exist);

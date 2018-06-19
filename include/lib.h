@@ -41,6 +41,7 @@ void set_pgfault_handler(void (*handler)(struct UTrapframe *utf));
 void _pgfault_upcall(void);
 
 // fork.c
+#define	PTE_SHARE	0x400
 envid_t fork(void);
 
 // syscall.c
@@ -74,6 +75,9 @@ sys_exofork(void)
 void ipc_send(envid_t to_env, int value, void *pg, int perm);
 int32_t ipc_recv(envid_t *from_env_store, void *pg, int *perm_store);
 envid_t ipc_find_env(enum EnvType type);
+
+// pageref.c
+int	pageref(void *addr);
 
 /* File open modes */
 #define	O_RDONLY	0x0000		/* open for reading only */
