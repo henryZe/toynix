@@ -31,6 +31,7 @@ USER_SRCFILES := \
 		$(USRDIR)/sendpage.c \
 		$(USRDIR)/pingpong.c \
 		$(USRDIR)/primes.c \
+		$(USRDIR)/testfile.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 
