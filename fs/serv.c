@@ -73,14 +73,32 @@ openfile_alloc(struct OpenFile **o)
 			/* fall through */
 
 		case 1:
+			/* increase the openfile counter */
 			opentab[i].o_fileid += MAXOPEN;
 			*o = &opentab[i];
 			memset(opentab[i].o_fd, 0, PGSIZE);
 			return (*o)->o_fileid;
+
+		/* case > 1 means busy */
 		}
 	}
 
 	return -E_MAX_OPEN;
+}
+
+// Look up an open file for envid.
+int
+openfile_lookup(envid_t envid, uint32_t fileid, struct OpenFile **po)
+{
+	struct OpenFile *o;
+
+	o = &opentab[fileid % MAXOPEN];
+	/* double-check openfile is using */
+	if (pageref(o->o_fd) <= 1 || o->o_fileid != fileid)
+		return -E_INVAL;
+
+	*po = o;
+	return 0;
 }
 
 // Open req->req_path in mode req->req_omode, storing the Fd page and
@@ -173,17 +191,71 @@ try_open:
 	return 0;
 }
 
+// Read at most ipc->read.req_n bytes from the current seek position
+// in ipc->read.req_fileid.  Return the bytes read from the file to
+// the caller in ipc->readRet, then update the seek position.  Returns
+// the number of bytes successfully read, or < 0 on error.
+int
+serve_read(envid_t envid, union Fsipc *ipc)
+{
+	struct Fsreq_read *req = &ipc->read;
+	struct Fsret_read *ret = &ipc->readRet;
+
+	if (debug)
+		cprintf("serve_read %08x %08x %08x\n",
+				envid, req->req_fileid, req->req_n);
+
+	// Lab 5: Your code here:
+	return 0;
+}
+
+// Write req->req_n bytes from req->req_buf to req_fileid, starting at
+// the current seek position, and update the seek position
+// accordingly.  Extend the file if necessary.  Returns the number of
+// bytes written, or < 0 on error.
+int serve_write(envid_t envid, struct Fsreq_write *req)
+{
+	if (debug)
+		cprintf("serve_write %08x %08x %08x\n",
+				envid, req->req_fileid, req->req_n);
+
+	// LAB 5: Your code here.
+	panic("serve_write not implemented");
+}
+
+// Stat ipc->stat.req_fileid.  Return the file's struct Stat to the
+// caller in ipc->statRet.
+int
+serve_stat(envid_t envid, union Fsipc *ipc)
+{
+	struct Fsreq_stat *req = &ipc->stat;
+	struct Fsret_stat *ret = &ipc->statRet;
+	struct OpenFile *o;
+	int ret;
+
+	if (debug)
+		cprintf("serve_stat %08x %08x\n",
+				envid, req->req_fileid);
+
+	ret = openfile_lookup(envid, ret->req_fileid, &o);
+	if (ret < 0)
+		return ret;
+
+	file_flush(o->o_file);
+	return 0;
+}
+
 typedef int (*fshandler)(envid_t envid, union Fsipc *req);
 
 fshandler handlers[] = {
 	// Open is handled specially because it passes pages
 	[FSREQ_OPEN] = (fshandler)serve_open,
-/*	[FSREQ_READ] = serve_read,
+	[FSREQ_SET_SIZE] = (fshandler)serve_set_size,
+	[FSREQ_READ] = serve_read,
+	[FSREQ_WRITE] = (fshandler)serve_write,
 	[FSREQ_STAT] = serve_stat,
 	[FSREQ_FLUSH] = (fshandler)serve_flush,
-	[FSREQ_WRITE] = (fshandler)serve_write,
-	[FSREQ_SET_SIZE] = (fshandler)serve_set_size,
-	[FSREQ_SYNC] = serve_sync,*/
+	[FSREQ_SYNC] = serve_sync,
 };
 
 void
