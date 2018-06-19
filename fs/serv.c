@@ -191,6 +191,32 @@ try_open:
 	return 0;
 }
 
+// Set the size of req->req_fileid to req->req_size bytes, truncating
+// or extending the file as necessary.
+int
+serve_set_size(envid_t envid, struct Fsreq_set_size *req)
+{
+	struct OpenFile *o;
+	int ret;
+
+	if (debug)
+		cprintf("serve_set_size %08x %08x %08x\n",
+				envid, req->req_fileid, req->req_size);
+
+	// Every file system IPC call has the same general structure.
+	// Here's how it goes.
+
+	// First, use openfile_lookup to find the relevant open file.
+	// On failure, return the error code to the client with ipc_send.
+	ret = openfile_lookup(envid, req->req_fileid, &o);
+	if (ret < 0)
+		return ret;
+
+	// Second, call the relevant file system function (from fs/fs.c).
+	// On failure, return the error code to the client.
+	return file_set_size(o->o_file, req->req_size);
+}
+
 // Read at most ipc->read.req_n bytes from the current seek position
 // in ipc->read.req_fileid.  Return the bytes read from the file to
 // the caller in ipc->readRet, then update the seek position.  Returns
@@ -229,7 +255,7 @@ int
 serve_stat(envid_t envid, union Fsipc *ipc)
 {
 	struct Fsreq_stat *req = &ipc->stat;
-	struct Fsret_stat *ret = &ipc->statRet;
+	struct Fsret_stat *req_ret = &ipc->statRet;
 	struct OpenFile *o;
 	int ret;
 
@@ -237,11 +263,38 @@ serve_stat(envid_t envid, union Fsipc *ipc)
 		cprintf("serve_stat %08x %08x\n",
 				envid, req->req_fileid);
 
-	ret = openfile_lookup(envid, ret->req_fileid, &o);
+	ret = openfile_lookup(envid, req->req_fileid, &o);
+	if (ret < 0)
+		return ret;
+
+	strcpy(req_ret->ret_name, o->o_file->f_name);
+	req_ret->ret_size = o->o_file->f_size;
+	req_ret->ret_isdir = (o->o_file->f_type == FTYPE_DIR);
+	return 0;
+}
+
+// Flush all data and metadata of req->req_fileid to disk.
+int
+serve_flush(envid_t envid, struct Fsreq_flush *req)
+{
+	struct OpenFile *o;
+	int ret;
+
+	if (debug)
+		cprintf("serve_flush %08x %08x\n", envid, req->req_fileid);
+
+	ret = openfile_lookup(envid, req->req_fileid, &o);
 	if (ret < 0)
 		return ret;
 
 	file_flush(o->o_file);
+	return 0;
+}
+
+int
+serve_sync(envid_t envid, union Fsipc *req)
+{
+	fs_sync();
 	return 0;
 }
 

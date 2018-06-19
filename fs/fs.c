@@ -547,3 +547,13 @@ file_set_size(struct File *f, off_t newsize)
 	flush_block(f);
 	return 0;
 }
+
+// Sync the entire file system.  A big hammer.
+void
+fs_sync(void)
+{
+	int i;
+
+	for (i = 1; i < super->s_nblocks; i++)
+		flush_block(diskaddr(i));
+}
