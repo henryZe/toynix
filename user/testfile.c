@@ -17,6 +17,10 @@ xopen(const char *path, int mode)
 	fs_env = ipc_find_env(ENV_TYPE_FS);
 	ipc_send(fs_env, FSREQ_OPEN, &fsipcbuf, PTE_W);
 
+	/*
+	 * Kernel will map FVA, and pageref++ = 2;
+	 * Need to unmap manually.
+	 */
 	return ipc_recv(NULL, FVA, NULL);
 }
 
@@ -59,7 +63,7 @@ umain(int argc, char **argv)
 	if (ret < 0)
 		panic("file_read: %e", ret);
 	if (strcmp(buf, msg))
-		panic("file_read returned wrong data");
+		panic("file_read returned wrong data\n%s\n%s\n", buf, msg);
 
 	cprintf("file_read is good\n");
 
@@ -83,6 +87,17 @@ umain(int argc, char **argv)
 	cprintf("stale fileid is good\n");
 
 	// Try writing
+	ret = xopen("/new-file", O_RDWR | O_CREAT);
+	if (ret < 0)
+		panic("serve_open /new-file: %e", ret);
+
+	ret = devfile.dev_write(FVA, msg, strlen(msg));
+	if (ret != strlen(msg))
+		panic("file_write: %e", ret);
+
+	cprintf("file_write is good\n");
+
+
 
 
 }

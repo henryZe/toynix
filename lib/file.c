@@ -37,7 +37,8 @@ fsipc(unsigned int type, void *dstva)
 	static_assert(sizeof(fsipcbuf) == PGSIZE);
 
 	if (debug)
-		cprintf("[%08x] fsipc %d %08x\n", thisenv->env_id, type, *(uint32_t *)&fsipcbuf);
+		cprintf("[%08x] fsipc %d %08x\n",
+			thisenv->env_id, type, *(uint32_t *)&fsipcbuf);
 
 	ipc_send(fsenv, type, &fsipcbuf, PTE_W);
 	return ipc_recv(NULL, dstva, NULL);
@@ -95,10 +96,50 @@ devfile_read(struct Fd *fd, void *buf, size_t n)
 static ssize_t
 devfile_write(struct Fd *fd, const void *buf, size_t n)
 {
-	// Make an FSREQ_WRITE request to the file system server.  Be
-	// careful: fsipcbuf.write.req_buf is only so large, but
+	// Make an FSREQ_WRITE request to the file system server.
+	// Be careful: fsipcbuf.write.req_buf is only so large, but
 	// remember that write is always allowed to write *fewer*
 	// bytes than requested.
-	// LAB 5: Your code here
-	panic("devfile_write not implemented");
+	int ret;
+
+	fsipcbuf.write.req_fileid = fd->fd_file.id;
+	fsipcbuf.write.req_n = MIN(n, sizeof(fsipcbuf.write.req_buf));
+	memmove(fsipcbuf.write.req_buf, buf, fsipcbuf.write.req_n);
+
+	ret = fsipc(FSREQ_WRITE, NULL);
+	if (ret < 0)
+		return ret;
+
+	assert(ret <= n);
+	assert(ret <= sizeof(fsipcbuf.write.req_buf));
+
+	return ret;
+}
+
+static int
+devfile_stat(struct Fd *fd, struct Stat *st)
+{
+	int ret;
+
+	fsipcbuf.stat.req_fileid = fd->fd_file.id;
+
+	ret = fsipc(FSREQ_STAT, NULL);
+	if (ret < 0)
+		return ret;
+
+	strcpy(st->st_name, fsipcbuf.statRet.ret_name);
+	st->st_size = fsipcbuf.statRet.ret_size;
+	st->st_isdir = fsipcbuf.statRet.ret_isdir;
+
+	return 0;
+}
+
+// Truncate or extend an open file to 'size' bytes
+static int
+devfile_trunc(struct Fd *fd, off_t newsize)
+{
+	fsipcbuf.set_size.req_fileid = fd->fd_file.id;
+	fsipcbuf.set_size.req_size = newsize;
+
+	return fsipc(FSREQ_SET_SIZE, NULL);
 }

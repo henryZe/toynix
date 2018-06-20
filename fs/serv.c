@@ -67,12 +67,14 @@ openfile_alloc(struct OpenFile **o)
 	for (i = 0; i < MAXOPEN; i++) {
 		switch (pageref(opentab[i].o_fd)) {
 		case 0:
+			/* this case is opentab[i].o_fd never be used before */
 			ret = sys_page_alloc(0, opentab[i].o_fd, PTE_W);
 			if (ret < 0)
 				return ret;
 			/* fall through */
 
 		case 1:
+			/* this case is opentab[i].o_fd unmap by file.c before */
 			/* increase the openfile counter */
 			opentab[i].o_fileid += MAXOPEN;
 			*o = &opentab[i];
@@ -225,14 +227,24 @@ int
 serve_read(envid_t envid, union Fsipc *ipc)
 {
 	struct Fsreq_read *req = &ipc->read;
-	struct Fsret_read *ret = &ipc->readRet;
+	struct Fsret_read *req_ret = &ipc->readRet;
+	struct OpenFile *o;
+	int ret;
 
 	if (debug)
 		cprintf("serve_read %08x %08x %08x\n",
 				envid, req->req_fileid, req->req_n);
 
-	// Lab 5: Your code here:
-	return 0;
+	ret = openfile_lookup(envid, req->req_fileid, &o);
+	if (ret < 0)
+		return ret;
+
+	ret = file_read(o->o_file, req_ret->ret_buf, req->req_n, o->o_fd->fd_offset);
+	if (ret < 0)
+		return ret;
+
+	o->o_fd->fd_offset += ret;
+	return ret;
 }
 
 // Write req->req_n bytes from req->req_buf to req_fileid, starting at
@@ -241,12 +253,23 @@ serve_read(envid_t envid, union Fsipc *ipc)
 // bytes written, or < 0 on error.
 int serve_write(envid_t envid, struct Fsreq_write *req)
 {
+	struct OpenFile *o;
+	int ret;
+
 	if (debug)
 		cprintf("serve_write %08x %08x %08x\n",
 				envid, req->req_fileid, req->req_n);
 
-	// LAB 5: Your code here.
-	panic("serve_write not implemented");
+	ret = openfile_lookup(envid, req->req_fileid, &o);
+	if (ret < 0)
+		return ret;
+
+	ret = file_write(o->o_file, req->req_buf, req->req_n, o->o_fd->fd_offset);
+	if (ret < 0)
+		return ret;
+
+	o->o_fd->fd_offset += ret;
+	return ret;
 }
 
 // Stat ipc->stat.req_fileid.  Return the file's struct Stat to the
