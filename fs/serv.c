@@ -1,7 +1,6 @@
 #include <lib.h>
 #include <x86.h>
 #include <fs/fs.h>
-#include <fd.h>
 
 #define debug 0
 

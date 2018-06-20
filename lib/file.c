@@ -1,5 +1,4 @@
 #include <lib.h>
-#include <fd.h>
 
 #define debug 0
 
@@ -142,4 +141,49 @@ devfile_trunc(struct Fd *fd, off_t newsize)
 	fsipcbuf.set_size.req_size = newsize;
 
 	return fsipc(FSREQ_SET_SIZE, NULL);
+}
+
+// Open a file (or directory).
+//
+// Returns:
+// 	The file descriptor index on success
+// 	-E_BAD_PATH if the path is too long (>= MAXPATHLEN)
+// 	< 0 for other errors.
+int
+open(const char *path, int mode)
+{
+	// Find an unused file descriptor page using fd_alloc.
+	// Then send a file-open request to the file server.
+	// Include 'path' and 'omode' in request,
+	// and map the returned file descriptor page
+	// at the appropriate fd address.
+	// FSREQ_OPEN returns 0 on success, < 0 on failure.
+	//
+	// (fd_alloc does not allocate a page, it just returns an
+	// unused fd address.  Do you need to allocate a page?)
+	//
+	// Return the file descriptor index.
+	// If any step after fd_alloc fails, use fd_close to free the
+	// file descriptor.
+
+	int ret;
+	struct Fd *fd;
+
+	if (strlen(path) >= MAXPATHLEN)
+		return -E_BAD_PATH;
+
+	ret = fd_alloc(&fd);
+	if (ret < 0)
+		return ret;
+
+	strcpy(fsipcbuf.open.req_path, path);
+	fsipcbuf.open.req_omode = mode;
+
+	ret = fsipc(FSREQ_OPEN, fd);
+	if (ret < 0) {
+		fd_close(fd, 0);
+		return ret;
+	}
+
+	return fd2num(fd);
 }
