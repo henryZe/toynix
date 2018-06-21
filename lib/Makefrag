@@ -15,6 +15,7 @@ LIB_SRCFILES :=	\
 			$(LIBDIR)/pageref.c \
 			$(LIBDIR)/file.c \
 			$(LIBDIR)/fd.c \
+			$(LIBDIR)/spawn.c \
 
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.c, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_SRCFILES))
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.S, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_OBJFILES))

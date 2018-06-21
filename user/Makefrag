@@ -32,6 +32,7 @@ USER_SRCFILES := \
 		$(USRDIR)/pingpong.c \
 		$(USRDIR)/primes.c \
 		$(USRDIR)/testfile.c \
+		$(USRDIR)/spawnhello.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 

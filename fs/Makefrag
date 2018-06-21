@@ -6,7 +6,7 @@ FSOFILES := \
 		$(OBJDIR)/$(FSDIR)/serv.o \
 
 USERAPPS := \
-		$(OBJDIR)/$(USRDIR)/init \
+		$(OBJDIR)/$(USRDIR)/hello \
 
 FSIMGTXTFILES := \
 		$(FSDIR)/newmotd \
