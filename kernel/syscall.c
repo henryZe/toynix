@@ -399,6 +399,8 @@ sys_env_set_trapframe(envid_t envid, struct Trapframe *tf)
 	if (ret < 0)
 		return ret;
 
+	user_mem_assert(curenv, tf, sizeof(struct Trapframe), PTE_W);
+
 	env->env_tf.tf_eip = tf->tf_eip;
 	env->env_tf.tf_esp = tf->tf_esp;
 
