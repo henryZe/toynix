@@ -1,6 +1,6 @@
-# toynix
+# Toynix
 
-toy kernel
+## Introduction
 
 ## Usage
 
@@ -10,14 +10,14 @@ toy kernel
   > Run the kernel with debug mode
 * make gdb
   > Run gdb and auto-link target QEMU
-* find . -name "*.[ch]" | xargs cat | wc -l
+* find . -name "*.[chS]" | xargs cat | wc -l
   > calculate code lines
 
 ## Todu List
 
 * High Priority
-  1. File System
-  2. mini shell
+  1. Spawn Call
+  2. Mini Shell
   3. Network Stack
 
 * Medium Priority

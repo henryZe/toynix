@@ -312,6 +312,7 @@ walk_path(const char *path, struct File **pdir,
 	struct File *dir, *file;
 	int ret;
 
+	/* absolute path required */
 	if (*path != '/')
 		return -E_BAD_PATH;
 

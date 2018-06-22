@@ -112,3 +112,9 @@ sys_ipc_recv(void *dst_va)
 {
 	return syscall(SYS_ipc_recv, 1, (uint32_t)dst_va, 0, 0, 0, 0);
 }
+
+int
+sys_env_set_trapframe(envid_t envid, struct Trapframe *tf)
+{
+	return syscall(SYS_env_set_trapframe, 2, envid, (uint32_t)tf, 0, 0, 0);
+}

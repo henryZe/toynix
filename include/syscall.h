@@ -16,6 +16,7 @@ enum {
 	SYS_env_set_pgfault_upcall,
 	SYS_ipc_try_send,
 	SYS_ipc_recv,
+	SYS_env_set_trapframe,
 	NUM_SYSCALLS
 };
 

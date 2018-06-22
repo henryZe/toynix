@@ -239,3 +239,17 @@ readn(int fdnum, void *buf, size_t n)
 
 	return tot;
 }
+
+int
+seek(int fdnum, off_t offset)
+{
+	int ret;
+	struct Fd *fd;
+
+	ret = fd_lookup(fdnum, &fd);
+	if (ret < 0)
+		return ret;
+
+	fd->fd_offset = offset;
+	return 0;
+}

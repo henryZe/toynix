@@ -392,10 +392,20 @@ sys_ipc_recv(void *dstva)
 static int
 sys_env_set_trapframe(envid_t envid, struct Trapframe *tf)
 {
-	// LAB 5: Your code here.
-	// Remember to check whether the user has supplied us with a good
-	// address!
-	panic("sys_env_set_trapframe not implemented");
+	int ret;
+	struct Env *env;
+
+	ret = envid2env(envid, &env, 1);
+	if (ret < 0)
+		return ret;
+
+	env->env_tf.tf_eip = tf->tf_eip;
+	env->env_tf.tf_esp = tf->tf_esp;
+
+	env->env_tf.tf_eflags |= FL_IF;			/* interrupts enabled */
+	env->env_tf.tf_eflags &= ~FL_IOPL_MASK;	/* IOPL of 0 */
+
+	return 0;
 }
 
 // Dispatches to the correct kernel function, passing the arguments.
@@ -445,6 +455,9 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 
 	case SYS_ipc_recv:
 		return sys_ipc_recv((void *)a1);
+
+	case SYS_env_set_trapframe:
+		return sys_env_set_trapframe(a1, (void *)a2);
 
 	default:
 		return -E_INVAL;

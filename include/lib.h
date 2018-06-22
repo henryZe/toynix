@@ -59,6 +59,7 @@ int	sys_page_unmap(envid_t env, void *pg);
 int sys_env_set_pgfault_upcall(envid_t envid, void *upcall);
 int sys_ipc_try_send(envid_t to_env, int value, void *pg, int perm);
 int sys_ipc_recv(void *rcv_pg);
+int sys_env_set_trapframe(envid_t envid, struct Trapframe *tf);
 
 static inline envid_t __attribute__((always_inline))
 sys_exofork(void)
