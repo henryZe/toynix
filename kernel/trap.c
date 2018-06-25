@@ -10,6 +10,7 @@
 #include <kernel/sched.h>
 #include <kernel/pmap.h>
 #include <kernel/picirq.h>
+#include <kernel/console.h>
 
 /* For debugging, so print_trapframe can distinguish between printing
  * a saved trapframe and printing the current trapframe and print some
@@ -351,6 +352,15 @@ trap_dispatch(struct Trapframe *tf)
 		// IRQ line or other reasons. We don't care.
 		cprintf("Spurious interrupt on irq %d\n", IRQ_SPURIOUS);
 		print_trapframe(tf);
+		break;
+
+	// Handle keyboard and serial interrupts.
+	case IRQ_OFFSET + IRQ_KBD:
+		kbd_intr();
+		break;
+
+	case IRQ_OFFSET + IRQ_SERIAL:
+		serial_intr();
 		break;
 
 	default:

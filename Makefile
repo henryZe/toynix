@@ -42,8 +42,8 @@ GCC_LIB := $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
 # Make sure that 'all' is the first target
 all:
 
-KERN_CFLAGS := $(CFLAGS) -DJOS_KERNEL -gstabs
-USER_CFLAGS := $(CFLAGS) -DJOS_USER -gstabs
+KERN_CFLAGS := $(CFLAGS) -DTOYNIX_KERNEL -gstabs
+USER_CFLAGS := $(CFLAGS) -DTOYNIX_USER -gstabs
 
 # Update .vars.X if variable X has changed since the last make run.
 #

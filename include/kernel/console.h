@@ -2,8 +2,8 @@
 
 #ifndef _CONSOLE_H_
 #define _CONSOLE_H_
-#ifndef JOS_KERNEL
-# error "This is a JOS kernel header; user programs should not #include it"
+#ifndef TOYNIX_KERNEL
+# error "This is a Toynix kernel header; user programs should not #include it"
 #endif
 
 #define MONO_BASE	0x3B4

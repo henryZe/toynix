@@ -59,9 +59,6 @@ init(void)
 	ENV_CREATE(user_spawnhello, ENV_TYPE_USER);
 #endif
 
-	// Should not be necessary - drains keyboard because interrupt has given up.
-	kbd_intr();
-
 	// Schedule and run the first user environment
 	sched_yield();
 }

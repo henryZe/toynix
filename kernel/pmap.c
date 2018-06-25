@@ -76,7 +76,7 @@ static physaddr_t check_va2pa(pde_t *pgdir, uintptr_t va);
 static void check_page(void);
 static void check_page_installed_pgdir(void);
 
-// This simple physical memory allocator is used only while JOS is setting
+// This simple physical memory allocator is used only while Toynix is setting
 // up its virtual memory system.  page_alloc() is the real allocator.
 //
 // If n>0, allocates enough pages of contiguous physical memory to hold 'n'

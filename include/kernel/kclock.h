@@ -2,8 +2,8 @@
 
 #ifndef KERN_KCLOCK_H
 #define KERN_KCLOCK_H
-#ifndef JOS_KERNEL
-# error "This is a JOS kernel header; user programs should not #include it"
+#ifndef TOYNIX_KERNEL
+# error "This is a Toynix kernel header; user programs should not #include it"
 #endif
 
 #define	IO_RTC		0x070		/* RTC port */

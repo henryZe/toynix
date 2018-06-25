@@ -1,7 +1,7 @@
 #ifndef KERN_PICIRQ_H
 #define KERN_PICIRQ_H
-#ifndef JOS_KERNEL
-# error "This is a JOS kernel header; user programs should not #include it"
+#ifndef TOYNIX_KERNEL
+# error "This is a Toynix kernel header; user programs should not #include it"
 #endif
 
 #define MAX_IRQS	16		// Number of IRQs
