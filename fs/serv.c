@@ -73,14 +73,14 @@ openfile_alloc(struct OpenFile **o)
 			/* fall through */
 
 		case 1:
-			/* this case is opentab[i].o_fd unmap by file.c before */
+			/* this case is opentab[i].o_fd unmap by fd_close */
 			/* increase the openfile counter */
 			opentab[i].o_fileid += MAXOPEN;
 			*o = &opentab[i];
 			memset(opentab[i].o_fd, 0, PGSIZE);
 			return (*o)->o_fileid;
 
-		/* case > 1 means busy */
+		/* case > 1 means busy which mapped by fsipc(ipc_recv) of user process */
 		}
 	}
 
@@ -187,6 +187,7 @@ try_open:
 	// Share the FD page with the caller by setting *pg_store,
 	// store its permission in *perm_store
 	*pg_store = o->o_fd;
+	/* !Notion: PTE_SHARE indicates share the page mapping(struct Fd) with process */
 	*perm_store = PTE_P | PTE_U | PTE_W | PTE_SHARE;
 
 	return 0;

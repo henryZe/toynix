@@ -99,8 +99,11 @@ int	fstat(int fd, struct Stat *statbuf);
 int	stat(const char *path, struct Stat *statbuf);
 
 // spawn.c
-envid_t	spawn(const char *program, const char **argv);
-envid_t	spawnl(const char *program, const char *arg0, ...);
+envid_t spawn(const char *program, const char **argv);
+envid_t spawnl(const char *program, const char *arg0, ...);
+
+// wait.c
+void wait(envid_t env);
 
 /* File open modes */
 #define	O_RDONLY	0x0000		/* open for reading only */

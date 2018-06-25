@@ -142,7 +142,19 @@ map_segment(envid_t child, uintptr_t va, size_t memsz,
 static int
 copy_shared_pages(envid_t child)
 {
-	// LAB 5: Your code here.
+	int ret;
+	void *va;
+
+	for (va = 0; (uintptr_t)va < USTACKTOP; va += PGSIZE) {
+		if ((uvpd[PDX(va)] & PTE_P) &&
+			(uvpt[PGNUM(va)] & PTE_P) &&
+			(uvpt[PGNUM(va)] & PTE_SHARE)) {
+			ret = sys_page_map(0, va, child, va, PGOFF(uvpt[PGNUM(va)]));
+			if (ret < 0)
+				return ret;
+		}
+	}
+
 	return 0;
 }
 
@@ -273,7 +285,7 @@ spawn(const char *prog, const char **argv)
 	if (ret < 0)
 		panic("copy_shared_pages: %e", ret);
 
-	/* set eip & esp */
+	/* set child eip & esp */
 	ret = sys_env_set_trapframe(child, &child_tf);
 	if (ret < 0)
 		panic("sys_env_set_trapframe: %e", ret);

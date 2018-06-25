@@ -24,7 +24,8 @@ pgfault(struct UTrapframe *utf)
 	 * If not, panic.
 	 */
 	if (!(err & FEC_WR) || !(uvpt[PGNUM(addr)] & PTE_COW))
-		panic("%s addr: %x err: %x pte %x", __func__, addr, err, uvpt[PGNUM(addr)]);
+		panic("%s addr: %x err: %x pte %x", __func__,
+				addr, err, uvpt[PGNUM(addr)]);
 
 	// Allocate a new page, map it at a temporary location (PFTEMP),
 	// copy the data from the old page to the new page, then move the new
@@ -57,6 +58,18 @@ duppage(envid_t dst_env, unsigned pn)
 {
 	int perm = PGOFF(uvpt[pn]);
 	int ret;
+
+	/*
+	 * If the page table entry has the PTE_SHARE bit set,
+	 * just copy the mapping directly.
+	 */
+	if (perm & PTE_SHARE) {
+		ret = sys_page_map(0, (void *)(pn << PGSHIFT), dst_env, (void *)(pn << PGSHIFT), perm);
+		if (ret < 0)
+			panic("sys_page_map: %e", ret);
+
+		return 0;
+	}
 
 	perm &= (~PTE_W);
 	perm |= PTE_COW;

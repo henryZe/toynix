@@ -7,9 +7,11 @@ FSOFILES := \
 
 USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/hello \
+		$(OBJDIR)/$(USRDIR)/testpteshare \
 
 FSIMGTXTFILES := \
 		$(FSDIR)/newmotd \
+		$(FSDIR)/motd \
 
 FSIMGFILES := $(USERAPPS) $(FSIMGTXTFILES)
 

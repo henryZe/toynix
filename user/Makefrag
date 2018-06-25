@@ -33,6 +33,8 @@ USER_SRCFILES := \
 		$(USRDIR)/primes.c \
 		$(USRDIR)/testfile.c \
 		$(USRDIR)/spawnhello.c \
+		$(USRDIR)/testpteshare.c \
+		$(USRDIR)/testfdsharing.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 
