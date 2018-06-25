@@ -18,6 +18,7 @@ LIB_SRCFILES :=	\
 			$(LIBDIR)/spawn.c \
 			$(LIBDIR)/wait.c \
 			$(LIBDIR)/console.c \
+			$(LIBDIR)/fprintf.c \
 
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.c, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_SRCFILES))
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.S, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_OBJFILES))

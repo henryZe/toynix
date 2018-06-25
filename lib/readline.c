@@ -8,8 +8,13 @@ readline(const char *prompt)
 {
 	int i, c, echoing;
 
-	if (prompt != NULL)
+#if TOYNIX_KERNEL
+	if (prompt)
 		cprintf("%s", prompt);
+#else
+	if (prompt)
+		fprintf(1, "%s", prompt);
+#endif
 
 	i = 0;
 	echoing = iscons(0);

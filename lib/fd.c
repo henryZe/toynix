@@ -25,6 +25,12 @@ fd2num(struct Fd *fd)
 	return ((uintptr_t)fd - FDTABLE) / PGSIZE;
 }
 
+char *
+fd2data(struct Fd *fd)
+{
+	return INDEX2DATA(fd2num(fd));
+}
+
 // Finds the smallest i from 0 to MAXFD-1 that doesn't have
 // its fd page mapped.
 // Sets *fd_store to the corresponding fd page virtual address.
@@ -252,4 +258,44 @@ seek(int fdnum, off_t offset)
 
 	fd->fd_offset = offset;
 	return 0;
+}
+
+// Make file descriptor 'newfdnum' a duplicate of file descriptor 'oldfdnum'.
+// For instance, writing onto either file descriptor will affect the
+// file and the file offset of the other.
+// Closes any previously open file descriptor at 'newfdnum'.
+// This is implemented using virtual memory tricks (of course!).
+int
+dup(int oldfdnum, int newfdnum)
+{
+	int ret;
+	char *ova, *nva;
+	pte_t pte;
+	struct Fd *oldfd, *newfd;
+
+	ret = fd_lookup(oldfdnum, &oldfd);
+	if (ret < 0)
+		return ret;
+
+	close(newfdnum);
+
+	newfd = INDEX2FD(newfdnum);
+	ova = fd2data(oldfd);
+	nva = fd2data(newfd);
+
+	if ((uvpd[PDX(ova)] & PTE_P) && (uvpt[PGNUM(ova)] & PTE_P)) {
+		ret = sys_page_map(0, ova, 0, nva, uvpt[PGNUM(ova)] & PTE_SYSCALL);
+		if (ret < 0)
+			return ret;
+	}
+
+	ret = sys_page_map(0, oldfd, 0, newfd, uvpt[PGNUM(oldfd)] & PTE_SYSCALL);
+	if (ret < 0)
+		goto err;
+
+	return newfdnum;
+
+err:
+	sys_page_unmap(0, nva);
+	return ret;
 }
