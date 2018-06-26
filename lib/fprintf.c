@@ -76,6 +76,7 @@ printf(const char *fmt, ...)
 	int cnt;
 
 	va_start(ap, fmt);
+	/* 1: standard output */
 	cnt = vfprintf(1, fmt, ap);
 	va_end(ap);
 
