@@ -23,18 +23,6 @@ void argstart(int *argc, char **argv, struct Argstate *args);
 // contains just the non-flag arguments.
 int argnext(struct Argstate *);
 
-// Returns the next value for the current flag, or 0 if it has no value.
-// For example, given an argument list ["-fval1", "val2", "val3"],
-// a call to argnext() will return 'f', after which repeated calls to
-// argnextvalue will return "val1", "val2", and "val3".
-// Consumes arguments from the argc/argv array.
-char *argnextvalue(struct Argstate *);
-
-// Returns the current flag's value, or 0 if it has no value.
-// Behaves like argnextvalue, except that repeated calls to argvalue will
-// return the same value.
-char *argvalue(struct Argstate *);
-
 // Example:
 //
 //	#include <inc/lib.h>

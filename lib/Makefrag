@@ -20,6 +20,7 @@ LIB_SRCFILES :=	\
 			$(LIBDIR)/console.c \
 			$(LIBDIR)/fprintf.c \
 			$(LIBDIR)/pipe.c \
+			$(LIBDIR)/args.c \
 
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.c, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_SRCFILES))
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.S, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_OBJFILES))

@@ -1,4 +1,7 @@
 #include <lib.h>
+#include <args.h>
+
+int debug = 0;
 
 void
 usage(void)
@@ -16,6 +19,8 @@ umain(int argc, char **argv)
 	inter_active = '?';
 	echo_cmds = 0;
 	argstart(&argc, argv, &args);
+
+	/* configure shell setting: -d, -i, -x */
 	while ((ret = argnext(&args)) >= 0) {
 		switch (ret) {
 		case 'd':
@@ -38,6 +43,7 @@ umain(int argc, char **argv)
 			/* close standard input */
 			close(0);
 
+			/* open script file as fd 0 */
 			ret = open(argv[1], O_RDONLY);
 			if (ret < 0)
 				panic("open %s: %e", argv[1], ret);
@@ -51,6 +57,7 @@ umain(int argc, char **argv)
 		while (1) {
 			char *buf;
 
+			/* read input until '\n' */
 			buf = readline(inter_active ? "sh $ " : NULL);
 			if (buf == NULL) {
 				if (debug)
