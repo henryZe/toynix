@@ -78,11 +78,20 @@ _pipeisclosed(struct Fd *fd, struct Pipe *p)
 	while (1) {
 		n = thisenv->env_runs;
 
-		
+		/* if equals, that is writer/reader is closed already (otherwise, pageref(pipe_data) = 2 * pageref(fd)) */
+		ret = (pageref(fd) == pageref(p));
+
+		nn = thisenv->env_runs;
+		if (n == nn)
+			return ret;
+
+		if (n != nn && ret)
+			cprintf("pipe race avoided\n");
 	}
 }
 
-int pipeisclosed(int fdnum)
+int
+pipeisclosed(int fdnum)
 {
 	struct Fd *fd;
 	struct Pipe *p;
@@ -137,11 +146,69 @@ devpipe_read(struct Fd *fd, void *vbuf, size_t n)
 	return i;
 }
 
+static ssize_t
+devpipe_write(struct Fd *fd, const void *vbuf, size_t n)
+{
+	const uint8_t *buf;
+	size_t i;
+	struct Pipe *p;
 
+	p = (struct Pipe *)fd2data(fd);
+	if (debug)
+		cprintf("[%08x] devpipe_write %08x %d rpos %d wpos %d\n",
+			thisenv->env_id, uvpt[PGNUM(p)], n, p->p_rpos, p->p_wpos);
 
+	buf = vbuf;
+	for (i = 0; i < n; i++) {
+
+		/* pipe is full */
+		while (p->p_wpos >= p->p_rpos + sizeof(p->p_buf)) {
+
+			/*
+			 * if all the readers are gone (it's only writers like us now),
+			 * note EOF.
+			 */
+			if (_pipeisclosed(fd, p))
+				return 0;
+
+			/* yield and see what happens */
+			if (debug)
+				cprintf("devpipe_write yield\n");
+
+			sys_yield();
+		}
+
+		// there's room for a byte.  store it.
+		// wait to increment wpos until the byte is stored!
+		p->p_buf[p->p_wpos % PIPEBUFSIZ] = buf[i];
+		p->p_wpos++;
+	}
+
+	return i;
+}
+
+static int
+devpipe_close(struct Fd *fd)
+{
+	(void)sys_page_unmap(0, fd);
+	return sys_page_unmap(0, fd2data(fd));
+}
+
+static int
+devpipe_stat(struct Fd *fd, struct Stat *stat)
+{
+	struct Pipe *p = (struct Pipe *)fd2data(fd);
+
+	strcpy(stat->st_name, "<pipe>");
+	stat->st_size = p->p_wpos - p->p_rpos;
+	stat->st_isdir = 0;
+	stat->st_dev = &devpipe;
+
+	return 0;
+}
 
 struct Dev devpipe = {
-	.dev_ip = 'p',
+	.dev_id = 'p',
 	.dev_name = "pipe",
 	.dev_read = devpipe_read,
 	.dev_write = devpipe_write,
