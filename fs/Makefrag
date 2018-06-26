@@ -9,6 +9,7 @@ USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/hello \
 		$(OBJDIR)/$(USRDIR)/testpteshare \
 		$(OBJDIR)/$(USRDIR)/init \
+		$(OBJDIR)/$(USRDIR)/sh \
 
 FSIMGTXTFILES := \
 		$(FSDIR)/newmotd \
