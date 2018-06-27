@@ -11,6 +11,7 @@ USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/faultio \
 		$(OBJDIR)/$(USRDIR)/init \
 		$(OBJDIR)/$(USRDIR)/sh \
+		$(OBJDIR)/$(USRDIR)/echo \
 
 FSIMGTXTFILES := \
 		$(FSDIR)/newmotd \
