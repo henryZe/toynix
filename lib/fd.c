@@ -53,7 +53,7 @@ fd_alloc(struct Fd **fd_store)
 	for (i = 0; i < MAXFD; i++) {
 		fd = INDEX2FD(i);
 		if ((uvpd[PDX(fd)] & PTE_P) == 0 ||
-			(uvpt[PGNUM(fd) & PTE_P]) == 0) {
+			(uvpt[PGNUM(fd)] & PTE_P) == 0) {
 			/* means free */
 			*fd_store = fd;
 			return 0;

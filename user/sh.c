@@ -328,7 +328,7 @@ umain(int argc, char **argv)
 		char *buf;
 
 		/* read input until '\n' */
-		buf = readline(inter_active ? "sh $ " : NULL);
+		buf = readline(inter_active ? "sh$ " : NULL);
 		if (buf == NULL) {
 			if (debug)
 				cprintf("EXITING\n");
