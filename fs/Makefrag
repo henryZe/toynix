@@ -12,6 +12,7 @@ USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/init \
 		$(OBJDIR)/$(USRDIR)/sh \
 		$(OBJDIR)/$(USRDIR)/echo \
+		$(OBJDIR)/$(USRDIR)/cat \
 
 FSIMGTXTFILES := \
 		$(FSDIR)/newmotd \

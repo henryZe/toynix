@@ -97,7 +97,7 @@ map_segment(envid_t child, uintptr_t va, size_t memsz,
 	int i, ret;
 	void *blk;
 
-	cprintf("map_segment %x + %x\n", va, memsz);
+	/* cprintf("map_segment %x + %x\n", va, memsz); */
 
 	i = PGOFF(va);
 	if (i) {
