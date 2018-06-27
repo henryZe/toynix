@@ -169,6 +169,14 @@ close(int fdnum)
 	return fd_close(fd, 1);
 }
 
+void
+close_all(void)
+{
+	int i;
+	for (i = 0; i < MAXFD; i++)
+		close(i);
+}
+
 ssize_t
 write(int fdnum, const void *buf, size_t n)
 {

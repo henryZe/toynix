@@ -1,7 +1,12 @@
 #ifndef INC_ARGS_H
 #define INC_ARGS_H
 
-struct Argstate;
+struct Argstate {
+	int *argc;
+	const char **argv;
+	const char *curarg;
+	const char *argvalue;
+};
 
 // Toynix command-line parsing functions.
 
@@ -59,12 +64,5 @@ int argnext(struct Argstate *);
 //	'-f foo' flag
 //	argument '-r'
 //	argument 'duh'
-
-struct Argstate {
-	int *argc;
-	const char **argv;
-	const char *curarg;
-	const char *argvalue;
-};
 
 #endif

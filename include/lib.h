@@ -111,6 +111,10 @@ int getchar(void);
 int iscons(int fd);
 int opencons(void);
 
+// pipe.c
+int	pipe(int pipefds[2]);
+int	pipeisclosed(int pipefd);
+
 /* File open modes */
 #define	O_RDONLY	0x0000		/* open for reading only */
 #define	O_WRONLY	0x0001		/* open for writing only */
