@@ -20,6 +20,9 @@ FSIMGTXTFILES := \
 		$(FSDIR)/newmotd \
 		$(FSDIR)/motd \
 		$(FSDIR)/lorem \
+		$(FSDIR)/testshell.sh \
+		$(FSDIR)/script \
+		$(FSDIR)/testshell.key \
 
 FSIMGFILES := $(USERAPPS) $(FSIMGTXTFILES)
 

@@ -38,6 +38,7 @@ USER_SRCFILES := \
 		$(USRDIR)/testkbd.c \
 		$(USRDIR)/icode.c \
 		$(USRDIR)/spawnfaultio.c \
+		$(USRDIR)/testshell.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 
