@@ -39,6 +39,7 @@ USER_SRCFILES := \
 		$(USRDIR)/icode.c \
 		$(USRDIR)/spawnfaultio.c \
 		$(USRDIR)/testshell.c \
+		$(USRDIR)/primespipe.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 
