@@ -313,8 +313,8 @@ walk_path(const char *path, struct File **pdir,
 	int ret;
 
 	/* absolute path required */
-	if (*path != '/')
-		return -E_BAD_PATH;
+//	if (*path != '/')
+//		return -E_BAD_PATH;
 
 	path = skip_slash(path);
 	file = &super->s_root;

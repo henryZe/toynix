@@ -8,6 +8,8 @@
 #include <kernel/spinlock.h>
 #include <kernel/sched.h>
 
+#define debug 0
+
 #define ENVGENSHIFT	12		// >= LOGNENV
 
 struct Env *envs = NULL;		// All environments
@@ -404,7 +406,8 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 	env_free_list = e->env_link;
 	*newenv_store = e;
 
-	cprintf("[%08x] new env %08x\n", curenv ? curenv->env_id : 0, e->env_id);
+	if (debug)
+		cprintf("[%08x] new env %08x\n", curenv ? curenv->env_id : 0, e->env_id);
 	return 0;
 }
 
@@ -509,8 +512,9 @@ env_free(struct Env *e)
 		lcr3(PADDR(kern_pgdir));
 
 	// Note the environment's demise.
-	cprintf("[%08x] free env %08x\n",
-		curenv ? curenv->env_id : 0, e->env_id);
+	if (debug)
+		cprintf("[%08x] free env %08x\n",
+			curenv ? curenv->env_id : 0, e->env_id);
 
 	// Flush all mapped pages in the user portion of the address space
 	static_assert(UTOP % PTSIZE == 0);

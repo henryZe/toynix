@@ -8,6 +8,9 @@
 #include <types.h>
 #include <fs.h>
 
+// Maximum number of file descriptors a program may hold open concurrently
+#define MAXFD		32
+
 struct Fd;
 struct Stat;
 struct Dev;

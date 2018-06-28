@@ -13,10 +13,13 @@ USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/sh \
 		$(OBJDIR)/$(USRDIR)/echo \
 		$(OBJDIR)/$(USRDIR)/cat \
+		$(OBJDIR)/$(USRDIR)/num \
+		$(OBJDIR)/$(USRDIR)/lsfd \
 
 FSIMGTXTFILES := \
 		$(FSDIR)/newmotd \
 		$(FSDIR)/motd \
+		$(FSDIR)/lorem \
 
 FSIMGFILES := $(USERAPPS) $(FSIMGTXTFILES)
 

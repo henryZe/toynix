@@ -90,6 +90,8 @@ error:
 	return ret;
 }
 
+#define debug 0
+
 static int
 map_segment(envid_t child, uintptr_t va, size_t memsz,
 				int fd, size_t filesz, off_t file_offset, int perm)
@@ -97,7 +99,8 @@ map_segment(envid_t child, uintptr_t va, size_t memsz,
 	int i, ret;
 	void *blk;
 
-	/* cprintf("map_segment %x + %x\n", va, memsz); */
+	if (debug)
+		cprintf("map_segment %x + %x\n", va, memsz);
 
 	i = PGOFF(va);
 	if (i) {

@@ -2,8 +2,6 @@
 
 #define debug		0
 
-// Maximum number of file descriptors a program may hold open concurrently
-#define MAXFD		32
 // Bottom of file descriptor area
 #define FDTABLE		0xD0000000
 // Bottom of file data area.  We reserve one data page for each FD,
@@ -305,5 +303,46 @@ dup(int oldfdnum, int newfdnum)
 
 err:
 	sys_page_unmap(0, nva);
+	return ret;
+}
+
+int
+fstat(int fdnum, struct Stat *stat)
+{
+	int ret;
+	struct Dev *dev;
+	struct Fd *fd;
+
+	ret = fd_lookup(fdnum, &fd);
+	if (ret < 0)
+		return ret;
+
+	ret = dev_lookup(fd->fd_dev_id, &dev);
+	if (ret < 0)
+		return ret;
+
+	if (!dev->dev_stat)
+		return -E_NOT_SUPP;
+
+	stat->st_name[0] = 0;
+	stat->st_size = 0;
+	stat->st_isdir = 0;
+	stat->st_dev = dev;
+
+	return (*dev->dev_stat)(fd, stat);
+}
+
+int
+stat(const char *path, struct Stat *stat)
+{
+	int fd, ret;
+
+	fd = open(path, O_RDONLY);
+	if (fd < 0)
+		return fd;
+
+	ret = fstat(fd, stat);
+
+	close(fd);
 	return ret;
 }
