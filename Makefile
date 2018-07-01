@@ -5,6 +5,7 @@ KERNDIR := kernel
 LIBDIR := lib
 USRDIR := user
 FSDIR := fs
+NETDIR := net
 
 CC	:= gcc -pipe
 AS	:= as
@@ -30,6 +31,11 @@ CFLAGS += -Wall -Wno-format -Wno-unused -Werror -gstabs -m32
 # -fno-tree-ch prevented gcc from sometimes reordering read_ebp() before
 # mon_backtrace()'s function prologue on gcc version: (Debian 4.7.2-5) 4.7.2
 CFLAGS += -fno-tree-ch
+
+# include network header files
+CFLAGS += -I$(NETDIR)/lwip/include \
+		-I$(NETDIR)/lwip/include/ipv4 \
+		-I$(NETDIR)/lwip/toynix
 
 # Add -fno-stack-protector if the option exists.
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
@@ -61,6 +67,7 @@ include $(LIBDIR)/Makefrag
 include $(USRDIR)/Makefrag
 include $(FSDIR)/Makefrag
 include $(KERNDIR)/Makefrag
+include $(NETDIR)/Makefrag
 
 clean:
 	rm -rf $(OBJDIR) .gdbinit jos.in qemu.log
@@ -85,6 +92,9 @@ GDBPORT := $(shell expr `id -u` % 5000 + 25000)
 
 CPUS ?= 1
 
+PORT7 := $(shell expr $(GDBPORT) + 1)
+PORT80 := $(shell expr $(GDBPORT) + 2)
+
 # disk 0: kernel.img, disk 1: fs.img
 QEMUOPTS = -m 256 -drive file=$(OBJDIR)/$(KERNDIR)/kernel.img,index=0,media=disk,format=raw -serial mon:stdio -gdb tcp::$(GDBPORT)
 QEMUOPTS += $(shell if $(QEMU) -nographic -help | grep -q '^-D '; then echo '-D qemu.log'; fi)
@@ -92,6 +102,8 @@ IMAGES = $(OBJDIR)/$(KERNDIR)/kernel.img
 QEMUOPTS += -smp $(CPUS)
 QEMUOPTS += -drive file=$(OBJDIR)/$(FSDIR)/fs.img,index=1,media=disk,format=raw
 IMAGES += $(OBJDIR)/$(FSDIR)/fs.img
+QEMUOPTS += -net user -net nic,model=e1000 -redir tcp:$(PORT7)::7 \
+			-redir tcp:$(PORT80)::80 -redir udp:$(PORT7)::7 -net dump,file=qemu.pcap
 QEMUOPTS += $(QEMUEXTRA)
 
 # debug bootloader, or debug kernel in default
@@ -103,6 +115,8 @@ gdb:
 	gdb -n -x .gdbinit
 
 pre-qemu: .gdbinit
+# QEMU doesn't truncate the pcap file.  Work around this.
+	@rm -f qemu.pcap
 
 qemu: $(IMAGES) pre-qemu
 	$(QEMU) $(QEMUOPTS)
@@ -126,6 +140,8 @@ qemu-nox-gdb: $(IMAGES) pre-qemu
 	$(QEMU) -nographic $(QEMUOPTS) -S
 
 # For test runs
+prep-net_%: override INIT_CFLAGS+=-DTEST_NO_NS
+
 prep-%:
 	$(MAKE) "INIT_CFLAGS=${INIT_CFLAGS} -DTEST=`case $* in *_*) echo $*;; *) echo user_$*;; esac`" $(IMAGES)
 
@@ -143,3 +159,20 @@ run-%: prep-% pre-qemu
 
 print-gdbport:
 	@echo $(GDBPORT)
+
+# For network connections
+which-ports:
+	@echo "Local port $(PORT7) forwards to port 7 (echo server)"
+	@echo "Local port $(PORT80) forwards to port 80 (web server)"
+
+nc-80:
+	nc localhost $(PORT80)
+
+nc-7:
+	nc localhost $(PORT7)
+
+telnet-80:
+	telnet localhost $(PORT80)
+
+telnet-7:
+	telnet localhost $(PORT7)
