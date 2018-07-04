@@ -56,7 +56,7 @@ init(void)
 #if defined(TEST)
 	ENV_CREATE(TEST, ENV_TYPE_USER);
 #else
-	ENV_CREATE(user_testshell, ENV_TYPE_USER);
+	ENV_CREATE(user_icode, ENV_TYPE_USER);
 #endif
 
 	// Schedule and run the first user environment
