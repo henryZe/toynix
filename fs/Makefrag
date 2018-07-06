@@ -24,6 +24,7 @@ FSIMGTXTFILES := \
 		$(FSDIR)/testshell.sh \
 		$(FSDIR)/script \
 		$(FSDIR)/testshell.key \
+		$(FSDIR)/index.html \
 
 FSIMGFILES := $(USERAPPS) $(FSIMGTXTFILES)
 

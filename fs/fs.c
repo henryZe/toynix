@@ -269,6 +269,7 @@ dir_alloc_file(struct File *dir, struct File **file)
 	char *blk;
 	struct File *f;
 
+	/* dir->f_size is aligned to BLKSIZE */
 	assert((dir->f_size % BLKSIZE) == 0);
 
 	n_block = dir->f_size / BLKSIZE;
