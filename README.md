@@ -27,7 +27,7 @@
     c. scheduler  
     d. IPC state  
 
-## Porting
+## Ported Modules
 
 * Bootloader configuration
 * Multiple-CPU configuration

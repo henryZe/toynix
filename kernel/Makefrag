@@ -26,6 +26,7 @@ KERN_SRCFILES := \
 		$(KERNDIR)/spinlock.c \
 		$(KERNDIR)/sched.c \
 		$(KERNDIR)/pci.c \
+		$(KERNDIR)/time.c \
 		$(LIBDIR)/string.c \
 		$(LIBDIR)/printfmt.c \
 		$(LIBDIR)/readline.c \

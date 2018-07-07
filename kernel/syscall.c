@@ -10,6 +10,7 @@
 #include <kernel/console.h>
 #include <kernel/sched.h>
 #include <kernel/env.h>
+#include <kernel/time.h>
 
 // Print a string to the system console.
 // The string is exactly 'len' characters long.
@@ -408,6 +409,13 @@ sys_env_set_trapframe(envid_t envid, struct Trapframe *tf)
 	env->env_tf.tf_eflags &= ~FL_IOPL_MASK;	/* IOPL of 0 */
 
 	return 0;
+}
+
+// Return the current time.
+static int
+sys_time_msec(void)
+{
+	return time_msec();
 }
 
 // Dispatches to the correct kernel function, passing the arguments.

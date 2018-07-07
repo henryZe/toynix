@@ -11,6 +11,7 @@
 #include <kernel/pmap.h>
 #include <kernel/picirq.h>
 #include <kernel/console.h>
+#include <kernel/time.h>
 
 /* For debugging, so print_trapframe can distinguish between printing
  * a saved trapframe and printing the current trapframe and print some
@@ -344,6 +345,11 @@ trap_dispatch(struct Trapframe *tf)
 		// interrupt using lapic_eoi() before calling the scheduler.
 		lapic_eoi();
 		sched_yield();
+
+		// Add time tick increment to clock interrupts.
+		// Be careful! In multiprocessors, clock interrupts are
+		// triggered on every CPU.
+		// LAB 6: Your code here.
 		break;
 
 	case IRQ_OFFSET + IRQ_SPURIOUS:

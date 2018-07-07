@@ -82,3 +82,15 @@ irq_setmask_8259A(uint16_t mask)
 			cprintf(" %d", i);
 	cprintf("\n");
 }
+
+void
+irq_eoi(void)
+{
+	// OCW2: rse00xxx
+	//    r: rotate
+	//    s: specific
+	//    e: end-of-interrupt
+	//  xxx: specific interrupt line
+	outb(IO_PIC1, 0x20);
+	outb(IO_PIC2, 0x20);
+}
