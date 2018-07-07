@@ -10,6 +10,8 @@
 #include <kernel/picirq.h>
 #include <kernel/spinlock.h>
 #include <kernel/sched.h>
+#include <kernel/pci.h>
+#include <kernel/time.h>
 
 static void boot_aps(void);
 
@@ -45,6 +47,10 @@ init(void)
 	/* multitasking initialization functions */
 	pic_init();
 
+	/* hardware initializations */
+	time_init();
+	pci_init();
+
 	// Acquire the big kernel lock before waking up APs
 	lock_kernel();
 	// Starting non-boot CPUs
@@ -52,6 +58,11 @@ init(void)
 
 	// Start fs env
 	ENV_CREATE(fs_fs, ENV_TYPE_FS);
+
+#if !defined(TEST_NO_NS)
+	// Start ns.
+//	ENV_CREATE(net_ns, ENV_TYPE_NS);
+#endif
 
 #if defined(TEST)
 	ENV_CREATE(TEST, ENV_TYPE_USER);

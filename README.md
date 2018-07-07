@@ -26,3 +26,10 @@
     b. console driver  
     c. scheduler  
     d. IPC state  
+
+## Porting
+
+* Bootloader configuration
+* Multiple-CPU configuration
+* IDE driver
+* PCI Bus driver

@@ -1,1 +1,9 @@
 
+
+
+
+
+NET_SRCFILES := \
+
+
+NET_OBJFILES := $(patsubst $(NETDIR)/%.c, $(OBJDIR)/$(NETDIR)/%.o, $(NET_SRCFILES))
