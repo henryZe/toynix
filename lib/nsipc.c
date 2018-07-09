@@ -87,23 +87,47 @@ nsipc_listen(int s, int backlog)
 int
 nsipc_recv(int s, void *mem, int len, unsigned int flags)
 {
+	int ret;
 
+	nsipcbuf.recv.req_s = s;
+	nsipcbuf.recv.req_len = len;
+	nsipcbuf.recv.req_flags = flags;
+
+	ret = nsipc(NSREQ_RECV);
+	if (ret >= 0) {
+		assert(ret < 1600 && ret <= len);
+		memmove(mem, nsipcbuf.recvRet.ret_buf, ret);
+	}
+
+	return ret;
 }
 
 int
 nsipc_send(int s, const void *buf, int size, unsigned int flags)
 {
+	assert(size < 1600);
 
+	nsipcbuf.send.req_s = s;
+	memmove(&nsipcbuf.send.req_buf, buf, size);
+	nsipcbuf.send.req_size = size;
+	nsipcbuf.send.req_flags = flags;
+
+	return nsipc(NSREQ_SEND);
 }
 
 int
 nsipc_shutdown(int s, int how)
 {
-	
+	nsipcbuf.shutdown.req_s = s;
+	nsipcbuf.shutdown.req_how = how;
+
+	return nsipc(NSREQ_SHUTDOWN);
 }
 
 int
 nsipc_close(int s)
 {
+	nsipcbuf.close.req_s = s;
 
+	return nsipc(NSREQ_CLOSE);
 }

@@ -17,6 +17,7 @@
 #include <memlayout.h>
 #include <syscall.h>
 #include <fd.h>
+#include <ns.h>
 
 #define USED(x)		(void)(x)
 
@@ -127,13 +128,22 @@ int	pipe(int pipefds[2]);
 int	pipeisclosed(int pipefd);
 
 // sockets.c
-#if 0
 int accept(int s, struct sockaddr *addr, socklen_t *addrlen);
 int bind(int s, struct sockaddr *name, socklen_t namelen);
 int shutdown(int s, int how);
 int connect(int s, const struct sockaddr *name, socklen_t namelen);
 int listen(int s, int backlog);
 int socket(int domain, int type, int protocol);
-#endif
+
+// nsipc.c
+int nsipc_accept(int s, struct sockaddr *addr, socklen_t *addrlen);
+int nsipc_bind(int s, struct sockaddr *name, socklen_t namelen);
+int nsipc_shutdown(int s, int how);
+int nsipc_close(int s);
+int nsipc_connect(int s, const struct sockaddr *name, socklen_t namelen);
+int nsipc_listen(int s, int backlog);
+int nsipc_recv(int s, void *mem, int len, unsigned int flags);
+int nsipc_send(int s, const void *buf, int size, unsigned int flags);
+int nsipc_socket(int domain, int type, int protocol);
 
 #endif	// !INC_LIB_H

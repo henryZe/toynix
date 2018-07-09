@@ -132,7 +132,7 @@ static struct Dev *devtab[] =
 	&devfile,
 	&devpipe,
 	&devcons,
-	//&devsock,
+	&devsock,
 	0,
 };
 
