@@ -48,6 +48,15 @@ nsipc_bind(int s, struct sockaddr *name, socklen_t namelen)
 }
 
 int
+nsipc_listen(int s, int backlog)
+{
+	nsipcbuf.listen.req_s = s;
+	nsipcbuf.listen.req_backlog = backlog;
+
+	return nsipc(NSREQ_LISTEN);
+}
+
+int
 nsipc_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
 {
 	int ret;
@@ -73,15 +82,6 @@ nsipc_connect(int s, const struct sockaddr *name, socklen_t namelen)
 	nsipcbuf.connect.req_namelen = namelen;
 
 	return nsipc(NSREQ_CONNECT);
-}
-
-int
-nsipc_listen(int s, int backlog)
-{
-	nsipcbuf.listen.req_s = s;
-	nsipcbuf.listen.req_backlog = backlog;
-
-	return nsipc(NSREQ_LISTEN);
 }
 
 int
