@@ -1,5 +1,4 @@
-#include <lib.h>
-#include <env.h>
+#include <net/ns.h>
 
 extern union Nsipc nsipcbuf;
 

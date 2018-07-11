@@ -40,6 +40,7 @@ USER_SRCFILES := \
 		$(USRDIR)/spawnfaultio.c \
 		$(USRDIR)/testshell.c \
 		$(USRDIR)/primespipe.c \
+		$(USRDIR)/testtime.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 

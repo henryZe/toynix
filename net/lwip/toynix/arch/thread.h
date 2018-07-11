@@ -1,7 +1,7 @@
 #ifndef LWIP_ARCH_THREAD_H
 #define LWIP_ARCH_THREAD_H
 
-#include <inc/types.h>
+#include <types.h>
 
 typedef uint32_t thread_id_t;
 

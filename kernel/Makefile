@@ -40,7 +40,8 @@ KERN_OBJFILES := $(patsubst $(LIBDIR)/%.c, $(OBJDIR)/$(KERNDIR)/%.o, $(KERN_OBJF
 KERN_BINFILES := \
 		$(patsubst %.o, %, $(USER_OBJFILES)) \
 		$(OBJDIR)/$(FSDIR)/fs \
-		$(OBJDIR)/$(NETDIR)/ns \
+
+#		$(OBJDIR)/$(NETDIR)/ns \
 
 # How to build kernel object files
 $(OBJDIR)/$(KERNDIR)/%.o: $(KERNDIR)/%.c
