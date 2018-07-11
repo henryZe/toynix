@@ -62,12 +62,12 @@ $(OBJDIR)/.vars.%: FORCE
 .PHONY: FORCE
 
 # Include Makefrags for subdirectories
-include $(BOOTDIR)/Makefrag
-include $(LIBDIR)/Makefrag
-include $(USRDIR)/Makefrag
-include $(FSDIR)/Makefrag
-include $(KERNDIR)/Makefrag
-include $(NETDIR)/Makefrag
+include $(BOOTDIR)/Makefile
+include $(LIBDIR)/Makefile
+include $(USRDIR)/Makefile
+include $(FSDIR)/Makefile
+include $(KERNDIR)/Makefile
+include $(NETDIR)/Makefile
 
 clean:
 	rm -rf $(OBJDIR) .gdbinit jos.in qemu.log
