@@ -33,4 +33,4 @@
 * Multiple-CPU configuration
 * IDE driver
 * PCI Bus driver
-* lwip module
+* lwip/api lwip/core lwip/netif modules
