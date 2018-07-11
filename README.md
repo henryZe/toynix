@@ -16,9 +16,7 @@
 ## Todu List
 
 * High Priority
-  1. Spawn Call
-  2. Mini Shell
-  3. Network Stack
+  1. Network
 
 * Medium Priority
   1. fine-gained lock instead of global kernel lock  
