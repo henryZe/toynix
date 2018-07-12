@@ -10,12 +10,10 @@ sleep(int sec)
 	if ((int)now < 0 && (int)now > -MAXERROR)
 		panic("sys_time_msec: %e", (int)now);
 	if (now > end)
-		panic("sleep: wrap, now %ud, end %ud", now, end);
+		panic("sleep: wrap");
 
-	while (sys_time_msec() < end) {
-		cprintf("%d\n", sys_time_msec());
+	while (sys_time_msec() < end)
 		sys_yield();
-	}
 }
 
 void
