@@ -24,7 +24,7 @@ struct pci_driver {
 // pci_attach_class matches the class and subclass of a PCI device
 struct pci_driver pci_attach_class[] = {
 	{ PCI_CLASS_BRIDGE, PCI_SUBCLASS_BRIDGE_PCI, &pci_bridge_attach },
-	{ 0, 0, 0 },
+	{ 0, 0, NULL },
 };
 
 // pci_attach_vendor matches the vendor ID and device ID of a PCI device. key1
@@ -104,6 +104,7 @@ pci_attach_match(uint32_t key1, uint32_t key2,
 static int
 pci_attach(struct pci_func *f)
 {
+	/* attach by class or vendor */
 	return pci_attach_match(PCI_CLASS(f->dev_class),
 				 PCI_SUBCLASS(f->dev_class),
 				 &pci_attach_class[0], f) ||
@@ -149,15 +150,6 @@ pci_scan_bus(struct pci_bus *bus)
 	return totaldev;
 }
 
-int
-pci_init(void)
-{
-	static struct pci_bus root_bus;
-	memset(&root_bus, 0, sizeof(root_bus));
-
-	return pci_scan_bus(&root_bus);
-}
-
 static int
 pci_bridge_attach(struct pci_func *pcif)
 {
@@ -183,4 +175,13 @@ pci_bridge_attach(struct pci_func *pcif)
 
 	pci_scan_bus(&nbus);
 	return 1;
+}
+
+int
+pci_init(void)
+{
+	static struct pci_bus root_bus;
+	memset(&root_bus, 0, sizeof(root_bus));
+
+	return pci_scan_bus(&root_bus);
 }
