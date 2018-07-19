@@ -51,7 +51,7 @@ umain(int argc, char **argv)
 		panic("error forking");
 	else if (timer_envid == 0) {
 		/* child */
-		timer(ns_envid, TIMER_INTERVAL);
+//		timer(ns_envid, TIMER_INTERVAL);
 		return;
 	}
 
