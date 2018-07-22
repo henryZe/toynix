@@ -54,6 +54,7 @@ thread_yield(void)
 {
 	struct thread_context *next_tc = threadq_pop(&thread_queue);
 
+	/* there is no threads in this process */
 	if (!next_tc)
 		return;
 
@@ -130,6 +131,3 @@ thread_create(thread_id_t *tid, const char *name,
 
 	return 0;
 }
-
-
-

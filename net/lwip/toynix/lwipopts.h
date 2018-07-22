@@ -3,8 +3,8 @@
 
 // Huge hack to include memcpy. Since this is the only file that is
 // consistently included in all of lwip, a definition of memcpy can be added
-// here to make it lwip visible. I am hiding lwip because JOS seems to want to
-// do so. There is a declaration of memcpy in JOS but not a definition.
+// here to make it lwip visible. I am hiding lwip because TOYNIX seems to want to
+// do so. There is a declaration of memcpy in TOYNIX but not a definition.
 #include <types.h>
 void *memcpy(void *dst, const void *src, size_t n);
 

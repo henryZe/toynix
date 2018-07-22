@@ -70,7 +70,7 @@ include $(KERNDIR)/Makefile
 include $(NETDIR)/Makefile
 
 clean:
-	rm -rf $(OBJDIR) .gdbinit jos.in qemu.log
+	rm -rf $(OBJDIR) .gdbinit qemu.log
 
 # try to infer the correct QEMU
 ifndef QEMU

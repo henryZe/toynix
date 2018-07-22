@@ -41,7 +41,7 @@ tmain(uint32_t arg)
 void
 umain(int argc, char **argv)
 {
-	envid_t ns_envid = sys_getenvid();
+	envid_t ns_envid = sys_getenvid();	/* get self id */
 
 	binaryname = "ns";
 
@@ -51,7 +51,7 @@ umain(int argc, char **argv)
 		panic("error forking");
 	else if (timer_envid == 0) {
 		/* child */
-//		timer(ns_envid, TIMER_INTERVAL);
+		timer(ns_envid, TIMER_INTERVAL);
 		return;
 	}
 
