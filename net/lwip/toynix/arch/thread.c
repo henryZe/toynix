@@ -9,11 +9,79 @@ static struct thread_context *cur_tc;
 static struct thread_queue thread_queue;	/* FIFO */
 static struct thread_queue kill_queue;
 
+uint32_t
+thread_id(void)
+{
+	return cur_tc->tc_tid;
+}
+
 void
 thread_init(void)
 {
 	threadq_init(&thread_queue);
 	max_tid = 0;
+}
+
+void
+thread_wait(volatile uint32_t *addr, uint32_t val, uint32_t msec)
+{
+	uint32_t s = sys_time_msec();
+	uint32_t p = s;
+
+	cur_tc->tc_wait_addr = addr;
+	cur_tc->tc_wakeup = 0;
+
+	while (p < msec) {
+		if (p < s)
+			break;
+		if (addr && *addr != val)
+			/* condition no meet */
+			break;
+		if (cur_tc->tc_wakeup)
+			/* already called to wake up */
+			break;
+
+		thread_yield();
+		p = sys_time_msec();
+	}
+
+	cur_tc->tc_wait_addr = NULL;
+	cur_tc->tc_wakeup = 0;
+}
+
+void
+thread_wakeup(volatile uint32_t *addr)
+{
+	struct thread_context *tc = thread_queue.tq_first;
+
+	while (tc) {
+		if (tc->tc_wait_addr == addr)
+			tc->tc_wakeup = 1;
+
+		tc = tc->tc_queue_link;
+	}
+}
+
+int
+thread_wakeups_pending(void)
+{
+	struct thread_context *tc = thread_queue.tq_first;
+	int n = 0;
+
+	while (tc) {
+		if (tc->tc_wakeup)
+			++n;
+
+		tc = tc->tc_queue_link;
+	}
+
+	return n;
+}
+
+int
+thread_onhalt()
+{
+	
 }
 
 static void
@@ -131,3 +199,5 @@ thread_create(thread_id_t *tid, const char *name,
 
 	return 0;
 }
+
+void t
