@@ -79,9 +79,13 @@ thread_wakeups_pending(void)
 }
 
 int
-thread_onhalt()
+thread_onhalt(void (*func)(thread_id_t))
 {
-	
+	if (cur_tc->tc_nonhalt >= THREAD_NUM_ONHALT)
+		return -E_NO_MEM;
+
+	cur_tc->tc_onhalt[cur_tc->tc_nonhalt++] = func;
+	return 0;
 }
 
 static void
@@ -151,8 +155,8 @@ thread_halt(void)
 	cur_tc = NULL;
 	thread_yield();
 
-    // WHAT IF THERE ARE NO MORE THREADS? HOW DO WE STOP?
-    // when yield has no thread to run, it will return here!
+	// WHAT IF THERE ARE NO MORE THREADS? HOW DO WE STOP?
+	// when yield has no thread to run, it will return here!
 	exit();
 }
 
@@ -199,5 +203,3 @@ thread_create(thread_id_t *tid, const char *name,
 
 	return 0;
 }
-
-void t

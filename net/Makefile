@@ -3,6 +3,7 @@ include $(NETDIR)/lwip/Makefile
 NET_SRCFILES := \
 		$(NETDIR)/input.c \
 		$(NETDIR)/output.c \
+		$(NETDIR)/timer.c \
 
 NET_OBJFILES := $(patsubst $(NETDIR)/%.c, $(OBJDIR)/$(NETDIR)/%.o, $(NET_SRCFILES))
 
