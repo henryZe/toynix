@@ -56,6 +56,7 @@ seta20.2:
 	# Complete the transition to 32-bit protected mode by using a long jmp
 	# to reload %cs and %eip.  The segment descriptors are set up with no
 	# translation, so that the mapping is still the identity mapping.
+	# SEG_KCODE is the index of gdt
 	ljmp    $(SEG_KCODE << 3), $start32
 
 .code32			# Tell assembler to generate 32-bit code now.
@@ -70,7 +71,7 @@ start32:
 	movw    %ax, %gs                # -> GS
 
 	# Set up the stack pointer and call into C.
-	movl    $start, %esp
+	movl    $start, %esp			# scratch space as stack
 	call    bootmain
 
 	# If bootmain returns (it shouldn't), trigger a Bochs
@@ -89,8 +90,8 @@ spin:
 .p2align 2                                  # force 4 byte alignment
 gdt:
 	SEG_NULLASM                             # null seg
-	SEG_ASM(STA_X | STA_R, 0x0, 0xffffffff) # code seg
-	SEG_ASM(STA_W, 0x0, 0xffffffff)         # data seg
+	SEG_ASM(STA_X | STA_R, 0x0, 0xffffffff) # code seg, index 1, +x/+r, 0 ~ 0xffffffff
+	SEG_ASM(STA_W, 0x0, 0xffffffff)         # data seg, index 2, +w, 0 ~ 0xffffffff
 
 gdtdesc:
 	.word   (gdtdesc - gdt - 1)             # sizeof(gdt) - 1

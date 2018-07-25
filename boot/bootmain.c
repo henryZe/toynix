@@ -35,7 +35,7 @@ readsect(void *dst, uint offset)
 
 	/* Read data. */
 	waitdisk();
-	insl(0x1F0, dst, SECTSIZE/4);
+	insl(0x1F0, dst, SECTSIZE / 4);
 }
 
 /*

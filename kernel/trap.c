@@ -113,6 +113,8 @@ trap_init(void)
 	SETGATE(idt[T_ALIGN], 1, GD_KT, traphandler_17, 0);
 	SETGATE(idt[T_MCHK], 1, GD_KT, traphandler_18, 0);
 	SETGATE(idt[T_SIMDERR], 1, GD_KT, traphandler_19, 0);
+
+	// soft interrupt
 	SETGATE(idt[T_SYSCALL], 0, GD_KT, traphandler_48, 3);
 
 	// interrupt
