@@ -41,6 +41,7 @@ USER_SRCFILES := \
 		$(USRDIR)/testshell.c \
 		$(USRDIR)/primespipe.c \
 		$(USRDIR)/testtime.c \
+		$(USRDIR)/init.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 
