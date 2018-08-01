@@ -27,6 +27,14 @@ The file system is according to micro-kernel spirit, which is working in user sp
 
 ## Usage
 
+### Necessary Tools
+
+* apt-get install qemu
+* apt-get install gcc
+* apt-get install gcc-multilib
+
+### Makefile Option
+
 * make qemu-nox
   > Run the kernel
 * make qemu-nox-gdb
