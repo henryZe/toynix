@@ -16,6 +16,7 @@ USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/num \
 		$(OBJDIR)/$(USRDIR)/lsfd \
 		$(OBJDIR)/$(USRDIR)/ls \
+		$(OBJDIR)/$(USRDIR)/debug_info \
 
 FSIMGTXTFILES := \
 		$(FSDIR)/newmotd \

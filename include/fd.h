@@ -34,6 +34,10 @@ struct FdSock {
 	int sockid;
 };
 
+struct FdDebg {
+	int option;
+};
+
 struct Fd {
 	int fd_dev_id;
 	off_t fd_offset;
@@ -43,6 +47,8 @@ struct Fd {
 		struct FdFile fd_file;
 		// Network sockets
 		struct FdSock fd_sock;
+		// Debug info
+		struct FdDebg fd_debg;
 	};
 };
 
@@ -63,6 +69,7 @@ int dev_lookup(int devid, struct Dev **dev_store);
 extern struct Dev devfile;
 extern struct Dev devcons;
 extern struct Dev devpipe;
+extern struct Dev devdebug;
 extern struct Dev devsock;
 
 #endif	// ! INC_FD_H

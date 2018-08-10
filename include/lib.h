@@ -18,6 +18,7 @@
 #include <syscall.h>
 #include <fd.h>
 #include <ns.h>
+#include <debug.h>
 
 #define USED(x)		(void)(x)
 
@@ -62,6 +63,7 @@ int sys_ipc_try_send(envid_t to_env, int value, void *pg, int perm);
 int sys_ipc_recv(void *rcv_pg);
 int sys_env_set_trapframe(envid_t envid, struct Trapframe *tf);
 unsigned int sys_time_msec(void);
+int sys_debug_info(int option, char *buf, size_t size);
 
 static inline envid_t __attribute__((always_inline))
 sys_exofork(void)
@@ -146,5 +148,8 @@ int nsipc_listen(int s, int backlog);
 int nsipc_recv(int s, void *mem, int len, unsigned int flags);
 int nsipc_send(int s, const void *buf, int size, unsigned int flags);
 int nsipc_socket(int domain, int type, int protocol);
+
+// debug
+int opendebug(void);
 
 #endif	// !INC_LIB_H

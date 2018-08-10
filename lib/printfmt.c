@@ -18,8 +18,7 @@
  * so that -E_NO_MEM and E_NO_MEM are equivalent.
  */
 
-static const char * const error_string[MAXERROR] =
-{
+static const char * const error_string[MAXERROR] = {
 	[E_UNSPECIFIED]	= "unspecified error",
 	[E_BAD_ENV]	= "bad environment",
 	[E_INVAL]	= "invalid parameter",

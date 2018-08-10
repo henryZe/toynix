@@ -5,6 +5,7 @@
 #include <error.h>
 #include <assert.h>
 #include <syscall.h>
+#include <debug.h>
 #include <kernel/env.h>
 #include <kernel/pmap.h>
 #include <kernel/console.h>
@@ -418,6 +419,34 @@ sys_time_msec(void)
 	return time_msec();
 }
 
+static int
+sys_debug_info(int option, char *buf, size_t size)
+{
+	int i;
+	struct PageInfo *p = page_free_list;
+
+	switch (option) {
+	case CPU_INFO:
+		cprintf("CPU num: %d\n", ncpu);
+		break;
+
+	case MEM_INFO:
+		for (i = 0; p != NULL; i++)
+			p = p->pp_link;
+
+		cprintf("Total Pages Num: %d\n"
+				"Free Pages Num: %d\n"
+				"Used Pages Num: %d\n",
+				npages, i, npages - i);
+		break;
+
+	default:
+		return -E_INVAL;
+	}
+
+	return 0;
+}
+
 // Dispatches to the correct kernel function, passing the arguments.
 int32_t
 syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
@@ -471,6 +500,9 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 
 	case SYS_time_msec:
 		return sys_time_msec();
+
+	case SYS_debug_info:
+		return sys_debug_info(a1, (void *)a2, a3);
 
 	default:
 		return -E_INVAL;

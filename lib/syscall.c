@@ -116,11 +116,17 @@ sys_ipc_recv(void *dst_va)
 int
 sys_env_set_trapframe(envid_t envid, struct Trapframe *tf)
 {
-	return syscall(SYS_env_set_trapframe, 2, envid, (uint32_t)tf, 0, 0, 0);
+	return syscall(SYS_env_set_trapframe, 1, envid, (uint32_t)tf, 0, 0, 0);
 }
 
 unsigned int
 sys_time_msec(void)
 {
 	return (unsigned int)syscall(SYS_time_msec, 0, 0, 0, 0, 0, 0);
+}
+
+int
+sys_debug_info(int option, char *buf, size_t size)
+{
+	return syscall(SYS_debug_info, 0, option, (uint32_t)buf, size, 0, 0);
 }

@@ -18,6 +18,7 @@ enum {
 	SYS_ipc_recv,
 	SYS_env_set_trapframe,
 	SYS_time_msec,
+	SYS_debug_info,
 	NUM_SYSCALLS
 };
 
