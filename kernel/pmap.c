@@ -614,7 +614,7 @@ void *
 mmio_map_region(physaddr_t pa, size_t size)
 {
 	// Where to start the next region.  Initially, this is the
-	// beginning of the MMIO region.  Because this is static, its
+	// beginning of the MMIO region.  Because this is "static", its
 	// value will be preserved between calls to mmio_map_region
 	// (just like nextfree in boot_alloc).
 	static uintptr_t base = MMIOBASE;

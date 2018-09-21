@@ -27,6 +27,7 @@ KERN_SRCFILES := \
 		$(KERNDIR)/sched.c \
 		$(KERNDIR)/pci.c \
 		$(KERNDIR)/time.c \
+		$(KERNDIR)/e1000.c \
 		$(LIBDIR)/string.c \
 		$(LIBDIR)/printfmt.c \
 		$(LIBDIR)/readline.c \
