@@ -16,7 +16,9 @@
 #define E1000_TCTL_PSP       (1 << 3)     /* pad short packets */
 #define E1000_TCTL_COLD(x)   (x << 12)    /* collision distance */
 
-#define E1000_TXD_STAT_DD    0x00000001 /* Descriptor Done */
+#define E1000_TXD_STAT_DD    (1 << 0)     /* Descriptor Done */
+
+#define E1000_TXD_CMD_RS     (1 << 3)     /* Report Status */
 
 int pci_e1000_attach(struct pci_func *pcif);
 

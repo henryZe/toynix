@@ -1,12 +1,15 @@
 #include <kernel/e1000.h>
 #include <kernel/pmap.h>
 #include <stdio.h>
+#include <error.h>
 
 #define NTXDESCS	64
+#define NRXDESCS	64
 
 #define E1000_REG_ADDR(base, offset) (((uintptr_t)base) + (offset))
 
 volatile uint32_t *e1000;
+volatile uint32_t *e1000_tdt;
 
 struct tx_desc {
 	uint64_t addr;
@@ -19,7 +22,7 @@ struct tx_desc {
 };
 
 static struct tx_desc tx_desc_table[NTXDESCS];
-//static struct rx_desc rx_desc_table[NTXDESCS];
+//static struct rx_desc rx_desc_table[NRXDESCS];
 
 int
 pci_e1000_attach(struct pci_func *pcif)
@@ -55,6 +58,7 @@ pci_e1000_attach(struct pci_func *pcif)
 	*(uint32_t *)tdh = 0;
 	uintptr_t tdt = E1000_REG_ADDR(e1000, E1000_TDT);
 	*(uint32_t *)tdt = 0;
+	e1000_tdt = (uint32_t *)tdt;
 
 	uint32_t tflag = 0;
 	uintptr_t tctl = E1000_REG_ADDR(e1000, E1000_TCTL);
@@ -71,3 +75,20 @@ pci_e1000_attach(struct pci_func *pcif)
 	return 0;
 }
 
+int
+e1000_put_tx_desc(struct tx_desc *td)
+{
+	struct tx_desc *td_p = &tx_desc_table[*e1000_tdt];
+
+	if (!(td_p->status & E1000_TXD_STAT_DD)) {
+		cprintf("Tranmit descriptor ring is full.\n");
+		return -E_BUSY;
+	}
+
+	*td_p = *td;
+	td_p->cmd |= E1000_TXD_CMD_RS;
+
+	/* Tail Pointer increase 1 */
+	*e1000_tdt = (*e1000_tdt + 1) & (NTXDESCS - 1);
+	return 0;
+}
