@@ -6,20 +6,10 @@
 #define NTXDESCS	64
 #define NRXDESCS	64
 
-#define E1000_REG_ADDR(base, offset) (((uintptr_t)base) + (offset))
+#define E1000_REG_ADDR(base, offset) ((uintptr_t)(base) + (offset))
 
 volatile uint32_t *e1000;
 volatile uint32_t *e1000_tdt;
-
-struct tx_desc {
-	uint64_t addr;
-	uint16_t length;
-	uint8_t	cso;
-	uint8_t cmd;
-	uint8_t	status;
-	uint8_t	css;
-	uint16_t special;
-};
 
 static struct tx_desc tx_desc_table[NTXDESCS];
 //static struct rx_desc rx_desc_table[NRXDESCS];
@@ -52,7 +42,7 @@ pci_e1000_attach(struct pci_func *pcif)
 	*(uint32_t *)tdbah = 0;
 
 	uintptr_t tdlen = E1000_REG_ADDR(e1000, E1000_TDLEN);
-	*(uint32_t *)tdbah = sizeof(tx_desc_table);
+	*(uint32_t *)tdlen = sizeof(tx_desc_table);
 
 	uintptr_t tdh = E1000_REG_ADDR(e1000, E1000_TDH);
 	*(uint32_t *)tdh = 0;
@@ -72,6 +62,23 @@ pci_e1000_attach(struct pci_func *pcif)
 	*(uint32_t *)tipg = 10;
 	/* IPGR1 and IPGR2 are not needed in full duplex */
 
+	int ret;
+	struct tx_desc td = {
+		.addr = 0,
+		.length = 32,
+		.cso = 0,
+		.cmd = 0,
+		.status = 0,
+		.css = 0,
+		.special = 0,
+	};
+
+	for (i = 0; i < (NTXDESCS + 1); i++) {
+		ret = e1000_put_tx_desc(&td);
+		if (ret < 0)
+			cprintf("ret = %d\n", ret);
+	}
+
 	return 0;
 }
 
@@ -89,6 +96,8 @@ e1000_put_tx_desc(struct tx_desc *td)
 	td_p->cmd |= E1000_TXD_CMD_RS;
 
 	/* Tail Pointer increase 1 */
+	cprintf("henry: index %d %s %d\n", *e1000_tdt, __func__, __LINE__);
 	*e1000_tdt = (*e1000_tdt + 1) & (NTXDESCS - 1);
+	cprintf("henry: index %d %s %d\n", *e1000_tdt, __func__, __LINE__);
 	return 0;
 }
