@@ -733,6 +733,19 @@ user_mem_assert(struct Env *env, const void *va, size_t len, int perm)
 	}
 }
 
+int
+user_mem_phy_addr(void *va, physaddr_t *pa_store)
+{
+	struct PageInfo *pp;
+
+	pp = page_lookup(curenv->env_pgdir, va, NULL);
+	if (!pp)
+		return -1;
+
+	*pa_store = page2pa(pp) | PGOFF(va);
+	return 0;
+}
+
 // --------------------------------------------------------------
 // Checking functions.
 // --------------------------------------------------------------
