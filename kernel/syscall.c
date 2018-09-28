@@ -12,6 +12,7 @@
 #include <kernel/sched.h>
 #include <kernel/env.h>
 #include <kernel/time.h>
+#include <kernel/e1000.h>
 
 // Print a string to the system console.
 // The string is exactly 'len' characters long.
@@ -447,6 +448,29 @@ sys_debug_info(int option, char *buf, size_t size)
 	return 0;
 }
 
+static int
+sys_tx_pkt(uint8_t *content, uint32_t length)
+{
+	int ret;
+	struct tx_desc td = {0};
+	physaddr_t c_paddr;
+
+	user_mem_assert(curenv, content, length, PTE_U);
+	ret = user_mem_phy_addr(content, &c_paddr);
+	if (ret < 0)
+		return -E_INVAL;
+
+	td.addr = c_paddr;
+	td.length = length;
+
+	while (1) {
+		if (e1000_put_tx_desc(&td) == 0)
+			break;
+	}
+
+	return 0;
+}
+
 // Dispatches to the correct kernel function, passing the arguments.
 int32_t
 syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
@@ -503,6 +527,9 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 
 	case SYS_debug_info:
 		return sys_debug_info(a1, (void *)a2, a3);
+
+	case SYS_tx_pkt:
+		return sys_tx_pkt((uint8_t *)a1, a2);
 
 	default:
 		return -E_INVAL;

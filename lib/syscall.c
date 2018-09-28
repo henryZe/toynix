@@ -130,3 +130,9 @@ sys_debug_info(int option, char *buf, size_t size)
 {
 	return syscall(SYS_debug_info, 0, option, (uint32_t)buf, size, 0, 0);
 }
+
+int
+sys_tx_pkt(uint8_t *content, uint32_t length)
+{
+	return syscall(SYS_tx_pkt, 0, (uint32_t)content, length, 0, 0, 0);
+}

@@ -19,6 +19,7 @@ enum {
 	SYS_env_set_trapframe,
 	SYS_time_msec,
 	SYS_debug_info,
+	SYS_tx_pkt,
 	NUM_SYSCALLS
 };
 

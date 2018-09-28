@@ -152,4 +152,7 @@ int nsipc_socket(int domain, int type, int protocol);
 // debug
 int opendebug(void);
 
+// network
+int sys_tx_pkt(uint8_t *content, uint32_t length);
+
 #endif	// !INC_LIB_H
