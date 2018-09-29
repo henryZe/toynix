@@ -66,8 +66,8 @@ include $(BOOTDIR)/Makefile
 include $(LIBDIR)/Makefile
 include $(USRDIR)/Makefile
 include $(FSDIR)/Makefile
-include $(KERNDIR)/Makefile
 include $(NETDIR)/Makefile
+include $(KERNDIR)/Makefile
 
 clean:
 	rm -rf $(OBJDIR) .gdbinit qemu.log

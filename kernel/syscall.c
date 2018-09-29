@@ -462,10 +462,12 @@ sys_tx_pkt(uint8_t *content, uint32_t length)
 
 	td.addr = c_paddr;
 	td.length = length;
+	td.cmd = E1000_TXD_CMD_EOP;
 
 	while (1) {
 		if (e1000_put_tx_desc(&td) == 0)
 			break;
+		sys_yield();
 	}
 
 	return 0;

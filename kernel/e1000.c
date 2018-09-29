@@ -2,6 +2,7 @@
 #include <kernel/pmap.h>
 #include <stdio.h>
 #include <error.h>
+#include <string.h>
 
 #define NTXDESCS	64
 #define NRXDESCS	64
@@ -62,22 +63,21 @@ pci_e1000_attach(struct pci_func *pcif)
 	*(uint32_t *)tipg = 10;
 	/* IPGR1 and IPGR2 are not needed in full duplex */
 
+#if 0 // For e1000_put_tx_desc test
 	int ret;
-	struct tx_desc td = {
-		.addr = 0,
-		.length = 32,
-		.cso = 0,
-		.cmd = 0,
-		.status = 0,
-		.css = 0,
-		.special = 0,
-	};
+	struct tx_desc td = {0};
+	char *content = "packet~capture";
+
+	td.addr = PADDR(content);
+	td.length = strlen(content);
+	td.cmd = E1000_TXD_CMD_EOP;
 
 	for (i = 0; i < (NTXDESCS + 1); i++) {
 		ret = e1000_put_tx_desc(&td);
 		if (ret < 0)
 			cprintf("ret = %d\n", ret);
 	}
+#endif
 
 	return 0;
 }
@@ -96,8 +96,7 @@ e1000_put_tx_desc(struct tx_desc *td)
 	td_p->cmd |= E1000_TXD_CMD_RS;
 
 	/* Tail Pointer increase 1 */
-	cprintf("henry: index %d %s %d\n", *e1000_tdt, __func__, __LINE__);
+	cprintf("e1000: index %d 0x%llx %d\n", *e1000_tdt, td_p->addr, td_p->length);
 	*e1000_tdt = (*e1000_tdt + 1) & (NTXDESCS - 1);
-	cprintf("henry: index %d %s %d\n", *e1000_tdt, __func__, __LINE__);
 	return 0;
 }

@@ -19,6 +19,7 @@
 #define E1000_TXD_STAT_DD    (1 << 0)     /* Descriptor Done */
 
 #define E1000_TXD_CMD_RS     (1 << 3)     /* Report Status */
+#define E1000_TXD_CMD_EOP    (1 << 0)     /* End of Packet */
 
 struct tx_desc {
 	uint64_t addr;
