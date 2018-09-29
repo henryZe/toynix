@@ -423,19 +423,19 @@ sys_time_msec(void)
 static int
 sys_debug_info(int option, char *buf, size_t size)
 {
-	int i;
+	int i, ret;
 	struct PageInfo *p = page_free_list;
 
 	switch (option) {
 	case CPU_INFO:
-		cprintf("CPU num: %d\n", ncpu);
+		ret = snprintf(buf, size, "CPU num: %d\n", ncpu);
 		break;
 
 	case MEM_INFO:
 		for (i = 0; p != NULL; i++)
 			p = p->pp_link;
 
-		cprintf("Total Pages Num: %d\n"
+		ret = snprintf(buf, size, "Total Pages Num: %d\n"
 				"Free Pages Num: %d\n"
 				"Used Pages Num: %d\n",
 				npages, i, npages - i);
@@ -445,7 +445,7 @@ sys_debug_info(int option, char *buf, size_t size)
 		return -E_INVAL;
 	}
 
-	return 0;
+	return ret;
 }
 
 static int

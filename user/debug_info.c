@@ -4,6 +4,7 @@ void
 umain(int argc, char **argv)
 {
 	int i, fd, ret;
+	char buf[128] = {0};
 
 	fd = opendebug();
 	if (fd < 0)
@@ -14,7 +15,11 @@ umain(int argc, char **argv)
 		if (ret < 0)
 			goto out;
 
-		read(fd, NULL, 0);
+		ret = read(fd, buf, sizeof(buf));
+		if (ret < 0)
+			goto out;
+
+		printf("%s", buf);
 
 	} else {
 		for (i = 0; i < MAXDEBUGOPT; i++) {
@@ -22,9 +27,11 @@ umain(int argc, char **argv)
 			if (ret < 0)
 				goto out;
 
-			ret = read(fd, NULL, 0);
+			ret = read(fd, buf, sizeof(buf));
 			if (ret < 0)
 				goto out;
+
+			printf("%s", buf);
 		}
 	}
 

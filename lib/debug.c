@@ -24,8 +24,7 @@ opendebug(void)
 static ssize_t
 devdebug_read(struct Fd *fd, void *vbuf, size_t n)
 {
-	sys_debug_info(fd->fd_debg.option, vbuf, n);
-	return 0;
+	return sys_debug_info(fd->fd_debg.option, vbuf, n);
 }
 
 static ssize_t
