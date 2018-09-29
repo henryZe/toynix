@@ -11,9 +11,10 @@
 
 volatile uint32_t *e1000;
 volatile uint32_t *e1000_tdt;
+volatile uint32_t *e1000_rdt;
 
 static struct tx_desc tx_desc_table[NTXDESCS];
-//static struct rx_desc rx_desc_table[NRXDESCS];
+static struct rx_desc rx_desc_table[NRXDESCS];
 
 int
 pci_e1000_attach(struct pci_func *pcif)
@@ -78,6 +79,38 @@ pci_e1000_attach(struct pci_func *pcif)
 			cprintf("ret = %d\n", ret);
 	}
 #endif
+
+	uintptr_t ral0 = E1000_REG_ADDR(e1000, E1000_RAL);
+	uintptr_t rah0 = E1000_REG_ADDR(e1000, E1000_RAH);
+	*(uint32_t *)ral0 = 0x2719a4a0;	// MAC: 08:00:27:19:a4:a0
+	*(uint32_t *)rah0 = 0x0800 | E1000_RAH_AV;
+
+	uintptr_t rdbal = E1000_REG_ADDR(e1000, E1000_RDBAL);
+	*(uint32_t *)rdbal = PADDR(rx_desc_table);
+	uintptr_t rdbah = E1000_REG_ADDR(e1000, E1000_RDBAH);
+	*(uint32_t *)rdbah = 0;
+
+	for (i = 0; i < NRXDESCS; i++)
+		rx_desc_table[i].addr = page2pa(page_alloc(0)) + sizeof(int);	// struct jif_pkt -> jp_len
+
+	uintptr_t rdlen = E1000_REG_ADDR(e1000, E1000_RDLEN);
+	*(uint32_t *)rdlen = sizeof(rx_desc_table);
+
+	uintptr_t rdh = E1000_REG_ADDR(e1000, E1000_RDH);
+	*(uint32_t *)rdh = 0;
+	uintptr_t rdt = E1000_REG_ADDR(e1000, E1000_RDT);
+	*(uint32_t *)rdt = NRXDESCS - 1;
+	e1000_rdt = (uint32_t *)rdt;
+
+	uintptr_t rctl = E1000_REG_ADDR(e1000, E1000_RCTL);
+	uint32_t rflag = 0;
+
+	rflag |= E1000_RCTL_EN;
+	rflag |= E1000_RCTL_BAM;
+	rflag |= E1000_RCTL_SZ_4096;
+	rflag |= E1000_RCTL_BSEX;
+	rflag |= E1000_RCTL_SECRC;
+	*(uint32_t *)rctl = rflag;
 
 	return 0;
 }
