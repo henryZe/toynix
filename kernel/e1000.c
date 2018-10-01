@@ -136,7 +136,9 @@ e1000_put_tx_desc(uint8_t *addr, uint32_t length, uint8_t flag)
 	td_p->cmd = flag | E1000_TXD_CMD_RS;
 
 	/* Tail Pointer increase 1 */
-	cprintf("e1000: index %d 0x%llx %d\n", *e1000_tdt, td_p->addr, td_p->length);
+	cprintf("e1000: index %d 0x%llx %d (%s %d)\n",
+			*e1000_tdt, td_p->addr, td_p->length,
+			__FILE__, __LINE__);
 	*e1000_tdt = (*e1000_tdt + 1) & (NTXDESCS - 1);
 	return 0;
 }

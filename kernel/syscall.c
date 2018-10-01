@@ -465,6 +465,8 @@ sys_tx_pkt(uint8_t *content, uint32_t length)
 		addr = content;
 		len = MIN(length, MAX_JIF_LEN);
 
+		content += len;
+		length -= len;
 		if (!length)
 			flag = E1000_TXD_CMD_EOP;
 		else
@@ -473,8 +475,6 @@ sys_tx_pkt(uint8_t *content, uint32_t length)
 		while (e1000_put_tx_desc(addr, len, flag))
 			sys_yield();
 
-		content += len;
-		length -= len;
 	}
 
 	return 0;
