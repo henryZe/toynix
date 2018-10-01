@@ -20,6 +20,7 @@ enum {
 	SYS_time_msec,
 	SYS_debug_info,
 	SYS_tx_pkt,
+	SYS_rx_pkt,
 	NUM_SYSCALLS
 };
 

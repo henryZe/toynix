@@ -450,10 +450,10 @@ sys_debug_info(int option, char *buf, size_t size)
 }
 
 static int
-sys_tx_pkt(uint8_t *content, uint32_t length)
+sys_tx_pkt(const uint8_t *content, uint32_t length)
 {
 	int ret;
-	uint8_t *addr;
+	const uint8_t *addr;
 	uint32_t len;
 	uint8_t flag;
 	user_mem_assert(curenv, content, length, PTE_U);
@@ -472,12 +472,25 @@ sys_tx_pkt(uint8_t *content, uint32_t length)
 		else
 			flag = 0;
 
-		while (e1000_put_tx_desc(addr, len, flag))
-			sys_yield();
-
+		while (1) {
+			/*
+			 * Suspend the task should be better,
+			 * sys_yield would lead to leave the kernel
+			 * and lost the state on the stack.
+			 */
+			if (!e1000_put_tx_desc(addr, len, flag))
+				break;
+		}
 	}
 
 	return 0;
+}
+
+static int
+sys_rx_pkt(uint8_t *content, uint32_t length)
+{
+	user_mem_assert(curenv, content, length, PTE_U | PTE_W);
+	return e1000_get_rx_desc(content, length);
 }
 
 // Dispatches to the correct kernel function, passing the arguments.
@@ -538,7 +551,10 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 		return sys_debug_info(a1, (void *)a2, a3);
 
 	case SYS_tx_pkt:
-		return sys_tx_pkt((uint8_t *)a1, a2);
+		return sys_tx_pkt((const uint8_t *)a1, a2);
+
+	case SYS_rx_pkt:
+		return sys_rx_pkt((uint8_t *)a1, a2);
 
 	default:
 		return -E_INVAL;

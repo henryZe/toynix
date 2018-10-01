@@ -11,7 +11,7 @@
 
 volatile uint32_t *e1000;
 volatile uint32_t *e1000_tdt;
-volatile uint32_t *e1000_rdh;
+volatile uint32_t *e1000_rdt;
 
 static struct tx_desc tx_desc_table[NTXDESCS];
 static struct rx_desc rx_desc_table[NRXDESCS];
@@ -100,7 +100,7 @@ pci_e1000_attach(struct pci_func *pcif)
 	*(uint32_t *)rdh = 0;
 	uintptr_t rdt = E1000_REG_ADDR(e1000, E1000_RDT);
 	*(uint32_t *)rdt = NRXDESCS - 1;
-	e1000_rdh = (uint32_t *)rdh;
+	e1000_rdt = (uint32_t *)rdt;
 
 	uintptr_t rctl = E1000_REG_ADDR(e1000, E1000_RCTL);
 	uint32_t rflag = 0;
@@ -116,7 +116,7 @@ pci_e1000_attach(struct pci_func *pcif)
 }
 
 int
-e1000_put_tx_desc(uint8_t *addr, uint32_t length, uint8_t flag)
+e1000_put_tx_desc(const uint8_t *addr, uint32_t length, uint8_t flag)
 {
 	int ret;
 	struct tx_desc *td_p = &tx_desc_table[*e1000_tdt];
@@ -127,7 +127,7 @@ e1000_put_tx_desc(uint8_t *addr, uint32_t length, uint8_t flag)
 		return -E_BUSY;
 	}
 
-	ret = user_mem_phy_addr(addr, &c_paddr);
+	ret = user_mem_phy_addr((void *)addr, &c_paddr);
 	if (ret < 0)
 		return -E_INVAL;
 
@@ -146,15 +146,15 @@ e1000_put_tx_desc(uint8_t *addr, uint32_t length, uint8_t flag)
 int
 e1000_get_rx_desc(uint8_t *addr, uint32_t length)
 {
-	int index = (*e1000_rdh + 1) & (NRXDESCS - 1);
+	int index = (*e1000_rdt + 1) & (NRXDESCS - 1);
 	struct rx_desc *rd_p = &rx_desc_table[index];
 
 	if (!(rd_p->status & E1000_RXD_STAT_DD))
-		return -E_BUSY;
+		return -E_EOF;
 
 	memcpy(addr, KADDR(rd_p->addr), MIN(rd_p->length, length));
 
 	rd_p->status = 0;
-	*e1000_rdh = index;
+	*e1000_rdt = index;
 	return 0;
 }
