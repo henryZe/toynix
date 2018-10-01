@@ -29,7 +29,7 @@ umain(int argc, char **argv)
             panic("sys_page_alloc: %e", ret);
 
         pkt->jp_len = snprintf(pkt->jp_data,
-                            PGSIZE - sizeof(pkt->jp_len),
+                            MAX_JIF_LEN,
                             "Packet %02d", i);
         cprintf("Transmitting packet %d\n", i);
         ipc_send(output_envid, NSREQ_OUTPUT, pkt, PTE_W);

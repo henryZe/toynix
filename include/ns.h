@@ -7,6 +7,8 @@
 #include <mmu.h>
 #include <lwip/sockets.h>
 
+#define MAX_JIF_LEN (PGSIZE - sizeof(int))
+
 struct jif_pkt {
 	int jp_len;
 	char jp_data[0];
