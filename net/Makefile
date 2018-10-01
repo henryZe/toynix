@@ -24,11 +24,9 @@ $(OBJDIR)/$(NETDIR)/ns: $(OBJDIR)/$(NETDIR)/serv.o $(NET_OBJFILES) $(OBJDIR)/$(L
 		-L$(OBJDIR)/$(LIBDIR) -llwip -ltoynix $(GCC_LIB)
 	$(OBJDUMP) -S $@ >$@.asm
 
-#$(OBJDIR)/$(NETDIR)/test%: $(OBJDIR)/$(NETDIR)/test%.o $(NET_OBJFILES) $(OBJDIR)/$(LIBDIR)/entry.o $(OBJDIR)/$(LIBDIR)/libtoynix.a $(OBJDIR)/$(LIBDIR)/liblwip.a $(USRDIR)/user.ld
-$(OBJDIR)/$(NETDIR)/test%: $(OBJDIR)/$(NETDIR)/test%.o $(NET_OBJFILES) $(OBJDIR)/$(LIBDIR)/entry.o $(OBJDIR)/$(LIBDIR)/libtoynix.a $(USRDIR)/user.ld
+$(OBJDIR)/$(NETDIR)/test%: $(OBJDIR)/$(NETDIR)/test%.o $(NET_OBJFILES) $(OBJDIR)/$(LIBDIR)/entry.o $(OBJDIR)/$(LIBDIR)/libtoynix.a $(OBJDIR)/$(LIBDIR)/liblwip.a $(USRDIR)/user.ld
 	@echo + ld $@
 	$(LD) -o $@ $(ULDFLAGS) $(LDFLAGS) -nostdlib \
 		$(OBJDIR)/$(LIBDIR)/entry.o $< $(NET_OBJFILES) \
-		-L$(OBJDIR)/$(LIBDIR) -ltoynix $(GCC_LIB)
-	#	-L$(OBJDIR)/$(LIBDIR) -llwip -ltoynix $(GCC_LIB)
+		-L$(OBJDIR)/$(LIBDIR) -llwip -ltoynix $(GCC_LIB)
 	$(OBJDUMP) -S $@ >$@.asm

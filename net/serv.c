@@ -12,7 +12,6 @@ static envid_t output_envid;
 
 
 
-
 #if 0
 void
 serve_init(uint32_t ipaddr, uint32_t netmask, uint32_t gateway)
@@ -26,11 +25,17 @@ serve_init(uint32_t ipaddr, uint32_t netmask, uint32_t gateway)
 	uint32_t done = 0;
 	tcpip_init(&tcpip_init_done, &done);
 	lwip_core_unlock();
+	thread_wait(&done, 0, (uint32_t)~0);
+	lwip_core_lock();
 
+	lwip_init(&nif, &output_envid, ipaddr, netmask, gw);
+
+	
 
 
 }
 #endif
+
 static void
 tmain(uint32_t arg)
 {
