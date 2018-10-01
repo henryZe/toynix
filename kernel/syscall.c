@@ -453,28 +453,28 @@ static int
 sys_tx_pkt(uint8_t *content, uint32_t length)
 {
 	int ret;
-	struct tx_desc td = {0};
-	physaddr_t c_paddr;
-
+	uint8_t *addr;
+	uint32_t len;
+	uint8_t flag;
 	user_mem_assert(curenv, content, length, PTE_U);
-	ret = user_mem_phy_addr(content, &c_paddr);
-	if (ret < 0)
-		return -E_INVAL;
 
 	/* Align the packet length to jp_len
 	 * and set EOP flag at the last descripter.
 	 */
 	while (length) {
-		td.addr = c_paddr;
-		td.length = MIN(length, MAX_JIF_LEN);
+		addr = content;
+		len = MIN(length, MAX_JIF_LEN);
 
-		c_paddr += td.length;
-		length -= td.length;
 		if (!length)
-			td.cmd = E1000_TXD_CMD_EOP;
+			flag = E1000_TXD_CMD_EOP;
+		else
+			flag = 0;
 
-		while (e1000_put_tx_desc(&td))
+		while (e1000_put_tx_desc(addr, len, flag))
 			sys_yield();
+
+		content += len;
+		length -= len;
 	}
 
 	return 0;

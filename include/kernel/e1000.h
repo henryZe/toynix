@@ -38,6 +38,8 @@
 
 #define E1000_RAH_AV         (1 << 31)    /* Address Valid */
 
+#define E1000_RXD_STAT_DD    (1 << 0)     /* Descriptor Done */
+
 struct tx_desc {
 	uint64_t addr;
 	uint16_t length;
@@ -58,6 +60,7 @@ struct rx_desc {
 };
 
 int pci_e1000_attach(struct pci_func *pcif);
-int e1000_put_tx_desc(struct tx_desc *td);
+int e1000_put_tx_desc(uint8_t *addr, uint32_t length, uint8_t flag);
+int e1000_get_rx_desc(uint8_t *addr, uint32_t length);
 
 #endif // KERN_E1000_H
