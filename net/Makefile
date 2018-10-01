@@ -7,6 +7,7 @@ NET_SRCFILES := \
 
 NET_TESTFILES := \
 		$(NETDIR)/testoutput.c \
+		$(NETDIR)/testinput.c \
 
 NET_OBJFILES := $(patsubst $(NETDIR)/%.c, $(OBJDIR)/$(NETDIR)/%.o, $(NET_SRCFILES))
 NET_TESTOBJS := $(patsubst $(NETDIR)/%.c, $(OBJDIR)/$(NETDIR)/%.o, $(NET_TESTFILES))
@@ -30,5 +31,4 @@ $(OBJDIR)/$(NETDIR)/test%: $(OBJDIR)/$(NETDIR)/test%.o $(NET_OBJFILES) $(OBJDIR)
 		$(OBJDIR)/$(LIBDIR)/entry.o $< $(NET_OBJFILES) \
 		-L$(OBJDIR)/$(LIBDIR) -ltoynix $(GCC_LIB)
 	#	-L$(OBJDIR)/$(LIBDIR) -llwip -ltoynix $(GCC_LIB)
-
 	$(OBJDUMP) -S $@ >$@.asm

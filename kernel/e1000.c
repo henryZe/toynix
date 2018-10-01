@@ -150,8 +150,7 @@ e1000_get_rx_desc(uint8_t *addr, uint32_t length)
 	if (!(rd_p->status & E1000_RXD_STAT_DD))
 		return -E_BUSY;
 
-	memcpy(addr, KADDR(rd_p->addr),
-			MIN(rd_p->length, length));
+	memcpy(addr, KADDR(rd_p->addr), MIN(rd_p->length, length));
 
 	rd_p->status = 0;
 	*e1000_rdh = index;
