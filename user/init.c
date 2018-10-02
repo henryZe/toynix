@@ -26,34 +26,25 @@ void
 umain(int argc, char **argv)
 {
 	int i, ret, x, want;
-	char args[256];
+	char args[256] = {0};
 
 	cprintf("init: running\n");
 
 	want = 0xf989e;
 	x = sum((char *)&data, sizeof(data));
 	if (x != want)
-		cprintf("init: data is not initialized: got sum %08x wanted %08x\n",
+		cprintf("init: data is not initialized: "
+				"got sum %08x wanted %08x\n",
 				x, want);
 	else
 		cprintf("init: data seems okay\n");
 
 	x = sum(bss, sizeof(bss));
 	if (x)
-		cprintf("bss is not initialized: wanted sum 0 got %08x\n", x);
+		cprintf("bss is not initialized: "
+				"wanted sum 0 got %08x\n", x);
 	else
 		cprintf("init: bss seems okay\n");
-
-	// output in one syscall per line to avoid output interleaving
-	strcat(args, "init: args:");
-	for (i = 0; i < argc; i++) {
-		strcat(args, " '");
-		strcat(args, argv[i]);
-		strcat(args, "'");
-	}
-	cprintf("%s\n", args);
-
-	cprintf("init: running sh\n");
 
 	// being run directly from kernel, so no file descriptors open yet
 	close(0);
@@ -68,12 +59,21 @@ umain(int argc, char **argv)
 	if (ret < 0)
 		panic("dup: %e", ret);
 
+	// output in one syscall per line to avoid output interleaving
+	strcat(args, "init: args:");
+	for (i = 0; i < argc; i++) {
+		strcat(args, " '");
+		strcat(args, argv[i]);
+		strcat(args, "'");
+	}
+	printf("%s\n", args);
+
 	while (1) {
-		cprintf("init: starting sh\n");
+		printf("init: starting sh\n");
 
 		ret = spawnl("/sh", "sh", NULL);
 		if (ret < 0) {
-			cprintf("init: spawn sh: %e\n", ret);
+			printf("init: spawn sh: %e\n", ret);
 			continue;
 		}
 
