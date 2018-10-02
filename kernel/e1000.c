@@ -136,8 +136,8 @@ e1000_put_tx_desc(const uint8_t *addr, uint32_t length, uint8_t flag)
 	td_p->cmd = flag | E1000_TXD_CMD_RS;
 
 	/* Tail Pointer increase 1 */
-	cprintf("e1000: index %d 0x%llx %d (%s %d)\n",
-			*e1000_tdt, td_p->addr, td_p->length,
+	cprintf("e1000: index:%d addr:0x%08llx len:%d cmd:%02x (%s %d)\n",
+			*e1000_tdt, td_p->addr, td_p->length, td_p->cmd,
 			__FILE__, __LINE__);
 	*e1000_tdt = (*e1000_tdt + 1) & (NTXDESCS - 1);
 	return 0;
@@ -151,6 +151,10 @@ e1000_get_rx_desc(uint8_t *addr, uint32_t length)
 
 	if (!(rd_p->status & E1000_RXD_STAT_DD))
 		return -E_EOF;
+
+	cprintf("e1000: index:%d addr:0x%08llx len:%d sts:%02x (%s %d)\n",
+			index, rd_p->addr, rd_p->length, rd_p->status,
+			__FILE__, __LINE__);
 
 	length = MIN(rd_p->length, length);
 	memcpy(addr, KADDR(rd_p->addr), length);
