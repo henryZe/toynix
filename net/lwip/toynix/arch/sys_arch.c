@@ -4,11 +4,11 @@
 void
 lwip_core_lock(void)
 {
-    return;
+	return;
 }
 
 void
 lwip_core_unlock(void)
 {
-    return;
+	return;
 }

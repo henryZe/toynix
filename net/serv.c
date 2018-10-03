@@ -16,6 +16,8 @@
 
 #define debug 0
 
+int errno = 0;
+
 struct timer_thread {
 	uint32_t msec;
 	void (*func)(void);

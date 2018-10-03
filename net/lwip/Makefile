@@ -46,6 +46,7 @@ LWIP_SRCFILES += \
 		$(NETDIR)/lwip/toynix/arch/longjmp.S \
 		$(NETDIR)/lwip/toynix/arch/sys_arch.c \
 		$(NETDIR)/lwip/toynix/arch/perror.c \
+		$(NETDIR)/lwip/toynix/jif/jif.c \
 
 LWIP_OBJFILES := $(patsubst %.c, $(OBJDIR)/%.o, $(LWIP_SRCFILES))
 LWIP_OBJFILES := $(patsubst %.S, $(OBJDIR)/%.o, $(LWIP_OBJFILES))
