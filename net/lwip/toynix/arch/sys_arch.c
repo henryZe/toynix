@@ -173,10 +173,62 @@ sys_thread_new(char *name, void (* thread)(void *arg), void *arg,
 	return tid;
 }
 
-struct sys_timeouts
-sys_arch_timeouts
-{
+struct sys_thread {
+    thread_id_t tid;
+    struct sys_timeouts tmo;
+    LIST_ENTRY(sys_thread) link;
+};
 
+enum { thread_hash_size = 257 };
+static LIST_HEAD(thread_list, sys_thread) threads[thread_hash_size];
+
+static void
+timeout_cleanup(thread_id_t tid)
+{
+	struct sys_thread *t;
+
+    lwip_core_lock();
+
+	LIST_FOREACH(t, &threads[tid % thread_hash_size], link) {
+		if (t->tid == tid) {
+			LIST_REMOVE(t, link);
+			free(t);
+			goto done;
+		}
+	}
+
+	if (debug)
+		cprintf("timeout_cleanup: bogus tid %ld\n", tid);
+
+done:
+	lwip_core_unlock();
+}
+
+struct sys_timeouts *
+sys_arch_timeouts(void)
+{
+	thread_id_t tid = thread_id();
+	struct sys_thread *t;
+
+	LIST_FOREACH(t, &threads[tid % thread_hash_size], link) {
+		if (t->tid == tid)
+			goto out;
+	}
+
+	t = malloc(sizeof(*t));
+	if (t == NULL)
+		panic("sys_arch_timeouts: cannot malloc");
+
+	int r = thread_onhalt(timeout_cleanup);
+	if (r < 0)
+		panic("thread_onhalt failed: %s", e2s(r));
+
+	t->tid = tid;
+	memset(&t->tmo, 0, sizeof(t->tmo));
+	LIST_INSERT_HEAD(&threads[tid % thread_hash_size], t, link);
+
+out:
+	return &t->tmo;
 }
 
 void

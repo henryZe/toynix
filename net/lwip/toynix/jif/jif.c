@@ -54,6 +54,89 @@ jif_output(struct netif *netif, struct pbuf *p,
 }
 
 /*
+ * low_level_input():
+ *
+ * Should allocate a pbuf and transfer the bytes of the incoming
+ * packet from the interface into the pbuf.
+ */
+static struct pbuf *
+low_level_input(void *va)
+{
+    struct jif_pkt *pkt = (struct jif_pkt *)va;
+    s16_t len = pkt->jp_len;
+
+    struct pbuf *p = pbuf_alloc(PBUF_RAW, len, PBUF_POOL);
+    if (p == NULL)
+		return 0;
+
+    /* We iterate over the pbuf chain until we have read the entire
+     * packet into the pbuf. */
+    void *rxbuf = (void *)pkt->jp_data;
+    int copied = 0;
+    struct pbuf *q;
+
+    for (q = p; q != NULL; q = q->next) {
+		/* Read enough bytes to fill this pbuf in the chain.
+		 * The available data in the pbuf is given by the
+		 * q->len variable.
+		 */
+		int bytes = q->len;
+		if (bytes > (len - copied))
+			bytes = len - copied;
+
+		memcpy(q->payload, rxbuf + copied, bytes);
+		copied += bytes;
+	}
+
+	return p;
+}
+
+/*
+ * jif_input():
+ *
+ * This function should be called when a packet is ready to be read
+ * from the interface. It uses the function low_level_input() that
+ * should handle the actual reception of bytes from the network
+ * interface.
+ */
+void
+jif_input(struct netif *netif, void *va)
+{
+	struct jif *jif;
+	struct eth_hdr *ethhdr;
+	struct pbuf *p;
+
+	jif = netif->state;
+
+    /* move received packet into a new pbuf */
+    p = low_level_input(va);
+
+    /* no packet could be read, silently ignore this */
+    if (p == NULL) return;
+    /* points to packet payload, which starts with an Ethernet header */
+    ethhdr = p->payload;
+
+    switch (htons(ethhdr->type)) {
+    case ETHTYPE_IP:
+		/* update ARP table */
+		etharp_ip_input(netif, p);
+		/* skip Ethernet header */
+		pbuf_header(p, -(int)sizeof(struct eth_hdr));
+		/* pass to network layer */
+		netif->input(p, netif);
+		break;
+
+    case ETHTYPE_ARP:
+		/* pass p to ARP module  */
+		etharp_arp_input(netif, jif->ethaddr, p);
+		break;
+
+	default:
+		pbuf_free(p);
+	}
+}
+
+/*
  * low_level_output():
  *
  * Should do the actual transmission of the packet. The packet is
