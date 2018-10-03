@@ -1,8 +1,10 @@
 #include <lib.h>
+#include <malloc.h>
 #include <lwip/sys.h>
 #include <arch/queue.h>
 #include <arch/sys_arch.h>
 #include <arch/thread.h>
+#include <arch/perror.h>
 
 #define debug 0
 
@@ -11,20 +13,48 @@
 #define MBOXSLOTS	32
 
 struct sys_sem_entry {
-    int freed;
-    int gen;
-    union {
+	int freed;
+	int gen;
+	union {
 		uint32_t v;
 		struct {
 			uint16_t counter;
-			uint16_t waiters;
+			uint16_t waiters;	/* whether there is waiter */
 		};
-    };
-    LIST_ENTRY(sys_sem_entry) link;
+	};
+	LIST_ENTRY(sys_sem_entry) link;
 };
 
 static struct sys_sem_entry sems[NSEM];
 static LIST_HEAD(sem_list, sys_sem_entry) sem_free;
+
+struct sys_mbox_entry {
+	int freed;
+	int head, nextq;
+	void *msg[MBOXSLOTS];
+	sys_sem_t queued_msg;
+	sys_sem_t free_msg;
+	LIST_ENTRY(sys_mbox_entry) link;
+};
+
+static struct sys_mbox_entry mboxes[NMBOX];
+static LIST_HEAD(mbox_list, sys_mbox_entry) mbox_free;
+
+void
+sys_init(void)
+{
+	int i = 0;
+
+	for (i = 0; i < NSEM; i++) {
+		sems[i].freed = 1;
+		LIST_INSERT_HEAD(&sem_free, &sems[i], link);
+	}
+
+	for (i = 0; i < NMBOX; i++) {
+		mboxes[i].freed = 1;
+		LIST_INSERT_HEAD(&mbox_free, &mboxes[i], link);
+	}
+}
 
 sys_sem_t
 sys_sem_new(uint8_t count)
@@ -101,6 +131,52 @@ sys_arch_sem_wait(sys_sem_t sem, uint32_t tm_msec)
 	}
 
 	return SYS_ARCH_TIMEOUT;
+}
+
+struct lwip_thread {
+	void (*func)(void *arg);
+	void *arg;
+};
+
+static void
+lwip_thread_entry(uint32_t arg)
+{
+	struct lwip_thread *lt = (struct lwip_thread *)arg;
+
+	lwip_core_lock();
+	lt->func(lt->arg);
+	lwip_core_unlock();
+
+	free(lt);
+}
+
+sys_thread_t
+sys_thread_new(char *name, void (* thread)(void *arg), void *arg,
+				int stacksize, int prio)
+{
+	struct lwip_thread *lt = malloc(sizeof(*lt));
+	if (!lt)
+		panic("sys_thread_new: cannot allocate thread struct");
+
+	if (stacksize > PGSIZE)
+		panic("large stack %d", stacksize);
+
+	lt->func = thread;
+	lt->arg = arg;
+
+	thread_id_t tid;
+	int r = thread_create(&tid, name, lwip_thread_entry, (uint32_t)lt);
+
+	if (r < 0)
+		panic("lwip: sys_thread_new: cannot create: %s\n", e2s(r));
+
+	return tid;
+}
+
+struct sys_timeouts
+sys_arch_timeouts
+{
+
 }
 
 void
