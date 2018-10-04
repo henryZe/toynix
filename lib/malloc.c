@@ -57,7 +57,7 @@ isfree(void *v, size_t n)
 {
 	uintptr_t va, end_va = (uintptr_t)v + n;
 
-	for (va = (uintptr_t)v; va < end_va; v += PGSIZE) {
+	for (va = (uintptr_t)v; va < end_va; va += PGSIZE) {
 		if (va >= (uintptr_t)mend)
 			return 0;
 
