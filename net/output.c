@@ -17,6 +17,10 @@ output(envid_t ns_envid)
 		if (ret)
 			continue;
 
+		if (thisenv->env_ipc_from != ns_envid ||
+			thisenv->env_ipc_value != NSREQ_OUTPUT)
+			continue;
+
 		//	- send the packet to the device driver
 		if (thisenv->env_ipc_value == NSREQ_OUTPUT) {
 			ret = sys_tx_pkt((const uint8_t *)nsipcbuf.pkt.jp_data, nsipcbuf.pkt.jp_len);
