@@ -30,10 +30,10 @@ static LIST_HEAD(sem_list, sys_sem_entry) sem_free;
 
 struct sys_mbox_entry {
 	int freed;
-	int head, nextq;
+	int head, nextq;		/* free msg index */
 	void *msg[MBOXSLOTS];
-	sys_sem_t queued_msg;
-	sys_sem_t free_msg;
+	sys_sem_t queued_msg;	/* sem of queued */
+	sys_sem_t free_msg;		/* sem of free */
 	LIST_ENTRY(sys_mbox_entry) link;
 };
 
@@ -131,6 +131,107 @@ sys_arch_sem_wait(sys_sem_t sem, uint32_t tm_msec)
 	}
 
 	return SYS_ARCH_TIMEOUT;
+}
+
+sys_mbox_t
+sys_mbox_new(int size)
+{
+	assert(size < MBOXSLOTS);
+
+	struct sys_mbox_entry *mbe = LIST_FIRST(&mbox_free);
+	if (!mbe) {
+		cprintf("lwip: sys_mbox_new: out of mailboxes\n");
+		return SYS_MBOX_NULL;
+	}
+	
+	LIST_REMOVE(mbe, link);
+	assert(mbe->freed);
+	mbe->freed = 0;
+	
+	int i = mbe - &mboxes[0];
+	mbe->head = -1;
+	mbe->nextq = 0;
+	mbe->queued_msg = sys_sem_new(0);
+	mbe->free_msg = sys_sem_new(MBOXSLOTS);
+
+	if (mbe->queued_msg == SYS_SEM_NULL ||
+		mbe->free_msg == SYS_SEM_NULL) {
+
+		sys_mbox_free(i);
+		cprintf("lwip: sys_mbox_new: can't get semaphore\n");
+		return SYS_MBOX_NULL;
+	}
+
+	return i;
+}
+
+void
+sys_mbox_free(sys_mbox_t mbox)
+{
+	assert(!mboxes[mbox].freed);
+	sys_sem_free(mboxes[mbox].queued_msg);
+	sys_sem_free(mboxes[mbox].free_msg);
+	LIST_INSERT_HEAD(&mbox_free, &mboxes[mbox], link);
+	mboxes[mbox].freed = 1;
+}
+
+err_t
+sys_mbox_trypost(sys_mbox_t mbox, void *msg)
+{
+	assert(!mboxes[mbox].freed);
+
+	/* blocking infinitely */
+	sys_arch_sem_wait(mboxes[mbox].free_msg, 0);
+	if (mboxes[mbox].nextq == mboxes[mbox].head)
+		return ERR_MEM;
+
+	int slot = mboxes[mbox].nextq;
+	mboxes[mbox].nextq = (slot + 1) % MBOXSLOTS;
+	mboxes[mbox].msg[slot] = msg;
+
+	/* head == -1 means queue is empty */
+	if (mboxes[mbox].head == -1)
+		mboxes[mbox].head = slot;
+
+	sys_sem_signal(mboxes[mbox].queued_msg);
+	return ERR_OK;
+}
+
+void
+sys_mbox_post(sys_mbox_t mbox, void *msg)
+{
+	assert(sys_mbox_trypost(mbox, msg) == ERR_OK);
+}
+
+uint32_t
+sys_arch_mbox_fetch(sys_sem_t mbox, void **msg, uint32_t tm_msec)
+{
+	assert(!mboxes[mbox].freed);
+
+	uint32_t waited = sys_arch_sem_wait(mboxes[mbox].queued_msg, tm_msec);
+	if (waited == SYS_ARCH_TIMEOUT)
+		return waited;
+
+	int slot = mboxes[mbox].head;
+	if (slot == -1)
+		panic("lwip: sys_arch_mbox_fetch: no message");
+
+	if (msg)
+		*msg = mboxes[mbox].msg[slot];
+
+	mboxes[mbox].head = (slot + 1) % MBOXSLOTS;
+	if (mboxes[mbox].head == mboxes[mbox].nextq)
+		/* It means queue is empty */
+		mboxes[mbox].head = -1;
+
+	sys_sem_signal(mboxes[mbox].free_msg);
+	return waited;
+}
+
+uint32_t
+sys_arch_mbox_tryfetch(sys_mbox_t mbox, void **msg)
+{
+	return sys_arch_mbox_fetch(mbox, msg, SYS_ARCH_NOWAIT); 
 }
 
 struct lwip_thread {
