@@ -45,4 +45,4 @@ ENTRY(toynix_longjmp)
 	movl	20(%eax), %edi
 
 	movl	%edx, %eax			// return value
-	jmp		*(%ecx)
+	jmp		*%ecx
