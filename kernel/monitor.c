@@ -340,11 +340,7 @@ mon_continue(int argc, char **argv, struct Trapframe *tf)
 int
 mon_si(int argc, char **argv, struct Trapframe *tf)
 {
-	uint32_t eflags;
-
-	eflags = read_eflags();
-	write_eflags(eflags | FL_TF);
-
+	tf->tf_eflags |= FL_TF;
 	env_run(curenv);
 	return 0;
 }

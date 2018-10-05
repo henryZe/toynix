@@ -13,6 +13,8 @@
 #include <kernel/console.h>
 #include <kernel/time.h>
 
+static int debug;
+
 /* For debugging, so print_trapframe can distinguish between printing
  * a saved trapframe and printing the current trapframe and print some
  * additional information in the latter case.
@@ -223,6 +225,11 @@ page_fault_handler(struct Trapframe *tf)
 
 	// Read processor's CR2 register to find the faulting address
 	fault_va = rcr2();
+
+	if (debug)
+		cprintf("eip: %08x fault_va: %08x uvpt: %08x\n",
+				tf->tf_eip, fault_va,
+				0xef400000 + PGNUM(fault_va) * 4);	/* UVPT */
 
 	// Handle kernel-mode page faults.
 	if ((tf->tf_cs & 0x3) != 0x3) {
