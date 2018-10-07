@@ -8,7 +8,6 @@ NET_SRCFILES := \
 NET_TESTFILES := \
 		$(NETDIR)/testoutput.c \
 		$(NETDIR)/testinput.c \
-		$(NETDIR)/testechosrv.c \
 		$(NETDIR)/testthread.c \
 
 NET_OBJFILES := $(patsubst $(NETDIR)/%.c, $(OBJDIR)/$(NETDIR)/%.o, $(NET_SRCFILES))

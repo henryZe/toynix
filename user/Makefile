@@ -42,6 +42,7 @@ USER_SRCFILES := \
 		$(USRDIR)/primespipe.c \
 		$(USRDIR)/testtime.c \
 		$(USRDIR)/init.c \
+		$(USRDIR)/echosrv.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 
@@ -52,7 +53,7 @@ $(OBJDIR)/$(USRDIR)/%.o: $(USRDIR)/%.c
 
 $(OBJDIR)/$(USRDIR)/%: $(OBJDIR)/$(USRDIR)/%.o $(OBJDIR)/$(LIBDIR)/entry.o $(OBJDIR)/$(LIBDIR)/libtoynix.a $(USRDIR)/user.ld
 	@echo + ld[USER] $@
-	$(LD) -o $@.debug $(USR_LDFLAGS) $(OBJDIR)/$(LIBDIR)/entry.o $@.o -L$(OBJDIR)/$(LIBDIR) -ltoynix $(GCC_LIB)
+	$(LD) -o $@.debug $(USR_LDFLAGS) $(OBJDIR)/$(LIBDIR)/entry.o $@.o -L$(OBJDIR)/$(LIBDIR) -ltoynix -llwip $(GCC_LIB)
 	$(OBJDUMP) -S $@.debug > $@.asm
 	$(NM) -n $@.debug > $@.sym
 	$(OBJCOPY) -R .stab -R .stabstr --add-gnu-debuglink=$(basename $@.debug) $@.debug $@
