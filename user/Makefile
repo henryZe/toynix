@@ -1,3 +1,5 @@
+include $(NETDIR)/lwip/Makefile
+
 # Linker flags for user programs
 USR_LDFLAGS := $(LDFLAGS) -T $(USRDIR)/user.ld -nostdlib
 
@@ -52,7 +54,7 @@ $(OBJDIR)/$(USRDIR)/%.o: $(USRDIR)/%.c
 	@mkdir -p $(@D)
 	$(CC) -nostdinc $(USER_CFLAGS) -c -o $@ $<
 
-$(OBJDIR)/$(USRDIR)/%: $(OBJDIR)/$(USRDIR)/%.o $(OBJDIR)/$(LIBDIR)/entry.o $(OBJDIR)/$(LIBDIR)/libtoynix.a $(USRDIR)/user.ld
+$(OBJDIR)/$(USRDIR)/%: $(OBJDIR)/$(USRDIR)/%.o $(OBJDIR)/$(LIBDIR)/entry.o $(OBJDIR)/$(LIBDIR)/libtoynix.a $(OBJDIR)/$(LIBDIR)/liblwip.a $(USRDIR)/user.ld
 	@echo + ld[USER] $@
 	$(LD) -o $@.debug $(USR_LDFLAGS) $(OBJDIR)/$(LIBDIR)/entry.o $@.o -L$(OBJDIR)/$(LIBDIR) -ltoynix -llwip $(GCC_LIB)
 	$(OBJDUMP) -S $@.debug > $@.asm

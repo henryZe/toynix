@@ -66,7 +66,6 @@ include $(BOOTDIR)/Makefile
 include $(LIBDIR)/Makefile
 include $(USRDIR)/Makefile
 include $(FSDIR)/Makefile
-include $(NETDIR)/lwip/Makefile
 include $(NETDIR)/Makefile
 include $(KERNDIR)/Makefile
 
