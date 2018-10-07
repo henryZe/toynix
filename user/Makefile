@@ -43,6 +43,7 @@ USER_SRCFILES := \
 		$(USRDIR)/testtime.c \
 		$(USRDIR)/init.c \
 		$(USRDIR)/echosrv.c \
+		$(USRDIR)/httpd.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 

@@ -27,6 +27,8 @@ enum {
 
 	E_BUSY,				// Device busy
 
+	E_BAD_REQ,			// Bad HTTP request
+
 	MAXERROR,			// the maximum allowed
 };
 
