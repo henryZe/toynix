@@ -23,7 +23,9 @@ Toynix even provides the programmable page fault function to user, and this larg
 
 The file system is according to micro-kernel spirit, which is working in user space. The solution keeps kernel tiny & low coupling, and makes file system modular. The file system is simple but powerful enough to provide the basic features: creating, reading, writing, and deleting files organized in a hierarchical directory structure. And of course, it is without any license corrupt.
 
-## Network Stack (Todo, in designing)
+## Network Stack
+
+Supports simple httpd server.(Including user-level thread, semaphore, mail-box, timer features and PCI network interface card).
 
 ## Usage
 
@@ -47,7 +49,7 @@ The file system is according to micro-kernel spirit, which is working in user sp
 ## Todu List
 
 * High Priority
-  1. Network
+  1. BUG: Kernel lock sometimes is illegally unlocked.
 
 * Medium Priority
   1. fine-gained lock instead of global kernel lock  
@@ -58,8 +60,4 @@ The file system is according to micro-kernel spirit, which is working in user sp
 
 ## Ported Modules
 
-* Bootloader configuration
-* Multiple-CPU configuration
-* IDE driver
-* PCI Bus driver
-* Port lwip/api lwip/core lwip/netif modules
+* Port lwip modules

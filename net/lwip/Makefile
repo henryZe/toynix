@@ -42,10 +42,6 @@ LWIP_SRCFILES += \
 		$(NETDIR)/lwip/core/udp.c \
 		$(NETDIR)/lwip/netif/etharp.c \
 		$(NETDIR)/lwip/netif/loopif.c \
-		$(NETDIR)/lwip/toynix/arch/thread.c \
-		$(NETDIR)/lwip/toynix/arch/longjmp.S \
-		$(NETDIR)/lwip/toynix/arch/sys_arch.c \
-		$(NETDIR)/lwip/toynix/arch/perror.c \
 		$(NETDIR)/lwip/toynix/jif/jif.c \
 
 LWIP_OBJFILES := $(patsubst %.c, $(OBJDIR)/%.o, $(LWIP_SRCFILES))

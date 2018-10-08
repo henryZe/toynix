@@ -6,8 +6,8 @@
 #include <malloc.h>
 #include <lib.h>
 #include <net/ns.h>
-#include <arch/perror.h>
-#include <arch/thread.h>
+#include <perror.h>
+#include <thread.h>
 #include <lwip/sys.h>
 #include <lwip/tcp.h>
 #include <lwip/tcpip.h>

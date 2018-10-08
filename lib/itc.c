@@ -1,10 +1,10 @@
 #include <lib.h>
 #include <malloc.h>
+#include <perror.h>
+#include <queue.h>
+#include <thread.h>
+#include <sys_arch.h>
 #include <lwip/sys.h>
-#include <arch/queue.h>
-#include <arch/sys_arch.h>
-#include <arch/thread.h>
-#include <arch/perror.h>
 
 #define debug 0
 

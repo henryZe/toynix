@@ -1,17 +1,17 @@
-#include <arch/thread.h>
+#include <thread.h>
 #include <lib.h>
 
 void
 tmain(uint32_t arg)
 {
-    cprintf("create thread success\n");
+	cprintf("create thread success\n");
 }
 
 void
 umain(int argc, char **argv)
 {
-    cprintf("test thread start\n");
-    thread_init();
+	cprintf("test thread start\n");
+	thread_init();
 	thread_create(NULL, "main", tmain, 0);
-    thread_yield();
+	thread_yield();
 }

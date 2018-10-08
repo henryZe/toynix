@@ -1,8 +1,8 @@
 #ifndef TOYNIX_INC_THREADQ_H
 #define TOYNIX_INC_THREADQ_H
 
-#include <arch/thread.h>
-#include <arch/setjmp.h>
+#include <thread.h>
+#include <setjmp.h>
 #include <mmu.h>
 
 #define THREAD_NUM_ONHALT 4

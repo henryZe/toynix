@@ -25,6 +25,10 @@ LIB_SRCFILES :=	\
 			$(LIBDIR)/nsipc.c \
 			$(LIBDIR)/sockets.c \
 			$(LIBDIR)/debug.c \
+			$(LIBDIR)/perror.c \
+			$(LIBDIR)/thread.c \
+			$(LIBDIR)/longjmp.S \
+			$(LIBDIR)/itc.c \
 
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.c, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_SRCFILES))
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.S, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_OBJFILES))

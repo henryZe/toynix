@@ -1,7 +1,7 @@
 #include <lib.h>
 #include <malloc.h>
-#include <arch/thread.h>
-#include <arch/threadq.h>
+#include <thread.h>
+#include <threadq.h>
 
 static thread_id_t max_tid;
 static struct thread_context *cur_tc;
