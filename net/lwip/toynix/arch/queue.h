@@ -28,7 +28,7 @@
  *
  *	@(#)queue.h	8.3 (Berkeley) 12/13/93
  *
- * For Jos, extra comments have been added to this file, and the original
+ * For toynix, extra comments have been added to this file, and the original
  * TAILQ and CIRCLEQ definitions have been removed.   - August 9, 2005
  */
 

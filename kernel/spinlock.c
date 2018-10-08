@@ -8,8 +8,10 @@
 
 // The big kernel lock
 struct spinlock kernel_lock = {
+	.locked = 0,
 #ifdef DEBUG_SPINLOCK
-	.name = "kernel_lock"
+	.name = "kernel_lock",
+	.cpu = NULL,
 #endif
 };
 
@@ -84,12 +86,18 @@ spin_unlock(struct spinlock *lk)
 #ifdef DEBUG_SPINLOCK
 	if (!holding(lk)) {
 		int i;
-		uint32_t pcs[DEBUG_PCS];
+		uint32_t pcs[DEBUG_PCS] = {0};
 
 		// Nab the acquiring EIP chain before it gets released
 		memmove(pcs, lk->pcs, sizeof(pcs));
-		cprintf("CPU %d cannot release %s: held by CPU %d\nAcquired at:\n",
-				cpunum(), lk->name, lk->cpu->cpu_id);
+
+		if (!lk->locked)
+			cprintf("The lock isn't holding!\n");
+		else
+			cprintf("CPU %d cannot release %s: held by CPU %d\n"
+					"Acquired at:\n",
+					cpunum(), lk->name, lk->cpu->cpu_id);
+
 		for (i = 0; i < DEBUG_PCS && pcs[i]; i++) {
 			struct Eipdebuginfo info;
 			if (debuginfo_eip(pcs[i], &info) >= 0)
