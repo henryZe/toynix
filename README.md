@@ -38,7 +38,7 @@ Supports simple httpd server.(Including user-level thread, semaphore, mail-box, 
 ### Makefile Option
 
 * make qemu-nox
-  > Run the kernel
+  > Run the kernel within terminal mode
 * make qemu-nox-gdb
   > Run the kernel with debug mode
 * make gdb
@@ -46,13 +46,99 @@ Supports simple httpd server.(Including user-level thread, semaphore, mail-box, 
 * find . -name "*.[chS]" | xargs cat | wc -l
   > calculate code lines
 
+### Command Line
+
+* hello - just for debug
+
+  ~~~ shell
+  $ hello
+  hello, world
+  i am environment 00001008
+  ~~~
+
+* echo - display a line of text
+
+  ~~~ shell
+  $ echo content
+  content
+  ~~~
+
+* cat - concatenate files and print on the standard output
+
+  ~~~ shell
+  $ cat file
+  file content
+  ~~~
+
+* num - show line number of the specified file
+
+  ~~~ shell
+  $ cat file | num
+     1 file content
+  ~~~
+
+* lsfd - display the occupying file descriptor and its property
+
+  ~~~ shell
+  $ lsfd
+  fd 0: name <cons> isdir 0 size 0 dev cons
+  fd 1: name <cons> isdir 0 size 0 dev cons
+  ~~~
+
+* ls - list directory contents
+
+  ~~~ shell
+  $ ls
+  current directory: / 8192
+  hello 14600
+  sh 25924
+  echo 21160
+  cat 21188
+  num 21216
+  lsfd 21248
+  ls 21176
+  debug_info 21184
+  ~~~
+
+* debug_info - show the current infomation of system
+
+  ~~~ shell
+  $ debug_info cpu
+  select option: cpu
+  CPU num: 1
+  $ debug_info
+  select option: cpu
+  CPU num: 1
+  select option: mem
+  Total Pages Num: 65536
+  Free Pages Num: 63130
+  Used Pages Num: 2406
+  ~~~
+
+* sh - command interpreter
+
+  ~~~ shell
+  $ sh < script.sh
+  perform script
+  ~~~
+
+* httpd - a web server and waits for the incoming server requests
+
+  ~~~ shell
+  $ httpd
+  Waiting for http connections...
+  ~~~
+
 ## Todu List
 
 * High Priority
   1. BUG: Kernel lock sometimes is illegally unlocked.
 
 * Medium Priority
-  1. fine-gained lock instead of global kernel lock  
+  1. implement `mkdir` command
+  2. show disk infomation by `debug_info` command
+  3. support background run flag `&`
+  4. fine-gained lock instead of global kernel lock
     a. page allocator  
     b. console driver  
     c. scheduler  
