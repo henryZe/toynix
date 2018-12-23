@@ -8,7 +8,7 @@ Here are some critical features you might be concerned about:
 
 ## Support Multi-Task & Multi-CPUs
 
-The Toynix kernel runs between user mode and kernel mode. It supports multiple user tasks running at the same time, and request the service from system. It is also designed to support and perform multi-CPUs hardware platform. The task scheduler adopts Round-Robin way.
+The Toynix kernel runs between user mode and kernel mode. It supports multiple user tasks running at the same time and request the service from system. It is also designed to support and perform multi-CPUs hardware platform. The task scheduler adopts Round-Robin way.
 
 ## Trap-Framework
 
@@ -21,11 +21,11 @@ Toynix even provides the programmable page fault function to user, and this larg
 
 ## File-System
 
-The file system is according to micro-kernel spirit, which is working in user space. The solution keeps kernel tiny & low coupling, and makes file system modular. The file system is simple but powerful enough to provide the basic features: creating, reading, writing, and deleting files organized in a hierarchical directory structure. And of course, it is without any license corrupt.
+The file system is according to micro-kernel spirit, which is working in user space. The solution keeps kernel tiny & low coupling and makes file system modular. The file system is simple but powerful enough to provide the basic features: creating, reading, writing, and deleting files organized in a hierarchical directory structure. And of course, it is without any license corrupt.
 
 ## Network Stack
 
-Supports simple httpd server.(Including user-level thread, semaphore, mail-box, timer features and PCI network interface card).
+Supports simple httpd server. (Including user-level thread, semaphore, mail-box, timer features and PCI network interface card).
 
 ## Usage
 
@@ -100,7 +100,7 @@ Supports simple httpd server.(Including user-level thread, semaphore, mail-box, 
   debug_info 21184
   ~~~
 
-* debug_info - show the current infomation of system
+* debug_info - show the current information of system
 
   ~~~ shell
   $ debug_info cpu
@@ -129,14 +129,14 @@ Supports simple httpd server.(Including user-level thread, semaphore, mail-box, 
   Waiting for http connections...
   ~~~
 
-## Todu List
+## Todo List
 
 * High Priority
   1. BUG: Kernel lock sometimes is illegally unlocked.
 
 * Medium Priority
   1. implement `mkdir` command
-  2. show disk infomation by `debug_info` command
+  2. show disk information by `debug_info` command
   3. support background run flag `&`
   4. fine-gained lock instead of global kernel lock
     a. page allocator  
