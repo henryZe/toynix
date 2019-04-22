@@ -17,7 +17,10 @@ It’s easy and flexible for kernel codes to register and configure the trap and
 ## Memory-Manage
 
 Toynix supplies the general protection mechanism according to mapping privilege level, and only process itself and its parent process allowed to modify the specific process’s mapping.
+
 Toynix even provides the programmable page fault function to user, and this largely promotes page mapping flexibility and compatibility for variable handle strategy.
+
+[Details about address space management.](./readme/mm.md)
 
 ## File-System
 
@@ -136,9 +139,10 @@ Supports simple httpd server. (Including user-level thread, semaphore, mail-box,
 
 * Medium Priority
   1. implement `mkdir` command
-  2. show disk information by `debug_info` command
+  2. show disk information by `debug_info` command, such as super_block
   3. support background run flag `&`
-  4. fine-gained lock instead of global kernel lock
+  4. replace static lib with share lib
+  5. fine-gained lock instead of global kernel lock
     a. page allocator  
     b. console driver  
     c. scheduler  
