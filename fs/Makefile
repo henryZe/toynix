@@ -18,6 +18,7 @@ USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/ls \
 		$(OBJDIR)/$(USRDIR)/debug_info \
 		$(OBJDIR)/$(USRDIR)/httpd \
+		$(OBJDIR)/$(USRDIR)/pwd \
 
 FSIMGTXTFILES := \
 		$(FSDIR)/newmotd \
