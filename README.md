@@ -138,11 +138,10 @@ Supports simple httpd server. (Including user-level thread, semaphore, mail-box,
   1. BUG: Kernel lock sometimes is illegally unlocked.
 
 * Medium Priority
-  1. implement `mkdir` command
-  2. show disk information by `debug_info` command, such as super_block
-  3. support background run flag `&`
-  4. replace static lib with share lib
-  5. fine-gained lock instead of global kernel lock
+  1. implement `mkdir` `rm` command
+  2. support background run flag `&`
+  3. replace static lib with share lib
+  4. fine-gained lock instead of global kernel lock
     a. page allocator  
     b. console driver  
     c. scheduler  
