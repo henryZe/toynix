@@ -339,7 +339,8 @@ serve(void)
 {
 	uint32_t req;
 	envid_t whom;
-	int perm, ret;
+	int perm, ret, i;
+	uint32_t cnt;
 	void *pg;
 
 	while (1) {
@@ -357,7 +358,17 @@ serve(void)
 		}
 
 		pg = NULL;
-		if (req == FSREQ_OPEN) {
+		if (req == FSREQ_INFO) {
+			for (cnt = 0, i = 0; i < super->s_nblocks; i++) {
+				if (!block_is_free(i))
+					cnt++;
+			}
+
+			fsreq->info.blk_num = super->s_nblocks;
+			fsreq->info.blk_ocp = cnt;
+			ret = 0;
+
+		} else if (req == FSREQ_OPEN) {
 			ret = serve_open(whom, (struct Fsreq_open *)fsreq, &pg, &perm);
 
 		} else if (req < ARRAY_SIZE(handlers) && handlers[req]) {
