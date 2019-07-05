@@ -4,7 +4,7 @@
 void
 usage(void)
 {
-	cprintf("usage: lsfd [-1]\n");
+	cprintf("usage: lsfd\n");
 	exit();
 }
 

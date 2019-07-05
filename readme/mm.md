@@ -47,8 +47,10 @@
    FILEDATA ------>  +------------------------------+ 0xd0020000
                      |    Struct File Descriptor    | RW/RW  MAXFD * PGSIZE
     FDTABLE ------>  +------------------------------+ 0xd0000000
+                     .                              .
                      .       Empty Memory (*)       .
-PKTMAP, mend ----->  +------------------------------+ 0x10000000
+  (DISKMAP, PKTMAP)  .                              .
+        mend ----->  +------------------------------+ 0x10000000
                      |      Invalid Memory (*)      | --/--  PGSIZE
                      +------------------------------+ 0x0ffff000
                      |          Union Nsipc         | RW/RW  QUEUE_SIZE * PGSIZE
