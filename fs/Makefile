@@ -19,6 +19,8 @@ USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/debug_info \
 		$(OBJDIR)/$(USRDIR)/httpd \
 		$(OBJDIR)/$(USRDIR)/pwd \
+		$(OBJDIR)/$(USRDIR)/touch \
+		$(OBJDIR)/$(USRDIR)/rm \
 
 FSIMGTXTFILES := \
 		$(FSDIR)/newmotd \

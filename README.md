@@ -93,14 +93,14 @@ Supports simple httpd server. (Including user-level thread, semaphore, mail-box,
   ~~~ shell
   $ ls
   current directory: / 8192
-  hello 14600
-  sh 25924
-  echo 21160
-  cat 21188
-  num 21216
-  lsfd 21248
-  ls 21176
-  debug_info 21184
+  r            15652           hello
+  r            26756           testpteshare
+  r            15656           faultio
+  r            32492           init
+  r            26976           sh
+  r            22212           echo
+  r            22240           cat
+  r            22296           num
   ~~~
 
 * debug_info - show the current information of system
@@ -109,13 +109,16 @@ Supports simple httpd server. (Including user-level thread, semaphore, mail-box,
   $ debug_info cpu
   select option: cpu
   CPU num: 1
-  $ debug_info
-  select option: cpu
-  CPU num: 1
+
+  $ debug_info mem
   select option: mem
   Total Pages Num: 65536
-  Free Pages Num: 63130
-  Used Pages Num: 2406
+  Free Pages Num: 63106
+  Used Pages Num: 2430
+
+  $ debug_info fs
+  Total Blocks Num: 1024
+  Used Blocks Num: 97
   ~~~
 
 * sh - command interpreter
@@ -130,6 +133,22 @@ Supports simple httpd server. (Including user-level thread, semaphore, mail-box,
   ~~~ shell
   $ httpd
   Waiting for http connections...
+  ~~~
+
+* pwd - print name of current/working directory
+
+  ~~~ shell
+  $ pwd
+  /
+  ~~~
+
+* touch - change file timestamps
+
+  ~~~ shell
+  $ touch file1 file2
+  $ ls
+  r            0       file1
+  r            0       file2
   ~~~
 
 ## Todo List
