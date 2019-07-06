@@ -3,7 +3,7 @@
 void
 usage(void)
 {
-	cprintf("touch FILE...\n");
+	cprintf("rm FILE...\n");
 	exit();
 }
 
@@ -12,16 +12,14 @@ umain(int argc, char **argv)
 {
 	int f, i;
 
-	binaryname = "touch";
+	binaryname = "rm";
 
 	if (argc == 1)
 		usage();
 
 	for (i = 1; i < argc; i++) {
-		f = open(argv[i], O_CREAT);
+		f = remove(argv[i]);
 		if (f < 0)
-			printf("can't open %s: %e\n", argv[i], f);
-		else
-			close(f);
+			printf("can't remove %s: %e\n", argv[i], f);
 	}
 }
