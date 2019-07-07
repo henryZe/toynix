@@ -2,37 +2,39 @@
 
 ## Introduction
 
-Toynix is sourced from “toy” kernel (which was programmed in the beginning just for fun) in Unix-like interface. It is designed in micro-kernel spirit and in “exokernel” fashion.
+Toynix is a tiny kernel (which was programmed just for fun) in Unix-like interface. It is composed of simplified fs and network module in micro-kernel spirit.
 
 Here are some critical features you might be concerned about:
 
 ## Support Multi-Task & Multi-CPUs
 
-The Toynix kernel runs between user mode and kernel mode. It supports multiple user tasks running at the same time and request the service from system. It is also designed to support and perform multi-CPUs hardware platform. The task scheduler adopts Round-Robin way.
+Toynix kernel runs between user mode and kernel mode. It supports multiple user processes running at the same time and requesting system services. It is designed to work on multi-CPUs hardware. The task scheduler adopts Round-Robin strategy.
+
+Within user land, it supports thread and ITC for communication between threads (like semaphore, mail-box).
 
 ## Trap-Framework
 
-It’s easy and flexible for kernel codes to register and configure the trap and interrupt functions into kernel. It provides interrupt handler function with an independent exception stack in user space.
+It’s easy and flexible to register trap and interrupt functions in kernel. It provides interrupt handler function with an independent exception stack in user space.
 
 ## Memory-Manage
 
-Toynix supplies the general protection mechanism according to mapping privilege level, and only process itself and its parent process allowed to modify the specific process’s mapping.
+Toynix supplies the general protection mechanism according to mapping privilege level, and only process itself and its parent process allowed to modify the specific process’s mapping. Meanwhile, it offers IPC interface to communicate between processes.
 
-Toynix even provides the programmable page fault function to user, and this largely promotes page mapping flexibility and compatibility for variable handle strategy.
+Toynix even provides the programmable page fault interface for user, which massively promotes page mapping flexibility and compatibility for various handle strategy.
 
 [Details about address space management.](./readme/mm.md)
 
 ## File-System
 
-The file system is according to micro-kernel spirit, which is working in user space. The solution keeps kernel tiny & low coupling and makes file system modular. The file system is simple but powerful enough to provide the basic features: creating, reading, writing, and deleting files organized in a hierarchical directory structure. And of course, it is without any license corrupt.
+The file system follows micro-kernel spirit, which is relied on an independent user process running in the background. This solution keeps kernel tiny and allows low coupling with kernel. The file system is simple but powerful enough to provide some basic features: creating, reading, writing, and deleting files which can be organized under directory structure.
 
-## Network Stack
+## Network
 
-Supports simple httpd server. (Including user-level thread, semaphore, mail-box, timer features and PCI network interface card).
+The network module follows micro-kernel spirit, which is relied on an independent user process listening in the background. This module is based on PCI network card. There is a simplified httpd server.
 
-## Usage
+## Guideline
 
-### Necessary Tools
+### Install Tool Chain
 
 * apt-get install qemu
 * apt-get install gcc
@@ -46,132 +48,24 @@ Supports simple httpd server. (Including user-level thread, semaphore, mail-box,
   > Run the kernel with debug mode
 * make gdb
   > Run gdb and auto-link target QEMU
-* find . -name "*.[chS]" | xargs cat | wc -l
-  > calculate code lines
 
 ### Command Line
 
-* hello - just for debug
-
-  ~~~ shell
-  $ hello
-  hello, world
-  i am environment 00001008
-  ~~~
-
-* echo - display a line of text
-
-  ~~~ shell
-  $ echo content
-  content
-  ~~~
-
-* cat - concatenate files and print on the standard output
-
-  ~~~ shell
-  $ cat file
-  file content
-  ~~~
-
-* num - show line number of the specified file
-
-  ~~~ shell
-  $ cat file | num
-     1 file content
-  ~~~
-
-* lsfd - display the occupying file descriptor and its property
-
-  ~~~ shell
-  $ lsfd
-  fd 0: name <cons> isdir 0 size 0 dev cons
-  fd 1: name <cons> isdir 0 size 0 dev cons
-  ~~~
-
-* ls - list directory contents
-
-  ~~~ shell
-  $ ls
-  current directory: / 8192
-  r            15652           hello
-  r            26756           testpteshare
-  r            15656           faultio
-  r            32492           init
-  r            26976           sh
-  r            22212           echo
-  r            22240           cat
-  r            22296           num
-  ~~~
-
-* debug_info - show the current information of system
-
-  ~~~ shell
-  $ debug_info cpu
-  select option: cpu
-  CPU num: 1
-
-  $ debug_info mem
-  select option: mem
-  Total Pages Num: 65536
-  Free Pages Num: 63106
-  Used Pages Num: 2430
-
-  $ debug_info fs
-  Total Blocks Num: 1024
-  Used Blocks Num: 97
-  ~~~
-
-* sh - command interpreter
-
-  ~~~ shell
-  $ sh < script.sh
-  perform script
-  ~~~
-
-* httpd - a web server and waits for the incoming server requests
-
-  ~~~ shell
-  $ httpd
-  Waiting for http connections...
-  ~~~
-
-* pwd - print name of current/working directory
-
-  ~~~ shell
-  $ pwd
-  /
-  ~~~
-
-* touch - change file timestamps
-
-  ~~~ shell
-  $ touch file1 file2
-  $ ls
-  r            0       file1
-  r            0       file2
-  ~~~
-
-* rm - remove files or directories
-
-  ~~~ shell
-  $ rm file1 file2
-  ~~~
+[Details about commands.](./readme/command_line.md)
 
 ## Todo List
 
-* High Priority
-  1. BUG: Kernel lock sometimes is illegally unlocked.
+### Features
 
-* Medium Priority
-  1. support background run flag `&`
-  2. implement `mkdir` command
-  3. implement recycling mechanism for page cache of fs block
-  4. replace static lib with share lib
-  5. fine-gained lock instead of global kernel lock
-    a. page allocator  
-    b. console driver  
-    c. scheduler  
-    d. IPC state  
+1. support background run flag `&`
+2. implement `mkdir` command
+3. implement recycling mechanism for page cache of fs block
+4. replace static lib with share lib
+5. fine-gained lock instead of global kernel lock (page allocator, console driver, scheduler, IPC state)
+
+### Bug Report
+
+1. Kernel lock sometimes is illegally unlocked.
 
 ## Ported Modules
 
