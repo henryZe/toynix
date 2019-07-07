@@ -38,7 +38,7 @@ umain(int argc, char **argv)
 		}
 
 		if (file.f_name[0] == '\0')
-			break;
+			continue;
 
 		printf("%c\t%d\t%s\n", (file.f_type == FTYPE_REG)? 'r': 'd',
 							file.f_size, file.f_name);

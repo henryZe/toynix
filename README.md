@@ -151,14 +151,20 @@ Supports simple httpd server. (Including user-level thread, semaphore, mail-box,
   r            0       file2
   ~~~
 
+* rm - remove files or directories
+
+  ~~~ shell
+  $ rm file1 file2
+  ~~~
+
 ## Todo List
 
 * High Priority
   1. BUG: Kernel lock sometimes is illegally unlocked.
 
 * Medium Priority
-  1. implement `mkdir` `rm` command
-  2. support background run flag `&`
+  1. support background run flag `&`
+  2. implement `mkdir` command
   3. implement recycling mechanism for page cache of fs block
   4. replace static lib with share lib
   5. fine-gained lock instead of global kernel lock
