@@ -315,6 +315,47 @@ serve_flush(envid_t envid, struct Fsreq_flush *req)
 }
 
 int
+serve_remove(envid_t envid, struct Fsreq_remove *req)
+{
+	struct File *f;
+	char path[MAXPATHLEN];
+	int i, ret;
+
+	if (debug)
+		cprintf("serve_remove %08x %s\n", envid, req->req_path);
+
+	// Copy in the path, making sure it's null-terminated
+	memmove(path, req->req_path, MAXPATHLEN);
+	path[MAXPATHLEN - 1] = 0;
+
+	ret = file_open(path, &f);
+	if (ret < 0) {
+		if (debug)
+			cprintf("file_open failed: %e", ret);
+
+		return ret;
+	}
+
+	for (i = 0; i < MAXOPEN; i++) {
+		// check all process attaching this file or not
+		if (pageref(opentab[i].o_fd) > 1) {
+			if (opentab[i].o_file == f)
+				return -EBUSY;
+		}
+	}
+
+	ret = file_remove(f);
+	if (ret < 0) {
+		if (debug)
+			cprintf("file_remove failed: %e", ret);
+
+		return ret;
+	}
+
+	return 0;
+}
+
+int
 serve_sync(envid_t envid, union Fsipc *req)
 {
 	fs_sync();
@@ -331,6 +372,7 @@ fshandler handlers[] = {
 	[FSREQ_WRITE] = (fshandler)serve_write,
 	[FSREQ_STAT] = serve_stat,
 	[FSREQ_FLUSH] = (fshandler)serve_flush,
+	[FSREQ_REMOVE] = (fshandler)serve_remove,
 	[FSREQ_SYNC] = serve_sync,
 };
 

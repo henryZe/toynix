@@ -47,6 +47,7 @@ free_block(uint32_t blockno)
 		panic("attempt to free zero block");
 
 	bitmap[blockno / 32] |= 1 << (blockno % 32);
+	flush_block(&bitmap[blockno / 32]);
 }
 
 // Search the bitmap for a free block and allocate it.  When you
@@ -558,4 +559,18 @@ fs_sync(void)
 
 	for (i = 1; i < super->s_nblocks; i++)
 		flush_block(diskaddr(i));
+}
+
+int
+file_remove(struct File *f)
+{
+	// delete file content
+	file_truncate_blocks(f, 0);
+
+	// delete file node
+	memset(f, 0, sizeof(struct File));
+	flush_block(f);
+
+	/* !recycle: dir data block */
+	return 0;
 }

@@ -159,8 +159,9 @@ Supports simple httpd server. (Including user-level thread, semaphore, mail-box,
 * Medium Priority
   1. implement `mkdir` `rm` command
   2. support background run flag `&`
-  3. replace static lib with share lib
-  4. fine-gained lock instead of global kernel lock
+  3. implement recycling mechanism for page cache of fs block
+  4. replace static lib with share lib
+  5. fine-gained lock instead of global kernel lock
     a. page allocator  
     b. console driver  
     c. scheduler  

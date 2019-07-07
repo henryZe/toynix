@@ -37,7 +37,7 @@ ssize_t	file_read(struct File *f, void *buf, size_t count, off_t offset);
 int	file_write(struct File *f, const void *buf, size_t count, off_t offset);
 int	file_set_size(struct File *f, off_t newsize);
 void	file_flush(struct File *f);
-int	file_remove(const char *path);
+int	file_remove(struct File *f);
 void	fs_sync(void);
 
 /* int	map_block(uint32_t); */

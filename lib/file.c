@@ -187,3 +187,13 @@ open(const char *path, int mode)
 
 	return fd2num(fd);
 }
+
+int
+remove(const char *path)
+{
+	if (strlen(path) >= MAXPATHLEN)
+		return -E_BAD_PATH;
+
+	strcpy(fsipcbuf.remove.req_path, path);
+	return fsipc(FSREQ_REMOVE, NULL);
+}
