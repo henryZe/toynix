@@ -215,6 +215,15 @@ again:
 			panic("| not implemented");
 			break;
 
+		case '&':
+			/* shell no need to wait this child process */
+			if (fork())
+				/* parent exit and return terminal */
+				exit();
+
+			/* child runcmd */
+			break;
+
 		case 0:		// String is complete
 			// Run the current command
 			goto runit;

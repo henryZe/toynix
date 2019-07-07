@@ -57,11 +57,10 @@ The network module follows micro-kernel spirit, which is relied on an independen
 
 ### Features
 
-1. support background run flag `&`
-2. implement `mkdir` command
-3. implement recycling mechanism for page cache of fs block
-4. replace static lib with share lib
-5. fine-gained lock instead of global kernel lock (page allocator, console driver, scheduler, IPC state)
+1. implement `mkdir` command
+2. implement recycling mechanism for page cache of fs block
+3. replace static lib with share lib
+4. fine-gained lock instead of global kernel lock (page allocator, console driver, scheduler, IPC state)
 
 ### Bug Report
 
