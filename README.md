@@ -57,14 +57,10 @@ The network module follows micro-kernel spirit, which is relied on an independen
 
 ### Features
 
-Short Term:
-    1. implement recycling mechanism for page cache of fs block
-    2. implement `mkdir` `rmdir` `cd ..` `mv` command
-
-Long Term:
-    1. convert organization of fs data block into list
-    2. replace static lib with share lib
-    3. fine-gained lock instead of global kernel lock (page allocator, console driver, scheduler, IPC state)
+1. implement `mkdir` `rmdir` `cd ..` `chdir` `mv` `rename` command
+1. convert organization of fs data block into list
+2. replace static lib with share lib
+3. fine-gained lock instead of global kernel lock (page allocator, console driver, scheduler, IPC state)
 
 ### Bug Report
 
