@@ -218,11 +218,19 @@ again:
 		case '&':
 			/* shell no need to wait this child process */
 			if (fork())
-				/* parent exit and return terminal */
-				exit();
+				goto again;
 
 			/* child runcmd */
-			break;
+			goto runit;
+
+		case ';':
+			ret = fork();
+			if (ret == 0)
+				goto runit;
+
+			/* shell need to wait this child process */
+			wait(ret);
+			goto again;
 
 		case 0:		// String is complete
 			// Run the current command
