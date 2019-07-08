@@ -502,6 +502,7 @@ file_free_block(struct File *f, uint32_t filebno)
 
 	if (*ptr) {
 		free_block(*ptr);
+		sys_page_unmap(0, BLKNO2ADDR(*ptr));
 		*ptr = 0;
 	}
 
@@ -534,6 +535,7 @@ file_truncate_blocks(struct File *f, off_t newsize)
 
 	if (new_nblocks <= NDIRECT && f->f_indirect) {
 		free_block(f->f_indirect);
+		sys_page_unmap(0, BLKNO2ADDR(f->f_indirect));
 		f->f_indirect = 0;
 	}
 }
