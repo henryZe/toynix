@@ -39,6 +39,7 @@ int	file_set_size(struct File *f, off_t newsize);
 void	file_flush(struct File *f);
 int	file_remove(struct File *f);
 void	fs_sync(void);
+int	file_dir_each_file(struct File *dir, int (*handler)(struct File *f));
 
 /* int	map_block(uint32_t); */
 bool	block_is_free(uint32_t blockno);

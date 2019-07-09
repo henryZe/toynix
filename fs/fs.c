@@ -577,3 +577,33 @@ file_remove(struct File *f)
 	/* !recycle: dir data block */
 	return 0;
 }
+
+int
+file_dir_each_file(struct File *dir, int (*handler)(struct File *f))
+{
+	int i, j, ret;
+	struct File *sub_f;
+	struct File **sub_fp;
+
+	if (dir->f_type != FTYPE_DIR)
+		return -E_INVAL;
+
+	for (i = 0; i < (dir->f_size / BLKSIZE); i++) {
+		if (i < NDIRECT)
+			sub_f = BLKNO2ADDR(dir->f_direct[i]);
+		else {
+			sub_fp = BLKNO2ADDR(dir->f_indirect);
+			sub_f = sub_fp[i - NDIRECT];
+		}
+
+		for (j = 0; j < BLKFILES; j++) {
+			if (sub_f[j].f_name[0]) {
+				ret = handler(&sub_f[j]);
+				if (ret < 0)
+					return ret;
+			}
+		}
+	}
+
+	return 0;
+}

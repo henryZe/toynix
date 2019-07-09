@@ -328,13 +328,27 @@ file_mutex_remove(struct File *f)
 {
 	int i, ret;
 
+	// rm sub dir
+	if (f->f_type == FTYPE_DIR) {
+		ret = file_dir_each_file(f, file_mutex_remove);
+		if (ret < 0)
+			return ret;
+	}
+
 	for (i = 0; i < MAXOPEN; i++) {
 		// check all process attaching this file or not
 		if (pageref(opentab[i].o_fd) > 1) {
-			if (opentab[i].o_file == f)
-				return -EBUSY;
+			if (opentab[i].o_file == f) {
+				if (debug)
+					cprintf("remove %s failed: %e\n", f->f_name, -E_BUSY);
+
+				return -E_BUSY;
+			}
 		}
 	}
+
+	if (debug)
+		cprintf("remove %s\n", f->f_name);
 
 	ret = file_remove(f);
 	if (ret < 0) {
@@ -350,9 +364,9 @@ file_mutex_remove(struct File *f)
 int
 serve_remove(envid_t envid, struct Fsreq_remove *req)
 {
-	struct File *f, *sub_f;
 	char path[MAXPATHLEN];
 	int ret;
+	struct File *f;
 
 	if (debug)
 		cprintf("serve_remove %08x %s\n", envid, req->req_path);
@@ -368,29 +382,6 @@ serve_remove(envid_t envid, struct Fsreq_remove *req)
 
 		return ret;
 	}
-
-	if (f->f_type == FTYPE_DIR) {
-		if (f->f_size) {
-			if (debug)
-				cprintf("serve_remove %s dir includes file\n", path);
-
-			return -E_BUSY;
-		}
-	}
-
-#if 0	
-	// Todo: rm sub dir
-	for (i = 0; i < (f->f_size / BLKSIZE); i++) {
-		if (i < NDIRECT)
-			for (sub_f = BLKNO2ADDR(f->f_direct[i]); ) {
-				f->name != '0'
-					serve_remove();
-			};
-
-		f->f_indirect[i - NDIRECT]
-			same as above
-	}
-#endif
 
 	return file_mutex_remove(f);
 }
