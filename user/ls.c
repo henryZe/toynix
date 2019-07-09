@@ -20,7 +20,7 @@ umain(int argc, char **argv)
 	if (argc != 1)
 		usage();
 
-	fd = open(currentpath, O_RDONLY);
+	fd = open(currentpath, O_DIR | O_RDONLY);
 	fstat(fd, &stat);
 
 	if (!stat.st_isdir) {

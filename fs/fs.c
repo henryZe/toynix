@@ -370,7 +370,7 @@ walk_path(const char *path, struct File **pdir,
 // Create "path".  On success set *pf to point at the file and return 0.
 // On error return < 0.
 int
-file_create(const char *path, struct File **pf)
+file_create(const char *path, struct File **pf, bool is_dir)
 {
 	char name[MAXPATHLEN];
 	int ret;
@@ -388,6 +388,7 @@ file_create(const char *path, struct File **pf)
 		return ret;
 
 	strcpy(f->f_name, name);
+	f->f_type = is_dir ? FTYPE_DIR : FTYPE_REG;
 	*pf = f;
 	file_flush(dir);
 

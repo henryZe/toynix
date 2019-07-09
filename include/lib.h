@@ -95,7 +95,7 @@ int	pageref(void *addr);
 #define	O_CREAT		0x0100		/* create if nonexistent */
 #define	O_TRUNC		0x0200		/* truncate to zero length */
 #define	O_EXCL		0x0400		/* error if file already exists */
-#define O_MKDIR		0x0800		/* create directory, not regular file */
+#define O_DIR		0x0800		/* open directory, not regular file */
 
 // file.c
 int	open(const char *path, int mode);
@@ -113,6 +113,7 @@ ssize_t	readn(int fd, void *buf, size_t nbytes);
 int	dup(int oldfd, int newfd);
 int	fstat(int fd, struct Stat *statbuf);
 int	stat(const char *path, struct Stat *statbuf);
+int mkdir(const char *path);
 
 // spawn.c
 envid_t spawn(const char *program, const char **argv);

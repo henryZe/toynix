@@ -133,7 +133,7 @@ serve_open(envid_t envid, struct Fsreq_open *req,
 
 	// Open the file
 	if (req->req_omode & O_CREAT) {
-		ret = file_create(path, &f);
+		ret = file_create(path, &f, (req->req_omode & O_DIR)? true : false);
 		if (ret < 0) {
 			if (!(req->req_omode & O_EXCL) && (ret == -E_FILE_EXISTS))
 				goto try_open;
@@ -151,6 +151,15 @@ try_open:
 
 			return ret;
 		}
+	}
+
+	if (f->f_type == FTYPE_DIR) {
+		if (!(req->req_omode & O_DIR))
+			return -E_NOT_FOUND;
+
+	} else {
+		if (req->req_omode & O_DIR)
+			return -E_NOT_FOUND;
 	}
 
 	// Truncate
@@ -314,27 +323,10 @@ serve_flush(envid_t envid, struct Fsreq_flush *req)
 	return 0;
 }
 
-int
-serve_remove(envid_t envid, struct Fsreq_remove *req)
+static int
+file_mutex_remove(struct File *f)
 {
-	struct File *f;
-	char path[MAXPATHLEN];
 	int i, ret;
-
-	if (debug)
-		cprintf("serve_remove %08x %s\n", envid, req->req_path);
-
-	// Copy in the path, making sure it's null-terminated
-	memmove(path, req->req_path, MAXPATHLEN);
-	path[MAXPATHLEN - 1] = 0;
-
-	ret = file_open(path, &f);
-	if (ret < 0) {
-		if (debug)
-			cprintf("file_open failed: %e", ret);
-
-		return ret;
-	}
 
 	for (i = 0; i < MAXOPEN; i++) {
 		// check all process attaching this file or not
@@ -353,6 +345,54 @@ serve_remove(envid_t envid, struct Fsreq_remove *req)
 	}
 
 	return 0;
+}
+
+int
+serve_remove(envid_t envid, struct Fsreq_remove *req)
+{
+	struct File *f, *sub_f;
+	char path[MAXPATHLEN];
+	int ret;
+
+	if (debug)
+		cprintf("serve_remove %08x %s\n", envid, req->req_path);
+
+	// Copy in the path, making sure it's null-terminated
+	memmove(path, req->req_path, MAXPATHLEN);
+	path[MAXPATHLEN - 1] = 0;
+
+	ret = file_open(path, &f);
+	if (ret < 0) {
+		if (debug)
+			cprintf("file_open failed: %e", ret);
+
+		return ret;
+	}
+
+	if (f->f_type == FTYPE_DIR) {
+		if (f->f_size) {
+			if (debug)
+				cprintf("serve_remove %s dir includes file\n", path);
+
+			return -E_BUSY;
+		}
+	}
+
+#if 0	
+	// Todo: rm sub dir
+	for (i = 0; i < (f->f_size / BLKSIZE); i++) {
+		if (i < NDIRECT)
+			for (sub_f = BLKNO2ADDR(f->f_direct[i]); ) {
+				f->name != '0'
+					serve_remove();
+			};
+
+		f->f_indirect[i - NDIRECT]
+			same as above
+	}
+#endif
+
+	return file_mutex_remove(f);
 }
 
 int

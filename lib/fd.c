@@ -348,3 +348,16 @@ stat(const char *path, struct Stat *stat)
 	close(fd);
 	return ret;
 }
+
+int
+mkdir(const char *path)
+{
+	int fd;
+
+	fd = open(path, O_DIR | O_CREAT | O_EXCL);
+	if (fd < 0)
+		return fd;
+
+	close(fd);
+	return 0;
+}
