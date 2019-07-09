@@ -57,8 +57,10 @@ The network module follows micro-kernel spirit, which is relied on an independen
 
 ### Features
 
-1. implement `mkdir` `rmdir` `cd ..` `chdir` `mv` `rename` command
-1. convert organization of fs data block into list
+1. supplement user/ folder of lab (test & cmd)
+2. implement `cd ..` `chdir` `mv` `rename` command
+
+1. convert organization of fs data block into LIST
 2. replace static lib with share lib
 3. fine-gained lock instead of global kernel lock (page allocator, console driver, scheduler, IPC state)
 
