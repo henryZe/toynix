@@ -47,6 +47,7 @@ USER_SRCFILES := \
 		$(USRDIR)/initsh.c \
 		$(USRDIR)/echosrv.c \
 		$(USRDIR)/httpd.c \
+		$(USRDIR)/fairness.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
 

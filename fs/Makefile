@@ -18,8 +18,8 @@ USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/ls \
 		$(OBJDIR)/$(USRDIR)/debug_info \
 		$(OBJDIR)/$(USRDIR)/httpd \
-		$(OBJDIR)/$(USRDIR)/echotest \
 		$(OBJDIR)/$(USRDIR)/echosrv \
+		$(OBJDIR)/$(USRDIR)/echotest \
 		$(OBJDIR)/$(USRDIR)/pwd \
 		$(OBJDIR)/$(USRDIR)/touch \
 		$(OBJDIR)/$(USRDIR)/rm \
