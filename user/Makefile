@@ -43,7 +43,7 @@ USER_SRCFILES := \
 		$(USRDIR)/testshell.c \
 		$(USRDIR)/primespipe.c \
 		$(USRDIR)/testtime.c \
-		$(USRDIR)/init.c \
+		$(USRDIR)/spawninit.c \
 		$(USRDIR)/initsh.c \
 		$(USRDIR)/echosrv.c \
 		$(USRDIR)/httpd.c \
