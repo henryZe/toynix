@@ -82,6 +82,7 @@ _pipeisclosed(struct Fd *fd, struct Pipe *p)
 		ret = (pageref(fd) == pageref(p));
 
 		nn = thisenv->env_runs;
+		/* make sure in the same timer interrupt */
 		if (n == nn)
 			return ret;
 

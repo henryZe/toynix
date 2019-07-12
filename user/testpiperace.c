@@ -1,4 +1,4 @@
-#include <inc/lib.h>
+#include <lib.h>
 
 void
 umain(int argc, char **argv)
@@ -34,21 +34,21 @@ umain(int argc, char **argv)
 		// fd and mapping the pipe structure, we'll have the same
 		// ref counts, still a no-no.
 		//
-		for (i=0; i<max; i++) {
-			if(pipeisclosed(p[0])){
+		for (i = 0; i < max; i++) {
+			if (pipeisclosed(p[0])) {
 				cprintf("RACE: pipe appears closed\n");
 				exit();
 			}
 			sys_yield();
 		}
 		// do something to be not runnable besides exiting
-		ipc_recv(0,0,0);
+		ipc_recv(0, 0, 0);
 	}
 	pid = r;
 	cprintf("pid is %d\n", pid);
 	va = 0;
 	kid = &envs[ENVX(pid)];
-	cprintf("kid is %d\n", kid-envs);
+	cprintf("kid is %d\n", kid - envs);
 	dup(p[0], 10);
 	while (kid->env_status == ENV_RUNNABLE)
 		dup(p[0], 10);
@@ -59,7 +59,7 @@ umain(int argc, char **argv)
 	if ((r = fd_lookup(p[0], &fd)) < 0)
 		panic("cannot look up p[0]: %e", r);
 	va = fd2data(fd);
-	if (pageref(va) != 3+1)
+	if (pageref(va) != (3 + 1))
 		cprintf("\nchild detected race\n");
 	else
 		cprintf("\nrace didn't happen\n", max);

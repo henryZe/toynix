@@ -1,5 +1,4 @@
-
-#include <inc/lib.h>
+#include <lib.h>
 
 void
 umain(int argc, char **argv)
@@ -53,12 +52,13 @@ umain(int argc, char **argv)
 	// So either way, pipeisclosed is going give a wrong answer.
 	//
 	kid = &envs[ENVX(r)];
-	while (kid->env_status == ENV_RUNNABLE)
+	while (kid->env_status == ENV_RUNNABLE) {
 		if (pipeisclosed(p[0]) != 0) {
 			cprintf("\nRACE: pipe appears closed\n");
 			sys_env_destroy(r);
 			exit();
 		}
+	}
 	cprintf("child done with loop\n");
 	if (pipeisclosed(p[0]))
 		panic("somehow the other end of p[0] got closed!");
