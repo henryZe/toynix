@@ -132,8 +132,8 @@ serve_open(envid_t envid, struct Fsreq_open *req,
 	fileid = ret;
 
 	// Open the file
-	if (req->req_omode & O_CREAT) {
-		ret = file_create(path, &f, (req->req_omode & O_DIR)? true : false);
+	if (req->req_omode & (O_CREAT | O_MKDIR)) {
+		ret = file_create(path, &f, (req->req_omode & O_MKDIR) ? true : false);
 		if (ret < 0) {
 			if (!(req->req_omode & O_EXCL) && (ret == -E_FILE_EXISTS))
 				goto try_open;
@@ -151,15 +151,6 @@ try_open:
 
 			return ret;
 		}
-	}
-
-	if (f->f_type == FTYPE_DIR) {
-		if (!(req->req_omode & O_DIR))
-			return -E_NOT_FOUND;
-
-	} else {
-		if (req->req_omode & O_DIR)
-			return -E_NOT_FOUND;
 	}
 
 	// Truncate

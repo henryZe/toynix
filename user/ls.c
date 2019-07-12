@@ -1,50 +1,96 @@
 #include <lib.h>
+#include <args.h>
+
+int flag[256];
+
+void
+ls1(const char *prefix, bool isdir, off_t size, const char *name)
+{
+	const char *sep;
+
+	if (flag['l'])
+		printf("%11d %c ", size, isdir ? 'd' : '-');
+
+	if (prefix) {
+		if (prefix[0] && prefix[strlen(prefix) - 1] != '/')
+			sep = "/";
+		else
+			sep = "";
+		printf("%s%s", prefix, sep);
+	}
+	printf("%s", name);
+
+	if (flag['F'] && isdir)
+		printf("/");
+
+	printf("\n");
+}
+
+void
+lsdir(const char *path, const char *prefix)
+{
+	int fd, n;
+	struct File f;
+
+	if ((fd = open(path, O_RDONLY)) < 0)
+		panic("open %s: %e", path, fd);
+
+	while ((n = readn(fd, &f, sizeof(f))) == sizeof(f)) {
+		if (f.f_name[0])
+			ls1(prefix, f.f_type == FTYPE_DIR, f.f_size, f.f_name);
+	}
+
+	if (n > 0)
+		panic("short read in directory %s", path);
+	if (n < 0)
+		panic("error reading directory %s: %e", path, n);
+}
+
+void
+ls(const char *path, const char *prefix)
+{
+	int r;
+	struct Stat st;
+
+	if ((r = stat(path, &st)) < 0)
+		panic("stat %s: %e", path, r);
+
+	if (st.st_isdir && !flag['d'])
+		lsdir(path, prefix);
+	else
+		ls1(NULL, st.st_isdir == FTYPE_DIR, st.st_size, path);
+}
 
 void
 usage(void)
 {
-	cprintf("usage: ls\n");
+	printf("usage: ls [-dFl] [file...]\n");
 	exit();
 }
 
 void
 umain(int argc, char **argv)
 {
-	int i, fd, ret;
-	struct File *dir;
-	struct Stat stat;
-	struct File file;	// 256 Bytes
+	int i;
+	struct Argstate args;
 
-	binaryname = "ls";
-
-	if (argc != 1)
-		usage();
-
-	fd = open(currentpath, O_DIR | O_RDONLY);
-	fstat(fd, &stat);
-
-	if (!stat.st_isdir) {
-		printf("%s is not directory.\n", stat.st_name);
-		goto exit;
-	}
-
-	printf("current directory: %s %d\n",
-			stat.st_name, stat.st_size);
-	for (i = 0; i < stat.st_size; i += ret) {
-		ret = read(fd, (void *)&file, sizeof(struct File));
-		if (ret < 0) {
-			printf("read %s failed: %e\n", stat.st_name, ret);
-			goto exit;
+	argstart(&argc, argv, &args);
+	while ((i = argnext(&args)) >= 0) {
+		switch (i) {
+		case 'd':	// only directory itself
+		case 'F':	// classify
+		case 'l':	// detailed inform
+			flag[i]++;
+			break;
+		default:
+			usage();
 		}
-
-		if (file.f_name[0] == '\0')
-			continue;
-
-		printf("%c\t%d\t%s\n", (file.f_type == FTYPE_REG)? 'r': 'd',
-							file.f_size, file.f_name);
 	}
 
-exit:
-	close(fd);
-	exit();
+	if (argc == 1)
+		ls(currentpath, "");
+	else {
+		for (i = 1; i < argc; i++)
+			ls(argv[i], argv[i]);
+	}
 }

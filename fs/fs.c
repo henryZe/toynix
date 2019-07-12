@@ -388,7 +388,7 @@ file_create(const char *path, struct File **pf, bool is_dir)
 		return ret;
 
 	strcpy(f->f_name, name);
-	f->f_type = is_dir ? FTYPE_DIR : FTYPE_REG;
+	f->f_type = (is_dir ? FTYPE_DIR : FTYPE_REG);
 	*pf = f;
 	file_flush(dir);
 

@@ -354,7 +354,7 @@ mkdir(const char *path)
 {
 	int fd;
 
-	fd = open(path, O_DIR | O_CREAT | O_EXCL);
+	fd = open(path, O_MKDIR | O_EXCL);
 	if (fd < 0)
 		return fd;
 

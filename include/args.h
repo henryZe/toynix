@@ -30,7 +30,7 @@ int argnext(struct Argstate *);
 
 // Example:
 //
-//	#include <inc/lib.h>
+//	#include <lib.h>
 //
 //	void
 //	umain(int argc, char **argv)
