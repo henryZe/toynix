@@ -44,6 +44,7 @@ USER_SRCFILES := \
 		$(USRDIR)/primespipe.c \
 		$(USRDIR)/testtime.c \
 		$(USRDIR)/init.c \
+		$(USRDIR)/initsh.c \
 		$(USRDIR)/echosrv.c \
 		$(USRDIR)/httpd.c \
 
