@@ -350,14 +350,22 @@ stat(const char *path, struct Stat *stat)
 }
 
 int
-mkdir(const char *path)
+ftruncate(int fdnum, off_t size)
 {
-	int fd;
+	int ret;
+	struct Dev *dev;
+	struct Fd *fd;
 
-	fd = open(path, O_MKDIR | O_EXCL);
-	if (fd < 0)
-		return fd;
+	ret = fd_lookup(fdnum, &fd);
+	if (ret < 0)
+		return ret;
 
-	close(fd);
-	return 0;
+	ret = dev_lookup(fd->fd_dev_id, &dev);
+	if (ret < 0)
+		return ret;
+
+	if (!dev->dev_trunc)
+		return -E_NOT_SUPP;
+
+	return (*dev->dev_trunc)(fd, size);
 }

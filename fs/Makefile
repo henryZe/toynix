@@ -22,6 +22,7 @@ USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/touch \
 		$(OBJDIR)/$(USRDIR)/rm \
 		$(OBJDIR)/$(USRDIR)/mkdir \
+		$(OBJDIR)/$(USRDIR)/writemotd \
 
 FSIMGTXTFILES := \
 		$(FSDIR)/newmotd \

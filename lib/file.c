@@ -197,3 +197,16 @@ remove(const char *path)
 	strcpy(fsipcbuf.remove.req_path, path);
 	return fsipc(FSREQ_REMOVE, NULL);
 }
+
+int
+mkdir(const char *path)
+{
+	int fd;
+
+	fd = open(path, O_MKDIR | O_EXCL);
+	if (fd < 0)
+		return fd;
+
+	close(fd);
+	return 0;
+}
