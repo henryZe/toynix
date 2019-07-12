@@ -3,7 +3,7 @@
 
 #include <lib.h>
 
-const volatile struct Env *thisenv;
+/* const volatile struct Env *thisenv; */
 const char *binaryname = "<unknown>";
 char currentpath[MAXPATHLEN] = "/";
 
@@ -11,7 +11,7 @@ void
 libmain(int argc, char **argv)
 {
 	// set thisenv to point at our Env structure in envs[].
-	thisenv = &envs[ENVX(sys_getenvid())];
+	/* thisenv = &envs[ENVX(sys_getenvid())]; */
 
 	// save the name of the program so that panic() can use it
 	if (argc > 0)
@@ -23,4 +23,3 @@ libmain(int argc, char **argv)
 	// exit gracefully
 	exit();
 }
-

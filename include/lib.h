@@ -27,7 +27,8 @@ void umain(int argc, char **argv);
 
 // libmain.c or entry.S
 extern const char *binaryname;
-extern const volatile struct Env *thisenv;
+/* extern const volatile struct Env *thisenv; */
+#define thisenv (&envs[ENVX(sys_getenvid())])
 extern const volatile struct Env envs[NENV];
 extern const volatile struct PageInfo pages[];
 extern char currentpath[MAXPATHLEN];
@@ -47,6 +48,7 @@ void _pgfault_upcall(void);
 // fork.c
 #define	PTE_SHARE	0x400
 envid_t fork(void);
+envid_t sfork(void);
 
 // syscall.c
 void sys_cputs(const char *string, size_t len);

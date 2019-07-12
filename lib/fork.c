@@ -111,7 +111,7 @@ fork(void)
 	envid = sys_exofork();
 	if (!envid) {
 		/* child */
-		thisenv = &envs[ENVX(sys_getenvid())];
+		/* thisenv = &envs[ENVX(sys_getenvid())]; */
 		return 0;
 	}
 
@@ -124,6 +124,78 @@ fork(void)
 
 	/* only dup-page from 0 to USTACKTOP */
 	for (va = 0; va < USTACKTOP; va += PGSIZE) {
+		if ((uvpd[PDX(va)] & PTE_P) &&
+			(uvpt[PGNUM(va)] & PTE_P)) {
+
+			ret = duppage(envid, PGNUM(va));
+			if (ret < 0)
+				return ret;
+		}
+	}
+
+	/* allocate page for child exception stack */
+	ret = sys_page_alloc(envid, (void *)(UXSTACKTOP - PGSIZE), PTE_W);
+	if (ret < 0)
+		panic("fork: %e", ret);
+
+	/* set upcall by kernel invoking */
+	ret = sys_env_set_pgfault_upcall(envid, _pgfault_upcall);
+	if (ret < 0)
+		panic("fork: %e", ret);
+
+	ret = sys_env_set_status(envid, ENV_RUNNABLE);
+	if (ret < 0)
+		panic("fork: %e", ret);
+
+	return envid;
+}
+
+static int
+share_page(envid_t dst_env, unsigned pn)
+{
+	int perm = PGOFF(uvpt[pn]);
+	int ret;
+
+	ret = sys_page_map(0, (void *)(pn << PGSHIFT), dst_env, (void *)(pn << PGSHIFT), perm | PTE_SHARE);
+	if (ret < 0)
+		panic("sys_page_map: %e", ret);
+
+	if (!(perm & PTE_SHARE)) {
+		ret = sys_page_map(0, (void *)(pn << PGSHIFT), 0, (void *)(pn << PGSHIFT), perm | PTE_SHARE);
+		if (ret < 0)
+			panic("sys_page_map: %e", ret);
+	}
+
+	return 0;
+}
+
+// User-level fork with shared-memory.
+envid_t
+sfork(void)
+{
+	int ret, envid;
+	uintptr_t va;
+
+	envid = sys_exofork();
+	if (!envid)
+		/* child */
+		return 0;
+
+	set_pgfault_handler(pgfault);
+
+	/* only dup-page from 0 to (FILEDATA + MAXFD * PGSIZE) */
+	for (va = 0; va < (FILEDATA + MAXFD * PGSIZE); va += PGSIZE) {
+		if ((uvpd[PDX(va)] & PTE_P) &&
+			(uvpt[PGNUM(va)] & PTE_P)) {
+
+			ret = share_page(envid, PGNUM(va));
+			if (ret < 0)
+				return ret;
+		}
+	}
+
+	/* only dup-page in User Stack Area */
+	for (; va < USTACKTOP; va += PGSIZE) {
 		if ((uvpd[PDX(va)] & PTE_P) &&
 			(uvpt[PGNUM(va)] & PTE_P)) {
 
