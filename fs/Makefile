@@ -24,6 +24,7 @@ USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/mkdir \
 		$(OBJDIR)/$(USRDIR)/writemotd \
 		$(OBJDIR)/$(USRDIR)/testmalloc \
+		$(OBJDIR)/$(USRDIR)/testpipe \
 
 FSIMGTXTFILES := \
 		$(FSDIR)/newmotd \
