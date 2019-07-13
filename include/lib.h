@@ -160,4 +160,7 @@ int opendebug(void);
 int sys_tx_pkt(const uint8_t *content, uint32_t length);
 int sys_rx_pkt(uint8_t *content, uint32_t length);
 
+// sleep
+void sleep(int sec);
+
 #endif	// !INC_LIB_H

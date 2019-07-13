@@ -29,6 +29,7 @@ LIB_SRCFILES :=	\
 			$(LIBDIR)/thread.c \
 			$(LIBDIR)/longjmp.S \
 			$(LIBDIR)/itc.c \
+			$(LIBDIR)/sleep.c \
 
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.c, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_SRCFILES))
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.S, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_OBJFILES))
