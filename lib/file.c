@@ -210,3 +210,29 @@ mkdir(const char *path)
 	close(fd);
 	return 0;
 }
+
+int
+chdir(const char *path)
+{
+	int fd, ret;
+	struct Stat st;
+
+	fd = open(path, O_RDONLY);
+	if (fd < 0)
+		return fd;
+
+	ret = fstat(fd, &st);
+	if (ret < 0)
+		goto close;
+
+	if (!st.st_isdir) {
+		ret = -E_INVAL;
+		goto close;
+	}
+
+	ret = sys_chdir(path);
+
+close:
+	close(fd);
+	return ret;
+}

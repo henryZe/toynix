@@ -15,8 +15,5 @@ umain(int argc, char **argv)
 	if (argc != 1)
 		usage();
 
-	printf("%s\n", currentpath);
-
-exit:
-	exit();
+	printf("%s\n", thisenv->currentpath);
 }

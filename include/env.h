@@ -48,15 +48,15 @@ enum EnvType {
 struct Env {
 	struct Trapframe env_tf;	// Saved registers
 	struct Env *env_link;		// Next free Env
-	envid_t env_id;				// Unique environment identifier
+	envid_t env_id;			// Unique environment identifier
 	envid_t env_parent_id;		// env_id of this env's parent
 	enum EnvType env_type;		// Indicates special system environments
 	unsigned env_status;		// Status of the environment
-	uint32_t env_runs;			// Number of times environment has run
-	int env_cpunum;				// The CPU that the env is running on
+	uint32_t env_runs;		// Number of times environment has run
+	int env_cpunum;			// The CPU that the env is running on
 
 	// Address space
-	pde_t *env_pgdir;			// Kernel virtual address of page dir
+	pde_t *env_pgdir;		// Kernel virtual address of page dir
 
 	// Exception handling
 	void *env_pgfault_upcall;	// Page fault upcall entry point
@@ -65,7 +65,10 @@ struct Env {
 	void *env_ipc_dstva;		// VA at which to map received page
 	int env_ipc_value;		// Data value send to us
 	envid_t env_ipc_from;		// envid of the sender
-	int env_ipc_perm;			// Perm of page mapping received
+	int env_ipc_perm;		// Perm of page mapping received
+
+	// File System
+	char currentpath[1024];		// current fs path
 };
 
 #endif // !INC_ENV_H

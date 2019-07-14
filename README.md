@@ -57,8 +57,8 @@ The network module follows micro-kernel spirit, which is relied on an independen
 
 ### Features
 
+2. implement `mv` `rename` command
 1. connect user/echotest.c
-2. implement `cd ..` `chdir` `mv` `rename` command
 
 1. convert organization of fs data block into LIST
 2. replace static lib with share lib

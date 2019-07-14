@@ -21,6 +21,7 @@ enum {
 	SYS_debug_info,
 	SYS_tx_pkt,
 	SYS_rx_pkt,
+	SYS_chdir,
 	NUM_SYSCALLS
 };
 

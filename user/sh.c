@@ -333,6 +333,9 @@ umain(int argc, char **argv)
 	if (argc > 2)
 		usage();
 
+	if ((ret = chdir("/")) < 0)
+		panic("chdir: %e", ret);
+
 	if (argc == 2) {
 		/* close standard input */
 		close(0);
@@ -370,6 +373,14 @@ umain(int argc, char **argv)
 
 		if (debug)
 			cprintf("BEFORE FORK\n");
+
+		// Clumsy but will have to do for now.
+		// Chdir has no effect on the parent if run in the child.
+		if (buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' ') {
+			if (chdir(buf + 3) < 0)
+				printf("cannot cd %s\n", buf + 3);
+			continue;
+		}
 
 		ret = fork();
 		if (ret < 0)

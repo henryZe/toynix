@@ -27,11 +27,10 @@ void umain(int argc, char **argv);
 
 // libmain.c or entry.S
 extern const char *binaryname;
+extern volatile struct Env envs[NENV];
+extern const volatile struct PageInfo pages[];
 /* extern const volatile struct Env *thisenv; */
 #define thisenv (&envs[ENVX(sys_getenvid())])
-extern const volatile struct Env envs[NENV];
-extern const volatile struct PageInfo pages[];
-extern char currentpath[MAXPATHLEN];
 
 // exit.c
 void exit(void);
@@ -67,6 +66,7 @@ int sys_ipc_recv(void *rcv_pg);
 int sys_env_set_trapframe(envid_t envid, struct Trapframe *tf);
 unsigned int sys_time_msec(void);
 int sys_debug_info(int option, char *buf, size_t size);
+int sys_chdir(const char *path);
 
 static inline envid_t __attribute__((always_inline))
 sys_exofork(void)
@@ -116,6 +116,7 @@ int	dup(int oldfd, int newfd);
 int	fstat(int fd, struct Stat *statbuf);
 int	stat(const char *path, struct Stat *statbuf);
 int mkdir(const char *path);
+int chdir(const char *path);
 
 // spawn.c
 envid_t spawn(const char *program, const char **argv);

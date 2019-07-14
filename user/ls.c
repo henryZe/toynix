@@ -32,18 +32,26 @@ lsdir(const char *path, const char *prefix)
 	int fd, n;
 	struct File f;
 
-	if ((fd = open(path, O_RDONLY)) < 0)
-		panic("open %s: %e", path, fd);
+	if ((fd = open(path, O_RDONLY)) < 0) {
+		printf("open %s: %e", path, fd);
+		exit();
+	}
 
 	while ((n = readn(fd, &f, sizeof(f))) == sizeof(f)) {
 		if (f.f_name[0])
 			ls1(prefix, f.f_type == FTYPE_DIR, f.f_size, f.f_name);
 	}
 
-	if (n > 0)
-		panic("short read in directory %s", path);
-	if (n < 0)
-		panic("error reading directory %s: %e", path, n);
+	if (n > 0) {
+		printf("short read in directory %s", path);
+		exit();
+	}
+	if (n < 0) {
+		printf("error reading directory %s: %e", path, n);
+		exit();
+	}
+
+	close(fd);
 }
 
 void
@@ -52,8 +60,10 @@ ls(const char *path, const char *prefix)
 	int r;
 	struct Stat st;
 
-	if ((r = stat(path, &st)) < 0)
-		panic("stat %s: %e", path, r);
+	if ((r = stat(path, &st)) < 0) {
+		printf("stat %s: %e", path, r);
+		exit();
+	}
 
 	if (st.st_isdir && !flag['d'])
 		lsdir(path, prefix);
@@ -88,7 +98,7 @@ umain(int argc, char **argv)
 	}
 
 	if (argc == 1)
-		ls(currentpath, "");
+		ls((const char *)thisenv->currentpath, "");
 	else {
 		for (i = 1; i < argc; i++)
 			ls(argv[i], argv[i]);

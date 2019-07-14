@@ -5,7 +5,6 @@
 
 /* const volatile struct Env *thisenv; */
 const char *binaryname = "<unknown>";
-char currentpath[MAXPATHLEN] = "/";
 
 void
 libmain(int argc, char **argv)

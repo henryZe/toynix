@@ -7,6 +7,7 @@
 #include <syscall.h>
 #include <debug.h>
 #include <ns.h>
+#include <string.h>
 #include <kernel/env.h>
 #include <kernel/pmap.h>
 #include <kernel/console.h>
@@ -96,6 +97,7 @@ sys_exofork(void)
 	env->env_tf = curenv->env_tf;
 	env->env_status = ENV_NOT_RUNNABLE;
 	env->env_tf.tf_regs.reg_eax = 0;	/* return 0 back to child */
+	strcpy(env->currentpath, curenv->currentpath);
 
 	return env->env_id;
 }
@@ -493,6 +495,14 @@ sys_rx_pkt(uint8_t *content, uint32_t length)
 	return e1000_get_rx_desc(content, length);
 }
 
+static int
+sys_chdir(const char *path)
+{
+	user_mem_assert(curenv, path, strlen(path) + 1, PTE_U);
+	strcpy(curenv->currentpath, path);
+	return 0;
+}
+
 // Dispatches to the correct kernel function, passing the arguments.
 int32_t
 syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
@@ -555,6 +565,9 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 
 	case SYS_rx_pkt:
 		return sys_rx_pkt((uint8_t *)a1, a2);
+
+	case SYS_chdir:
+		return sys_chdir((const char *)a1);
 
 	default:
 		return -E_INVAL;

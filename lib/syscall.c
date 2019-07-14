@@ -142,3 +142,9 @@ sys_rx_pkt(uint8_t *content, uint32_t length)
 {
 	return syscall(SYS_rx_pkt, 0, (uint32_t)content, length, 0, 0, 0);
 }
+
+int
+sys_chdir(const char *path)
+{
+	return syscall(SYS_chdir, 0, (uint32_t)path, 0, 0, 0, 0);
+}
