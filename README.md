@@ -57,7 +57,7 @@ The network module follows micro-kernel spirit, which is relied on an independen
 
 ### Features
 
-1. supplement user/ folder of lab (test & cmd)
+1. connect user/echotest.c
 2. implement `cd ..` `chdir` `mv` `rename` command
 
 1. convert organization of fs data block into LIST

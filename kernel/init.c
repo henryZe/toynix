@@ -56,11 +56,6 @@ init(void)
 	// Starting non-boot CPUs
 	boot_aps();
 
-	ENV_CREATE(user_fairness, ENV_TYPE_USER);
-	ENV_CREATE(user_fairness, ENV_TYPE_USER);
-	ENV_CREATE(user_fairness, ENV_TYPE_USER);
-
-#if 0
 	// Start fs env
 	ENV_CREATE(fs_fs, ENV_TYPE_FS);
 
@@ -73,7 +68,6 @@ init(void)
 	ENV_CREATE(TEST, ENV_TYPE_USER);
 #else
 	ENV_CREATE(user_initsh, ENV_TYPE_USER);
-#endif
 #endif
 
 	// Schedule and run the first user environment

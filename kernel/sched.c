@@ -6,13 +6,15 @@
 #include <kernel/cpu.h>
 #include <kernel/spinlock.h>
 
+#define MRT_strat 1
+
 void sched_halt(void);
 
 // Choose a user environment to run and run it.
 void
 sched_yield(void)
 {
-	struct Env *idle;
+	struct Env *idle, *min_env = NULL;
 	int i, j;
 
 	// Implement simple round-robin scheduling.
@@ -32,10 +34,25 @@ sched_yield(void)
 	idle = curenv;
 	i = idle ? (ENVX(idle->env_id) + 1) % NENV : 0;
 
+#if RR_strat
+	/* Round Robin Schedule */
 	for (j = 0; j < NENV; j++, i = (i + 1) % NENV) {
 		if (envs[i].env_status == ENV_RUNNABLE)
 			env_run(envs + i);
 	}
+#elif MRT_strat
+	/* Minimum Run Times Schedule */
+	for (j = 0; j < NENV; j++, i = (i + 1) % NENV) {
+		if (envs[i].env_status == ENV_RUNNABLE) {
+			if (min_env)
+				min_env = envs[i].env_runs < min_env->env_runs ? (envs + i) : min_env;
+			else
+				min_env = envs + i;
+		}
+	}
+	if (min_env)
+		env_run(min_env);
+#endif
 
 	/* If there is no other runnable task, run current task. */
 	if (idle && idle->env_status == ENV_RUNNING)
