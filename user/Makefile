@@ -4,6 +4,9 @@ include $(NETDIR)/lwip/Makefile
 USR_LDFLAGS := $(LDFLAGS) -T $(USRDIR)/user.ld -nostdlib
 
 USER_SRCFILES := \
+		$(USRDIR)/initsh.c \
+
+USER_TESTFILES := \
 		$(USRDIR)/hello.c \
 		$(USRDIR)/divzero.c \
 		$(USRDIR)/badsegment.c \
@@ -44,12 +47,12 @@ USER_SRCFILES := \
 		$(USRDIR)/primespipe.c \
 		$(USRDIR)/testtime.c \
 		$(USRDIR)/spawninit.c \
-		$(USRDIR)/initsh.c \
 		$(USRDIR)/echosrv.c \
 		$(USRDIR)/httpd.c \
 		$(USRDIR)/fairness.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
+#USER_OBJFILES += $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_TESTFILES))
 
 $(OBJDIR)/$(USRDIR)/%.o: $(USRDIR)/%.c
 	@echo + cc[USER] $<

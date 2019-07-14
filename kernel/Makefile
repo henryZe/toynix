@@ -39,10 +39,10 @@ KERN_OBJFILES := $(patsubst $(LIBDIR)/%.c, $(OBJDIR)/$(KERNDIR)/%.o, $(KERN_OBJF
 
 # Binary program images to embed within the kernel.
 KERN_BINFILES := \
-		$(patsubst %.o, %, $(USER_OBJFILES)) \
-		$(patsubst %.o, %, $(NET_TESTOBJS)) \
 		$(OBJDIR)/$(FSDIR)/fs \
 		$(OBJDIR)/$(NETDIR)/ns \
+		$(patsubst %.o, %, $(USER_OBJFILES)) \
+		#$(patsubst %.o, %, $(NET_TESTOBJS)) \
 
 # How to build kernel object files
 $(OBJDIR)/$(KERNDIR)/%.o: $(KERNDIR)/%.c

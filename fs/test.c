@@ -65,4 +65,3 @@ fs_test(void)
 	assert(!(uvpt[PGNUM(f)] & PTE_D));
 	cprintf("file rewrite is good\n");
 }
-

@@ -10,20 +10,8 @@ USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/testpteshare \
 		$(OBJDIR)/$(USRDIR)/faultio \
 		$(OBJDIR)/$(USRDIR)/init \
-		$(OBJDIR)/$(USRDIR)/sh \
-		$(OBJDIR)/$(USRDIR)/echo \
-		$(OBJDIR)/$(USRDIR)/cat \
-		$(OBJDIR)/$(USRDIR)/num \
-		$(OBJDIR)/$(USRDIR)/lsfd \
-		$(OBJDIR)/$(USRDIR)/ls \
-		$(OBJDIR)/$(USRDIR)/debug_info \
-		$(OBJDIR)/$(USRDIR)/httpd \
 		$(OBJDIR)/$(USRDIR)/echosrv \
 		$(OBJDIR)/$(USRDIR)/echotest \
-		$(OBJDIR)/$(USRDIR)/pwd \
-		$(OBJDIR)/$(USRDIR)/touch \
-		$(OBJDIR)/$(USRDIR)/rm \
-		$(OBJDIR)/$(USRDIR)/mkdir \
 		$(OBJDIR)/$(USRDIR)/writemotd \
 		$(OBJDIR)/$(USRDIR)/testmalloc \
 		$(OBJDIR)/$(USRDIR)/testpipe \
@@ -40,7 +28,21 @@ FSIMGTXTFILES := \
 		$(FSDIR)/testshell.key \
 		$(FSDIR)/index.html \
 
-FSIMGFILES := $(USERAPPS) $(FSIMGTXTFILES)
+BUSYBOX := \
+		$(OBJDIR)/$(USRDIR)/sh \
+		$(OBJDIR)/$(USRDIR)/echo \
+		$(OBJDIR)/$(USRDIR)/cat \
+		$(OBJDIR)/$(USRDIR)/num \
+		$(OBJDIR)/$(USRDIR)/lsfd \
+		$(OBJDIR)/$(USRDIR)/ls \
+		$(OBJDIR)/$(USRDIR)/debug_info \
+		$(OBJDIR)/$(USRDIR)/httpd \
+		$(OBJDIR)/$(USRDIR)/pwd \
+		$(OBJDIR)/$(USRDIR)/touch \
+		$(OBJDIR)/$(USRDIR)/rm \
+		$(OBJDIR)/$(USRDIR)/mkdir \
+
+FSIMGFILES := $(BUSYBOX) #$(USERAPPS) $(FSIMGTXTFILES)
 
 # Compile FS object files
 $(OBJDIR)/$(FSDIR)/%.o: $(FSDIR)/%.c $(OBJDIR)/.vars.USER_CFLAGS

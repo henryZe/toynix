@@ -32,6 +32,10 @@ The file system follows micro-kernel spirit, which is relied on an independent u
 
 The network module follows micro-kernel spirit, which is relied on an independent user process listening in the background. This module is based on PCI network card. There is a simplified httpd server.
 
+## Boot Loader
+
+The tiny boot image is based on x86 architecture (that only occupies one sector(512 bytes)).
+
 ## Guideline
 
 ### Install Tool Chain
