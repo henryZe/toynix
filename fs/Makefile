@@ -41,6 +41,7 @@ BUSYBOX := \
 		$(OBJDIR)/$(USRDIR)/touch \
 		$(OBJDIR)/$(USRDIR)/rm \
 		$(OBJDIR)/$(USRDIR)/mkdir \
+		$(OBJDIR)/$(USRDIR)/mv \
 
 FSIMGFILES := $(BUSYBOX) #$(USERAPPS) $(FSIMGTXTFILES)
 

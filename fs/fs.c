@@ -607,3 +607,26 @@ file_dir_each_file(struct File *dir, int (*handler)(struct File *f))
 
 	return 0;
 }
+
+int
+file_rename(struct File *dir, struct File *src_file)
+{
+	int ret;
+	struct File *new_file;
+
+	/* only support dst path is existing directory */
+	if (dir->f_type != FTYPE_DIR)
+		return -E_INVAL;
+
+	ret = dir_alloc_file(dir, &new_file);
+	if (ret < 0)
+		return ret;
+
+	memcpy(new_file, src_file, sizeof(struct File));
+	flush_block(new_file);
+
+	memset(src_file, 0, sizeof(struct File));
+	flush_block(src_file);
+
+	return 0;
+}

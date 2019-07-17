@@ -38,3 +38,6 @@
 
 * cd - switch current working directory  
   `$ cd DIRECTORY`
+
+* mv - move (rename) files  
+  `$ mv SOURCE DIRECTORY`

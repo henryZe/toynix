@@ -236,3 +236,18 @@ close:
 	close(fd);
 	return ret;
 }
+
+int
+rename(const char *oldpath, const char *newpath)
+{
+	int ret;
+
+	if ((strlen(oldpath) >= MAXPATHLEN) ||
+		(strlen(newpath) >= MAXPATHLEN))
+		return -E_BAD_PATH;
+
+	strcpy(fsipcbuf.rename.src_path, oldpath);
+	strcpy(fsipcbuf.rename.dst_path, newpath);
+
+	return fsipc(FSREQ_RENAME, NULL);
+}

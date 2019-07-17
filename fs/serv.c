@@ -315,9 +315,25 @@ serve_flush(envid_t envid, struct Fsreq_flush *req)
 }
 
 static int
+fileisclosed(struct File *f)
+{
+	int i;
+
+	for (i = 0; i < MAXOPEN; i++) {
+		// check all process attaching this file or not
+		if (pageref(opentab[i].o_fd) > 1) {
+			if (opentab[i].o_file == f)
+				return 0;
+		}
+	}
+
+	return 1;
+}
+
+static int
 file_mutex_remove(struct File *f)
 {
-	int i, ret;
+	int ret;
 
 	// rm sub dir
 	if (f->f_type == FTYPE_DIR) {
@@ -326,16 +342,11 @@ file_mutex_remove(struct File *f)
 			return ret;
 	}
 
-	for (i = 0; i < MAXOPEN; i++) {
-		// check all process attaching this file or not
-		if (pageref(opentab[i].o_fd) > 1) {
-			if (opentab[i].o_file == f) {
-				if (debug)
-					cprintf("remove %s failed: %e\n", f->f_name, -E_BUSY);
+	if (!fileisclosed(f)) {
+		if (debug)
+			cprintf("remove %s failed: %e\n", f->f_name, -E_BUSY);
 
-				return -E_BUSY;
-			}
-		}
+		return -E_BUSY;
 	}
 
 	if (debug)
@@ -384,6 +395,43 @@ serve_sync(envid_t envid, union Fsipc *req)
 	return 0;
 }
 
+int
+serve_info(envid_t envid, union Fsipc *req)
+{
+	uint32_t cnt;
+	int i;
+
+	for (cnt = 0, i = 0; i < super->s_nblocks; i++) {
+		if (!block_is_free(i))
+			cnt++;
+	}
+
+	req->info.blk_num = super->s_nblocks;
+	req->info.blk_ocp = cnt;
+
+	return 0;
+}
+
+int
+serve_rename(envid_t envid, union Fsipc *req)
+{
+	int ret;
+	struct File *dst_file, *src_file;
+
+	ret = file_open(req->rename.src_path, &src_file);
+	if (ret < 0)
+		return ret;
+
+	if (!fileisclosed(src_file))
+		return -E_BUSY;
+
+	ret = file_open(req->rename.dst_path, &dst_file);
+	if (ret < 0)
+		return ret;
+
+	return file_rename(dst_file, src_file);
+}
+
 typedef int (*fshandler)(envid_t envid, union Fsipc *req);
 
 fshandler handlers[] = {
@@ -396,6 +444,8 @@ fshandler handlers[] = {
 	[FSREQ_FLUSH] = (fshandler)serve_flush,
 	[FSREQ_REMOVE] = (fshandler)serve_remove,
 	[FSREQ_SYNC] = serve_sync,
+	[FSREQ_INFO] = serve_info,
+	[FSREQ_RENAME] = serve_rename,
 };
 
 void
@@ -403,8 +453,7 @@ serve(void)
 {
 	uint32_t req;
 	envid_t whom;
-	int perm, ret, i;
-	uint32_t cnt;
+	int perm, ret;
 	void *pg;
 
 	while (1) {
@@ -422,17 +471,7 @@ serve(void)
 		}
 
 		pg = NULL;
-		if (req == FSREQ_INFO) {
-			for (cnt = 0, i = 0; i < super->s_nblocks; i++) {
-				if (!block_is_free(i))
-					cnt++;
-			}
-
-			fsreq->info.blk_num = super->s_nblocks;
-			fsreq->info.blk_ocp = cnt;
-			ret = 0;
-
-		} else if (req == FSREQ_OPEN) {
+		if (req == FSREQ_OPEN) {
 			ret = serve_open(whom, (struct Fsreq_open *)fsreq, &pg, &perm);
 
 		} else if (req < ARRAY_SIZE(handlers) && handlers[req]) {

@@ -61,7 +61,6 @@ The tiny boot image is based on x86 architecture (that only occupies one sector(
 
 ### 8.1 Features
 
-1. implement `mv` `rename` command
 1. connect user/echotest.c
 
 1. convert organization of fs data block into LIST

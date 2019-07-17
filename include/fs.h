@@ -74,7 +74,8 @@ enum {
 	FSREQ_REMOVE,
 	FSREQ_SYNC,
 
-	FSREQ_INFO
+	FSREQ_INFO,
+	FSREQ_RENAME,
 };
 
 union Fsipc {
@@ -116,6 +117,10 @@ union Fsipc {
 		uint32_t blk_num;
 		uint32_t blk_ocp;
 	} info;
+	struct Fsreq_rename {
+		char src_path[MAXPATHLEN];
+		char dst_path[MAXPATHLEN];
+	} rename;
 
 	// Ensure Fsipc is one page
 	char _pad[PGSIZE];

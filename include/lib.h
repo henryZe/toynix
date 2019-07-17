@@ -117,6 +117,7 @@ int	fstat(int fd, struct Stat *statbuf);
 int	stat(const char *path, struct Stat *statbuf);
 int mkdir(const char *path);
 int chdir(const char *path);
+int rename(const char *oldpath, const char *newpath);
 
 // spawn.c
 envid_t spawn(const char *program, const char **argv);
