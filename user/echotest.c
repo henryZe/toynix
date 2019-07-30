@@ -35,7 +35,7 @@ void umain(int argc, char **argv)
 	// Construct the server sockaddr_in structure
 	memset(&echoserver, 0, sizeof(echoserver));       // Clear struct
 	echoserver.sin_family = AF_INET;                  // Internet/IP
-	echoserver.sin_addr.s_addr = inet_addr(IPADDR);   // IP address
+	echoserver.sin_addr.s_addr = htonl(INADDR_ANY);   // IP address
 	echoserver.sin_port = htons(PORT);		  // server port
 
 	cprintf("trying to connect to server\n");

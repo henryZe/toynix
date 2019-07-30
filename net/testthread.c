@@ -14,4 +14,5 @@ umain(int argc, char **argv)
 	thread_init();
 	thread_create(NULL, "main", tmain, 0);
 	thread_yield();
+	/* never return */
 }

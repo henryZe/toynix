@@ -61,11 +61,10 @@ The tiny boot image is based on x86 architecture (that only occupies one sector(
 
 ### 8.1 Features
 
-1. connect user/echotest.c
-
-1. convert organization of fs data block into LIST
-2. replace static lib with share lib
-3. fine-gained lock instead of global kernel lock (page allocator, console driver, scheduler, IPC state)
+1. fix lwip connect function by user/echotest.c
+2. convert organization of fs data block into LIST
+3. replace static lib with share lib
+4. fine-gained lock instead of global kernel lock (page allocator, console driver, scheduler, IPC state)
 
 ### 8.2 Bug Report
 
