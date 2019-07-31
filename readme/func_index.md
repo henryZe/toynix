@@ -34,7 +34,7 @@ file: init.c function: init
 
 1. initialize bss segment
 2. initialize console devices including CGA, keyboard and serial port (cons_init)
-3. initialize memory ([mem_init](#Memory-Manage))
+3. initialize memory ([mem_init](#Memory-Management))
 4. initialize task ([env_init](#Environment))
 5. initialize trap ([trap_init](#Trap))
 6. initialize multiprocessor (mp_init)
