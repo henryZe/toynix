@@ -2,7 +2,7 @@
 
 ## 0 Introduction
 
-Toynix is a tiny kernel (which was programmed just for fun) in Unix-like interface. It is composed of simplified fs and network module in micro-kernel spirit.
+Toynix is a tiny kernel (which was programmed just for fun) in Unix-like interface. It is composed of simplified fs and network module in micro-kernel spirit. [Function Index](./readme/func_index.md)
 
 Here are some critical features you might be concerned about:
 
@@ -34,7 +34,7 @@ The network module follows micro-kernel spirit, which is relied on an independen
 
 ## 6 Boot Loader
 
-The tiny boot image is based on x86 architecture (that only occupies one sector(512 bytes)).
+The only one thing done by bootloader is reading the kernel image from disk. This tiny boot is based on x86 architecture (that only occupies one sector(512 bytes)).
 
 ## 7 User Guideline
 

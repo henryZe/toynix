@@ -21,18 +21,18 @@
 #define	RELOC(x) ((x) - KERNBASE)
 
 ##########################################################################
-# The xv6 kernel starts executing in this file. This file is linked with
+# The toynix kernel starts executing in this file. This file is linked with
 # the kernel C code, so it can refer to kernel symbols such as main().
 # The boot block (bootasm.S and bootmain.c) jumps to entry below.
 #
 # Multiboot header, for multiboot boot loaders like GNU Grub.
 # http://www.gnu.org/software/grub/manual/multiboot/multiboot.html
 #
-# Using GRUB 2, you can boot xv6 from a file stored in a
+# Using GRUB 2, you can boot toynix from a file stored in a
 # Linux file system by copying kernel or kernelmemfs to /boot
 # and then adding this menu entry:
 #
-# menuentry "xv6" {
+# menuentry "toynix" {
 # 	insmod ext2
 # 	set root='(hd0,msdos1)'
 # 	set kernel='/boot/kernel'
@@ -83,13 +83,13 @@ entry:
 
 	# Turn on paging.
 	movl	%cr0, %eax
-	orl	    $(CR0_PE|CR0_PG|CR0_WP), %eax
+	orl     $(CR0_PE|CR0_PG|CR0_WP), %eax
 	movl	%eax, %cr0
 
 	# Now paging is enabled, but we're still running at a low EIP.
 	# Jump up above KERNBASE before entering C code.
-	mov	    $relocated, %eax
-	jmp	    *%eax
+	mov     $relocated, %eax
+	jmp     *%eax
 
 relocated:
 
