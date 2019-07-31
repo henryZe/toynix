@@ -49,7 +49,7 @@ mon_kerninfo(int argc, char **argv, struct Trapframe *tf)
 	extern char _start[], entry[], etext[], edata[], end[];
 
 	cprintf("Special kernel symbols:\n");
-	cprintf("  _start                  %08x (phys)\n", _start);
+	cprintf("  _start              %08x (phys)\n", _start);
 	cprintf("  entry  %08x (virt)  %08x (phys)\n", entry, entry - KERNBASE);
 	cprintf("  etext  %08x (virt)  %08x (phys)\n", etext, etext - KERNBASE);
 	cprintf("  edata  %08x (virt)  %08x (phys)\n", edata, edata - KERNBASE);
@@ -64,9 +64,9 @@ mon_kerninfo(int argc, char **argv, struct Trapframe *tf)
 *	movl		$0x0, %ebp
 *	movl		$(bootstacktop), %esp
 *
-*	call func				# 1. (esp - 4); 2. *esp =  next_eip; 3. eip = func
+*	call func			# 1. (esp - 4); 2. *esp =  next_eip; 3. eip = func
 *	push %ebp			# store ebp
-*	mov  %esp,%ebp		# set ebp as old_esp
+*	mov  %esp,%ebp			# set ebp as old_esp
 *	push %edi
 *
 *	pop %edi
@@ -82,7 +82,7 @@ mon_kerninfo(int argc, char **argv, struct Trapframe *tf)
 *	ebp[f0109f78] eip[f0100134 : test_backtrace]	args[00000002 00000003 f0109fa4 0000001a f0101958]
 *	ebp[f0109f98] eip[f0100134 : test_backtrace]	args[00000003 00000004 f0109fc4 0000001a f010198f]
 *	ebp[f0109fb8] eip[f0100134 : test_backtrace]	args[00000004 00000005 f0109fe4 00000010 00000000]
-*	ebp[f0109fd8] eip[f01001b2 : init]			args[00000005 00000000 0000023c 00000000 00000000]
+*	ebp[f0109fd8] eip[f01001b2 : init]		args[00000005 00000000 0000023c 00000000 00000000]
 *	ebp[f0109ff8] eip[f010003e : spin (entry.S)]	args[00000003 00001003 00002003 00003003 00004003]
 *
 */

@@ -432,6 +432,7 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
 		if (!new_page)
 			return NULL;
 
+		/* set PTE_U to page directory, control privilege level only by page table */
 		*pd_entry = (page2pa(new_page) | PTE_P | PTE_W | PTE_U);
 		new_page->pp_ref++;
 	}

@@ -293,14 +293,14 @@ load_icode(struct Env *e, uint8_t *binary)
 	//  to make sure that the environment starts executing there.
 	//  What?  (See env_run() and env_pop_tf() below.)
 
-    struct Elf *ELFHDR = (struct Elf *)binary;
-    struct Proghdr *ph, *eph;
-    int i;
+	struct Elf *ELFHDR = (struct Elf *)binary;
+	struct Proghdr *ph, *eph;
+	int i;
 
 	/* switch address space */
 	lcr3(PADDR(e->env_pgdir));
 
-    if (ELFHDR->e_magic != ELF_MAGIC)
+	if (ELFHDR->e_magic != ELF_MAGIC)
 		panic("%s Not a elf binary\n", __func__);
 
 	ph = (struct Proghdr *)((uint8_t *)ELFHDR + ELFHDR->e_phoff);
@@ -450,11 +450,11 @@ env_pop_tf(struct Trapframe *tf)
 
 	asm volatile(
 		"\tmovl %0, %%esp\n"		/* move tf arg to esp */
-		"\tpopal\n"					/* popl PushRegs to registers */
+		"\tpopal\n"			/* popl PushRegs to registers */
 		"\tpopl %%es\n"
 		"\tpopl %%ds\n"
 		"\taddl $0x8, %%esp\n"		/* skip tf_trapno and tf_errcode */
-		"\tiret\n"					/* popl %%eip; popl %%cs; popfl */
+		"\tiret\n"			/* popl %%eip; popl %%cs; popfl */
 		: : "g" (tf) : "memory");
 
 	panic("iret failed");			/* mostly to placate the compiler */
