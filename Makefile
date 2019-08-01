@@ -90,7 +90,7 @@ endif
 
 GDBPORT := $(shell expr `id -u` % 5000 + 25000)
 
-CPUS ?= 1
+CPUS ?= 4
 
 PORT7 := $(shell expr $(GDBPORT) + 1)
 PORT80 := $(shell expr $(GDBPORT) + 2)

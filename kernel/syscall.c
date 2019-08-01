@@ -128,6 +128,35 @@ sys_env_set_status(envid_t envid, int status)
 	return 0;
 }
 
+// Set envid's trap frame to 'tf'.
+// tf is modified to make sure that user environments always run at code
+// protection level 3 (CPL 3), interrupts enabled, and IOPL of 0.
+//
+// Returns 0 on success, < 0 on error.  Errors are:
+//	-E_BAD_ENV if environment envid doesn't currently exist,
+//		or the caller doesn't have permission to change envid.
+static int
+sys_env_set_trapframe(envid_t envid, struct Trapframe *tf)
+{
+	int ret;
+	struct Env *env;
+
+	ret = envid2env(envid, &env, 1);
+	if (ret < 0)
+		return ret;
+
+	user_mem_assert(curenv, tf, sizeof(struct Trapframe), PTE_W);
+
+	/* only set eip & esp */
+	env->env_tf.tf_eip = tf->tf_eip;
+	env->env_tf.tf_esp = tf->tf_esp;
+
+	env->env_tf.tf_eflags |= FL_IF;		/* interrupts enabled */
+	env->env_tf.tf_eflags &= ~FL_IOPL_MASK;	/* IOPL of 0 */
+
+	return 0;
+}
+
 /*
  * Allocate a page of memory and map it at 'va' with permission
  * 'perm' in the address space of 'envid'.
@@ -388,34 +417,6 @@ sys_ipc_recv(void *dstva)
 	sched_yield();
 }
 
-// Set envid's trap frame to 'tf'.
-// tf is modified to make sure that user environments always run at code
-// protection level 3 (CPL 3), interrupts enabled, and IOPL of 0.
-//
-// Returns 0 on success, < 0 on error.  Errors are:
-//	-E_BAD_ENV if environment envid doesn't currently exist,
-//		or the caller doesn't have permission to change envid.
-static int
-sys_env_set_trapframe(envid_t envid, struct Trapframe *tf)
-{
-	int ret;
-	struct Env *env;
-
-	ret = envid2env(envid, &env, 1);
-	if (ret < 0)
-		return ret;
-
-	user_mem_assert(curenv, tf, sizeof(struct Trapframe), PTE_W);
-
-	env->env_tf.tf_eip = tf->tf_eip;
-	env->env_tf.tf_esp = tf->tf_esp;
-
-	env->env_tf.tf_eflags |= FL_IF;			/* interrupts enabled */
-	env->env_tf.tf_eflags &= ~FL_IOPL_MASK;	/* IOPL of 0 */
-
-	return 0;
-}
-
 // Return the current time.
 static int
 sys_time_msec(void)
@@ -533,6 +534,9 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 	case SYS_env_set_status:
 		return sys_env_set_status(a1, a2);
 
+	case SYS_env_set_trapframe:
+		return sys_env_set_trapframe(a1, (void *)a2);
+
 	case SYS_page_alloc:
 		return sys_page_alloc(a1, (void *)a2, a3);
 
@@ -550,9 +554,6 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 
 	case SYS_ipc_recv:
 		return sys_ipc_recv((void *)a1);
-
-	case SYS_env_set_trapframe:
-		return sys_env_set_trapframe(a1, (void *)a2);
 
 	case SYS_time_msec:
 		return sys_time_msec();

@@ -71,7 +71,7 @@ mon_kerninfo(int argc, char **argv, struct Trapframe *tf)
 *
 *	pop %edi
 *	pop %ebp
-*	ret					# convert call: 1. eip = *esp; 2. (esp + 4)
+*	ret				# convert call: 1. eip = *esp; 2. (esp + 4)
 *
 *
 *	refer to kernel.asm:

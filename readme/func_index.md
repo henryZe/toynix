@@ -46,9 +46,13 @@ file: init.c function: init
 12. start network server (net serve)
 13. start init process (user initsh)
 
-## Stack
+## Monitor
 
-file: monitor.c mon_backtrace
+file: monitor.c
+
+### Trace of Stack
+
+function: mon_backtrace
 > Display the trace of function call
 
 1. read & load ebp
@@ -168,6 +172,21 @@ function: env_run
 function: env_pop_tf
 > Restores the register values in the Trapframe with the 'iret' instruction
 
+function: env_destroy
+> Free specific environment
+
+1. set env status as ENV_DYING
+2. in next schedule, call env_free
+3. schedule
+
+function: env_free
+> Free the env and all memory it uses
+
+1. switch page dir
+2. remove pages and page tables of user land
+3. free the page dir
+4. set env free and add it into free list
+
 ## Trap
 
 ### Initialize
@@ -233,6 +252,81 @@ function: alltraps
 file: trap.c
 
 function: trap
-> 
+> handle the exception/interrupt
 
+1. lock kernel if this CPU is halted before
+2. lock kernel if this task comes from user land
+3. dispatch based on the type of trap (trap_dispatch)
+4. schedule
 
+function: trap_dispatch
+> dispatch based on trap num
+
+1. page fault
+2. breakpoint & debug
+3. system call
+4. timer
+5. spurious
+6. key board
+7. serial port
+
+### Page Fault
+
+function: page_fault_handler
+> handle page fault
+
+!!!!!!!!!!
+
+### System Call
+
+function: syscall
+> dispatches to the correct kernel function
+
+* Console
+
+1. sys_cputs: print string
+2. sys_cgetc: read a character from the system console
+
+* Env
+
+1. sys_getenvid: returns the current environment's envid
+2. sys_env_destroy: [env_destroy](#Create-New-Environment)
+3. sys_yield: schedule !!!
+4. sys_exofork: !!!
+5. sys_env_set_status: set the status of a specified environment (ENV_RUNNABLE or ENV_NOT_RUNNABLE)
+6. sys_env_set_trapframe: set env's eip & esp (enable interrupts, set IOPL as 0)
+
+* Memory
+
+1. sys_page_alloc: allocate a page of memory and map it at 'va' with permission
+2. sys_page_map: map the page of memory at 'src va' in src env's address space at 'dst va' in dst env's address space with permission 'perm'
+3. sys_page_unmap: unmap the page of memory at 'va' in the address space of 'env'
+4. sys_env_set_pgfault_upcall: [set the page fault upcall](#Page-Fault)
+
+* IPC
+
+1. sys_ipc_try_send: !!!
+2. sys_ipc_recv: !!!
+
+* Time
+
+1. sys_time_msec: gain time (unit: millisecond)
+
+* Debug
+
+1. sys_debug_info: gain info of CPU & memory
+
+* Network
+
+1. sys_tx_pkt: transmit packet to e1000
+2. sys_rx_pkt: receive packet from e1000
+
+* File System
+
+1. sys_chdir: switch working dir of current env
+
+### Timer
+
+1. increase time tick (if this CPU is boot one)
+2. acknowledge interrupt
+3. schedule
