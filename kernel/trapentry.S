@@ -20,13 +20,13 @@
  *   void NAME();
  * where NAME is the argument passed to TRAPHANDLER.
  */
-#define TRAPHANDLER(name, num)								\
+#define TRAPHANDLER(name, num)							\
 	.global name;			/* define global symbol for 'name' */	\
-	.type name, @function;	/* symbol type is function */		\
-	.align 2;				/* align function definition */		\
-	name:					/* function starts here */			\
-		cli;												\
-		pushl $(num);		/* push trap num */				\
+	.type name, @function;		/* symbol type is function */		\
+	.align 2;			/* align function definition */		\
+	name:				/* function starts here */		\
+		cli;			/* close interrupt when enter kernel */ \
+		pushl $(num);		/* push trap num */			\
 		jmp alltraps
 
 /* Use TRAPHANDLER_NOEC for traps where the CPU doesn't push an error code.
@@ -34,13 +34,13 @@
  * format in either case.
  */
 #define TRAPHANDLER_NOEC(name, num)	\
-	.global name;					\
-	.type name, @function;			\
-	.align 2;						\
-	name:							\
-		cli; 						\
-		pushl $0;					\
-		pushl $(num);				\
+	.global name;			\
+	.type name, @function;		\
+	.align 2;			\
+	name:				\
+		cli;			\
+		pushl $0;		\
+		pushl $(num);		\
 		jmp alltraps
 
 .text

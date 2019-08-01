@@ -169,3 +169,70 @@ function: env_pop_tf
 > Restores the register values in the Trapframe with the 'iret' instruction
 
 ## Trap
+
+### Initialize
+
+file: trap.c
+
+function: trap_init
+> set trap, soft interrupt, interrupt handler, and initialize TSS for each CPU, load tss selector & idt
+
+1. set handler in idt
+2. load tss & idt in each CPU
+
+### Exception & Interruption
+
+file: trapentry.S
+
+function: TRAPHANDLER_NOEC TRAPHANDLER
+> It pushes a trap number onto the stack, then jumps to alltraps
+
+~~~
+    save the user running state
+
+    cross rings case:
+    +--------------------+ KSTACKTOP
+    | 0x00000 | old SS   |     " - 4
+    |      old ESP       |     " - 8
+    |     old EFLAGS     |     " - 12
+    | 0x00000 | old CS   |     " - 16
+    |      old EIP       |     " - 20
+    |     error code     |     " - 24
+    +--------------------+ <---- ESP
+    |      trap num      |     " - 28
+    +--------------------+
+
+    non-cross rings case:
+    +--------------------+ <---- old ESP
+    |     old EFLAGS     |     " - 4
+    | 0x00000 | old CS   |     " - 8
+    |      old EIP       |     " - 12
+    +--------------------+
+~~~
+
+function: alltraps
+> generate struct Trapframe and call trap with argument Trapframe
+
+~~~
+    +--------------------+ KSTACKTOP
+    | 0x00000 | old SS   |     " - 4
+    |      old ESP       |     " - 8
+    |     old EFLAGS     |     " - 12
+    | 0x00000 | old CS   |     " - 16
+    |      old EIP       |     " - 20
+    |     error code     |     " - 24
+    +--------------------+
+    |      trap num      |     " - 28
+    +--------------------+
+    |       old DS       |
+    |       old ES       |
+    |  general registers |
+    +--------------------+ <---- ESP
+~~~
+
+file: trap.c
+
+function: trap
+> 
+
+

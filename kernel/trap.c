@@ -401,7 +401,6 @@ trap(struct Trapframe *tf)
 {
 	// The environment may have set DF(10th bit) and some versions
 	// of GCC rely on DF being clear
-	/* disable interrupt when enter trap */
 	asm volatile("cld" ::: "cc");
 
 	// Halt the CPU if some other CPU has called panic()
@@ -416,6 +415,7 @@ trap(struct Trapframe *tf)
 	// Check that interrupts are disabled. If this assertion
 	// fails, DO NOT be tempted to fix it by inserting a "cli" in
 	// the interrupt path.
+	// Hardware will clean FL_IF when interrupt comes.
 	assert(!(read_eflags() & FL_IF));
 
 	if ((tf->tf_cs & 3) == 3) {
