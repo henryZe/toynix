@@ -262,23 +262,62 @@ function: trap
 function: trap_dispatch
 > dispatch based on trap num
 
-1. page fault
+1. [page fault](#Page-Fault)
 2. breakpoint & debug
-3. system call
-4. timer
+3. [system call](#System-Call)
+4. [timer](#Timer)
 5. spurious
 6. key board
 7. serial port
 
 ### Page Fault
 
+file: trap.c
 function: page_fault_handler
 > handle page fault
 
-!!!!!!!!!!
+1. gain fault va
+2. check this incident come from user
+3. prepare User Trapframe in stack
+4. set eip as _pgfault_upcall and return to user (env_run)
+
+file: pfentry.S
+function: _pgfault_upcall
+
+1. call _pgfault_handler (means pgfault)
+2. simulate 'iret' and return to trap point
+
+~~~
+already in exception stack case:
++-----------------------+
+| Exception Stack n     |
++-----------------------+ <--- esp
+| trap-time eip         |
++-----------------------+
+| Exception Stack (n+1) |
++-----------------------+
+
+first time trap into exception stack case:
++-------------------+            +-------------------+
+| Regular Stack     |            | Exception Stack 1 |
++-------------------+ <--- esp   +-------------------+
+| trap-time eip     |
++-------------------+
+~~~
+
+file: fork.c
+function: pgfault
+
+1. check faulting access
+    a. write operation
+    b. copy-on-write page
+2. allocate new page
+3. copy original page to new one
+4. remap this page
 
 ### System Call
 
+file: trap.c
 function: syscall
 > dispatches to the correct kernel function
 

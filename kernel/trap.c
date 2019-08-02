@@ -272,11 +272,13 @@ page_fault_handler(struct Trapframe *tf)
 			 * In non-recursive case:
 			 * Regular Stack & Exception Stack status
 			 *
-			 * |-------------------|         |-------------------|
-			 * | Regular Stack     |         | Exception Stack 1 |
-			 * |-------------------|         |-------------------|
-			 * | trap-time eip     |
-			 * |-------------------|
+			 * +-----------------------+
+			 * | Exception Stack n     |
+			 * +-----------------------+ <--- esp
+			 * | trap-time eip         |
+			 * +-----------------------+
+			 * | Exception Stack (n+1) |
+			 * +-----------------------+
 			 */
 			esp = tf->tf_esp - 4 - sizeof(struct UTrapframe);
 		else
@@ -286,13 +288,11 @@ page_fault_handler(struct Trapframe *tf)
 			 * In recursive case:
 			 * Exception Stack status
 			 *
-			 * |-----------------------|
-			 * | Exception Stack n     |
-			 * |-----------------------|
-			 * | trap-time eip         |
-			 * |-----------------------|
-			 * | Exception Stack (n+1) |
-			 * |-----------------------|
+			 * +-------------------+            +-------------------+
+			 * | Regular Stack     |            | Exception Stack 1 |
+			 * +-------------------+ <--- esp   +-------------------+
+			 * | trap-time eip     |
+			 * +-------------------+
 			 */
 			esp = UXSTACKTOP - sizeof(struct UTrapframe);
 

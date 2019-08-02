@@ -6,7 +6,7 @@
 #include <kernel/cpu.h>
 #include <kernel/spinlock.h>
 
-#define MRT_strat 1
+#define MRT_STRAT 1
 
 void sched_halt(void);
 
@@ -34,13 +34,7 @@ sched_yield(void)
 	idle = curenv;
 	i = idle ? (ENVX(idle->env_id) + 1) % NENV : 0;
 
-#if RR_strat
-	/* Round Robin Schedule */
-	for (j = 0; j < NENV; j++, i = (i + 1) % NENV) {
-		if (envs[i].env_status == ENV_RUNNABLE)
-			env_run(envs + i);
-	}
-#elif MRT_strat
+#if MRT_STRAT
 	/* Minimum Run Times Schedule */
 	for (j = 0; j < NENV; j++, i = (i + 1) % NENV) {
 		if (envs[i].env_status == ENV_RUNNABLE) {
@@ -52,6 +46,12 @@ sched_yield(void)
 	}
 	if (min_env)
 		env_run(min_env);
+#else
+	/* Round Robin Schedule */
+	for (j = 0; j < NENV; j++, i = (i + 1) % NENV) {
+		if (envs[i].env_status == ENV_RUNNABLE)
+			env_run(envs + i);
+	}
 #endif
 
 	/* If there is no other runnable task, run current task. */

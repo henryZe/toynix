@@ -41,7 +41,7 @@ _pgfault_upcall:
 	// to the trap time state.
 	// Push trap-time %eip onto the trap-time stack.
 	//
-	// Explanation:
+	// Explaination:
 	//   We must prepare the trap-time stack for our eventual return to
 	//   re-execute the instruction that faulted.
 	//   Unfortunately, we can't return directly from the exception stack:
@@ -65,7 +65,7 @@ _pgfault_upcall:
 
 	/* sizeof(struct UTrapframe) = 52 */
 	movl	48(%esp), %eax	// Temp0 = UTrapframe->esp = trap-time esp
-	subl	$4, %eax		// Temp0 -= 4
+	subl	$4, %eax	// Temp0 -= 4
 	movl	%eax, 48(%esp)	// UTrapframe->esp = Temp0 (scratch space for pushing eip)
 
 	movl	40(%esp), %ebx	// Temp1 = UTrapframe->eip
@@ -73,17 +73,17 @@ _pgfault_upcall:
 
 	// Restore the trap-time registers.  After you do this, you
 	// can no longer modify any general-purpose registers.
-	addl	$8, %esp		// pop utf_fault_va & utf_err
+	addl	$8, %esp	// pop utf_fault_va & utf_err
 	popal
 
 	// Restore eflags from the stack.  After you do this, you can
 	// no longer use arithmetic operations or anything else that
 	// modifies eflags.
-	addl	$4, %esp		// pop eip
+	addl	$4, %esp	// pop eip
 	popfl
 
 	// Switch back to the adjusted trap-time stack.
-	popl	%esp			// restore trap-time esp
+	popl	%esp		// restore trap-time esp
 
 	// Return to re-execute the instruction that faulted.
-	ret						// pop eip (trap-time)
+	ret			// pop eip (trap-time)
