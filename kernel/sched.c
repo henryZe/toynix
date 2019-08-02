@@ -101,9 +101,9 @@ sched_halt(void)
 		"movl %0, %%esp\n"	// push ts_esp0 (stack top) to esp
 		"pushl $0\n"		// push 0 as eip
 		"pushl $0\n"		// push 0 as ebp
-		"sti\n"				// restore interrupt
+		"sti\n"			// restore interrupt
 		"1:\n"
-		"hlt\n"				// halt this cpu and wait for interrupt
+		"hlt\n"			// halt this cpu and wait for interrupt
 		"jmp 1b\n"
 		: : "a" (thiscpu->cpu_ts.ts_esp0));
 }

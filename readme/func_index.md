@@ -187,6 +187,26 @@ function: env_free
 3. free the page dir
 4. set env free and add it into free list
 
+### Schedule
+
+file: sched.c
+
+function: sched_yield
+> Choose a user environment to run and run it
+
+1. select a suspending env by specific strategy and run it
+2. if there is no other runnable task, run current task
+3. if no task, then halt this CPU (sched_halt)
+
+function: sched_halt
+> Halt this CPU when there is nothing to do
+
+1. set current env as NULL
+2. switch to kern_pgdir
+3. set CPU status as halted
+4. unlock kernel
+5. clean stack & restore interrupt & halt this CPU (until next interrupt comes)
+
 ## Trap
 
 ### Initialize
@@ -330,7 +350,7 @@ function: syscall
 
 1. sys_getenvid: returns the current environment's envid
 2. sys_env_destroy: [env_destroy](#Create-New-Environment)
-3. sys_yield: schedule !!!
+3. sys_yield: [schedule](#Schedule)
 4. sys_exofork: !!!
 5. sys_env_set_status: set the status of a specified environment (ENV_RUNNABLE or ENV_NOT_RUNNABLE)
 6. sys_env_set_trapframe: set env's eip & esp (enable interrupts, set IOPL as 0)
