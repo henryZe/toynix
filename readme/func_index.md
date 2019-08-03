@@ -10,6 +10,13 @@ start pa: 0xffff0
 
 start pa: 0x7c00
 
+file: boot/Makefile
+> point out entry of bootloader
+
+~~~ Makefile
+ld -e start -Ttext 0x7C00
+~~~
+
 file: boot.S function: start
 
 1. switch to 32-bit protected mode
@@ -23,6 +30,18 @@ file: bootmain.c function: bootmain
 ### Kernel
 
 start pa: 0x00100000 va: 0xF0100000
+
+file: kernel/kernel.ld
+> point out entry of kernel
+
+~~~ ld
+ENTRY(_start)
+
+    . = 0xF0100000;
+    .text : AT(0x100000) {
+        ...
+    }
+~~~
 
 file: entry.S function: _start
 
@@ -57,7 +76,11 @@ function: mon_backtrace
 
 1. read & load ebp
 2. gain eip according to ebp
-3. parse eip from STAB file (kernel/user, file, function, line)
+3. parse eip from STAB file, call debuginfo_eip
+    a. source from kernel/user
+    b. file
+    c. function
+    d. line
 
 ~~~
             +---------------+
@@ -206,6 +229,22 @@ function: sched_halt
 3. set CPU status as halted
 4. unlock kernel
 5. clean stack & restore interrupt & halt this CPU (until next interrupt comes)
+
+### User-mode Startup
+
+file: user.ld
+> point out entry of user programs
+
+~~~ ld
+ENTRY(_start)
+
+    . = 0x800020;
+~~~
+
+file: entry.S
+function: _start
+
+!!!
 
 ### Fork
 
@@ -360,7 +399,7 @@ file: fork.c
 function: pgfault
 > handle page fault accident in user
 
-1. check faulting access
+1. check faulting access:
     a. write operation
     b. copy-on-write page
 2. allocate new page
@@ -377,16 +416,26 @@ function: set_pgfault_handler
 
 ### System Call
 
+#### Flow
+
+file: lib/syscall.c
+function: syscall
+> generic system call in user, use 'int $T_SYSCALL'
+
 file: trap.c
+function: trap_dispatch
+> parse trap num and call the relevant handler in kernel
+
+file: kernel/syscall.c
 function: syscall
 > dispatches to the correct kernel function
 
-* Console
+#### Console
 
 1. sys_cputs: print string
 2. sys_cgetc: read a character from the system console
 
-* Env
+#### Env
 
 1. sys_getenvid: returns the current environment's envid
 2. sys_env_destroy: [env_destroy](#Create-New-Environment)
@@ -395,32 +444,32 @@ function: syscall
 5. sys_env_set_status: set the status of a specified environment (ENV_RUNNABLE or ENV_NOT_RUNNABLE)
 6. sys_env_set_trapframe: set env's eip & esp (enable interrupts, set IOPL as 0)
 
-* Memory
+#### Memory
 
 1. sys_page_alloc: allocate a page of memory and map it at 'va' with permission
 2. sys_page_map: map the page of memory at 'src va' in src env's address space at 'dst va' in dst env's address space with permission 'perm'
 3. sys_page_unmap: unmap the page of memory at 'va' in the address space of 'env'
 4. sys_env_set_pgfault_upcall: [set the page fault upcall](#Page-Fault)
 
-* IPC
+#### IPC
 
 1. sys_ipc_try_send: !!!
 2. sys_ipc_recv: !!!
 
-* Time
+#### Time
 
 1. sys_time_msec: gain time (unit: millisecond)
 
-* Debug
+#### Debug Information
 
 1. sys_debug_info: gain info of CPU & memory
 
-* Network
+#### Network
 
 1. sys_tx_pkt: transmit packet to e1000
 2. sys_rx_pkt: receive packet from e1000
 
-* File System
+#### File System
 
 1. sys_chdir: switch working dir of current env
 
