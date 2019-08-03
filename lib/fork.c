@@ -64,29 +64,37 @@ duppage(envid_t dst_env, unsigned pn)
 	 * just copy the mapping directly.
 	 */
 	if (perm & PTE_SHARE) {
-		ret = sys_page_map(0, (void *)(pn << PGSHIFT), dst_env, (void *)(pn << PGSHIFT), perm);
+		ret = sys_page_map(0, (void *)(pn << PGSHIFT),
+				dst_env, (void *)(pn << PGSHIFT), perm);
 		if (ret < 0)
 			panic("sys_page_map: %e", ret);
 
 		return 0;
 	}
 
-	perm &= (~PTE_W);
-	perm |= PTE_COW;
+	/* copy-on-write */
+	if ((perm & PTE_W) || (perm & PTE_COW)) {
+		perm &= (~PTE_W);
+		perm |= PTE_COW;
 
-	/* map page to child */
-	ret = sys_page_map(0, (void *)(pn << PGSHIFT), dst_env, (void *)(pn << PGSHIFT), perm);
-	if (ret < 0)
-		panic("sys_page_map: %e", ret);
+		/* map page to child */
+		ret = sys_page_map(0, (void *)(pn << PGSHIFT),
+				dst_env, (void *)(pn << PGSHIFT), perm);
+		if (ret < 0)
+			panic("sys_page_map: %e", ret);
 
-	/* remap self for setting PTE_COW
-	 *
-	 * Q: Why do we need to mark ours copy-on-write again
-	 * if it was already copy-on-write at the beginning of this function?
-	 *
-	 * A: For increasing page reference count by (sys_page_map -> page_insert).
-	 */
-	ret = sys_page_map(0, (void *)(pn << PGSHIFT), 0, (void *)(pn << PGSHIFT), perm);
+		/* remap page self */
+		ret = sys_page_map(0, (void *)(pn << PGSHIFT),
+				0, (void *)(pn << PGSHIFT), perm);
+		if (ret < 0)
+			panic("sys_page_map: %e", ret);
+
+		return 0;
+	}
+
+	/* read-only */
+	ret = sys_page_map(0, (void *)(pn << PGSHIFT),
+			dst_env, (void *)(pn << PGSHIFT), perm);
 	if (ret < 0)
 		panic("sys_page_map: %e", ret);
 
@@ -156,15 +164,10 @@ share_page(envid_t dst_env, unsigned pn)
 	int perm = PGOFF(uvpt[pn]);
 	int ret;
 
-	ret = sys_page_map(0, (void *)(pn << PGSHIFT), dst_env, (void *)(pn << PGSHIFT), perm | PTE_SHARE);
+	ret = sys_page_map(0, (void *)(pn << PGSHIFT),
+			dst_env, (void *)(pn << PGSHIFT), perm);
 	if (ret < 0)
 		panic("sys_page_map: %e", ret);
-
-	if (!(perm & PTE_SHARE)) {
-		ret = sys_page_map(0, (void *)(pn << PGSHIFT), 0, (void *)(pn << PGSHIFT), perm | PTE_SHARE);
-		if (ret < 0)
-			panic("sys_page_map: %e", ret);
-	}
 
 	return 0;
 }

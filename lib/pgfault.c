@@ -20,19 +20,19 @@ void (*_pgfault_handler)(struct UTrapframe *utf) = NULL;
 void
 set_pgfault_handler(void (*handler)(struct UTrapframe *utf))
 {
-    int ret;
+	int ret;
 
-    if (!_pgfault_handler) {
-        /* First time through */
-        ret = sys_page_alloc(0, (void *)(UXSTACKTOP - PGSIZE), PTE_W);
-        if (ret < 0)
-            panic("%s: %e", __func__, ret);
+	if (!_pgfault_handler) {
+		/* First time through */
+		ret = sys_page_alloc(0, (void *)(UXSTACKTOP - PGSIZE), PTE_W);
+		if (ret < 0)
+			panic("%s: %e", __func__, ret);
 
-        ret = sys_env_set_pgfault_upcall(0, _pgfault_upcall);
-        if (ret < 0)
-            panic("%s: %e", __func__, ret);
-    }
+		ret = sys_env_set_pgfault_upcall(0, _pgfault_upcall);
+		if (ret < 0)
+			panic("%s: %e", __func__, ret);
+	}
 
-    /* call back by assembly function _pgfault_upcall */
-    _pgfault_handler = handler;
+	/* call back by assembly function _pgfault_upcall */
+	_pgfault_handler = handler;
 }
