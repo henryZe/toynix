@@ -207,6 +207,36 @@ function: sched_halt
 4. unlock kernel
 5. clean stack & restore interrupt & halt this CPU (until next interrupt comes)
 
+### Fork
+
+file: fork.c
+
+function: fork
+> User-level fork with copy-on-write.
+
+1. generate new blank env (sys_exofork)
+2. set page fault handler for this env (set_pgfault_handler)
+3. duplicate pages in user space (duppage)
+4. set page fault handler for child
+5. set env as ENV_RUNNABLE
+
+function: sfork
+> User-level fork with shared-memory.
+
+1. generate new blank env (sys_exofork)
+2. set page fault handler for this env (set_pgfault_handler)
+3. share pages with child
+4. duplicate pages in user stack area (duppage)
+5. set page fault handler for child
+6. set env as ENV_RUNNABLE
+
+function: duppage
+> duplicate page in copy-on-write strategy
+
+1. share PTE_SHARE pages directly
+2. adopt copy-on-write strategy on pages set with PTE_W or PTE_COW
+3. share read-only pages directly
+
 ## Trap
 
 ### Initialize
@@ -294,7 +324,7 @@ function: trap_dispatch
 
 file: trap.c
 function: page_fault_handler
-> handle page fault
+> handle page fault signal in kernel
 
 1. gain fault va
 2. check this incident come from user
@@ -303,6 +333,7 @@ function: page_fault_handler
 
 file: pfentry.S
 function: _pgfault_upcall
+> call user handler and restore original field
 
 1. call _pgfault_handler (means pgfault)
 2. simulate 'iret' and return to trap point
@@ -327,6 +358,7 @@ first time trap into exception stack case:
 
 file: fork.c
 function: pgfault
+> handle page fault accident in user
 
 1. check faulting access
     a. write operation
@@ -334,6 +366,14 @@ function: pgfault
 2. allocate new page
 3. copy original page to new one
 4. remap this page
+
+file: pgfault.c
+function: set_pgfault_handler
+> set page fault handler entry
+
+1. allocate exception stack
+2. set _pgfault_upcall entry
+3. set page fault handler for user
 
 ### System Call
 
@@ -351,7 +391,7 @@ function: syscall
 1. sys_getenvid: returns the current environment's envid
 2. sys_env_destroy: [env_destroy](#Create-New-Environment)
 3. sys_yield: [schedule](#Schedule)
-4. sys_exofork: !!!
+4. sys_exofork: [fork](#Fork)
 5. sys_env_set_status: set the status of a specified environment (ENV_RUNNABLE or ENV_NOT_RUNNABLE)
 6. sys_env_set_trapframe: set env's eip & esp (enable interrupts, set IOPL as 0)
 
