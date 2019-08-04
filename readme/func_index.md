@@ -218,6 +218,8 @@ function: sched_yield
 > Choose a user environment to run and run it
 
 1. select a suspending env by specific strategy and run it
+    a. Round-Robin strategy
+    b. Least-Run-Time strategy
 2. if there is no other runnable task, run current task
 3. if no task, then halt this CPU (sched_halt)
 
@@ -485,12 +487,12 @@ function: syscall
 
 #### IPC
 
-1. sys_ipc_try_send: !!!
-2. sys_ipc_recv: !!!
+1. sys_ipc_try_send: try to send 'value' to the target env 'envid' ([IPC](#Inter-Process-Communication))
+2. sys_ipc_recv: block until a value is ready ([IPC](#Inter-Process-Communication))
 
 #### Time
 
-1. sys_time_msec: gain time (unit: millisecond)
+1. sys_time_msec: gain time, unit: millisecond ([Time Tick](#Time-Tick))
 
 #### Debug Information
 
@@ -505,18 +507,19 @@ function: syscall
 
 1. sys_chdir: switch working dir of current env
 
-## Timer
+## Time Tick
 
-### Initialize
+file: time.c
+function: time_init
+> clean time-counter
 
-!!!
-time_init
+file: trap.c
+function: trap_dispatch
 
-when receives a timer signal:
-
-1. increase time tick (if this CPU is boot one)
-2. acknowledge interrupt
-3. schedule
+* when receives IRQ_TIMER:
+    1. increase time tick (if this CPU is boot one)
+    2. acknowledge interrupt
+    3. schedule
 
 ## Multiple Processor
 
@@ -600,3 +603,29 @@ asm volatile("lock; xchgl %0, %1"
             : "1" (newval)
             : "cc");
 ~~~
+
+### Inter-Process Communication
+
+#### User space
+
+file: lib/ipc.c
+
+function: ipc_recv
+> receive a value via IPC and return it, call sys_ipc_recv
+
+function: ipc_send
+> Send 'val' to 'env', call sys_ipc_try_send
+
+#### Kernel space
+
+file: kernel/syscall.c
+
+function: sys_ipc_recv
+> pending self until data is ready
+
+function: sys_ipc_try_send
+> try to send 'value' to the target env
+
+1. find target env by env id
+2. pass data page
+3. restore target env running

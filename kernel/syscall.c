@@ -344,7 +344,7 @@ sys_env_set_pgfault_upcall(envid_t envid, void *upcall)
 //		address space.
 static int
 sys_ipc_try_send(envid_t envid, int value,
-					void *srcva, unsigned perm)
+		void *srcva, unsigned perm)
 {
 	struct Env *env;
 	int ret;

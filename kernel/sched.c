@@ -6,7 +6,7 @@
 #include <kernel/cpu.h>
 #include <kernel/spinlock.h>
 
-#define MRT_STRAT 1
+#define LRT_STRAT 1
 
 void sched_halt(void);
 
@@ -34,8 +34,8 @@ sched_yield(void)
 	idle = curenv;
 	i = idle ? (ENVX(idle->env_id) + 1) % NENV : 0;
 
-#if MRT_STRAT
-	/* Minimum Run Times Schedule */
+#ifdef LRT_STRAT
+	/* Least-Run-Time Schedule */
 	for (j = 0; j < NENV; j++, i = (i + 1) % NENV) {
 		if (envs[i].env_status == ENV_RUNNABLE) {
 			if (min_env)
