@@ -42,7 +42,7 @@ mpentry_start:
 	# Turn on Protection Mode
 	lgdt	MPBOOTPHYS(gdtdesc)
 	movl	%cr0, %eax
-	orl		$CR0_PE, %eax
+	orl	$CR0_PE, %eax
 	movl	%eax, %cr0
 
 	ljmpl	$GD_KT, $(MPBOOTPHYS(start32))
@@ -66,7 +66,7 @@ start32:
 
 	# Turn on Paging.
 	movl    %cr0, %eax
-	orl		$(CR0_PE | CR0_PG | CR0_WP), %eax
+	orl	$(CR0_PE | CR0_PG | CR0_WP), %eax
 	movl	%eax, %cr0
 
 	# Switch to the per-cpu stack allocated in boot_aps()
@@ -81,13 +81,13 @@ start32:
 
 	# If mp_main returns (it should not), let it loop.
 spin:
-	jmp		spin
+	jmp	spin
 
 # Bootstrap GDT
-.p2align 2								# force 4 byte alignment
+.p2align 2						# force 4 byte alignment
 gdt:
-	SEG_NULL							# null seg
-	SEG(STA_X | STA_R, 0x0, 0xffffffff)	# code seg
+	SEG_NULL					# null seg
+	SEG(STA_X | STA_R, 0x0, 0xffffffff)		# code seg
 	SEG(STA_W, 0x0, 0xffffffff)			# data seg
 
 gdtdesc:

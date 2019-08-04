@@ -96,8 +96,10 @@ boot_aps(void)
 		if (c == cpus + cpunum())  // We've started already.
 			continue;
 
-		// Tell mpentry.S what stack to use
+		// Tell mpentry.S what stack to use.
+		// We can't use KSTACKTOP because AP can't use kern_pgdir yet (only entry_pgdir).
 		mpentry_kstack = percpu_kstacks[c - cpus] + KSTKSIZE;
+
 		// Start the CPU at mpentry_start
 		lapic_startap(c->cpu_id, PADDR(code));
 

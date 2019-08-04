@@ -232,6 +232,8 @@ function: sched_halt
 
 ### User-mode Startup
 
+start va: 0x800020
+
 file: user.ld
 > point out entry of user programs
 
@@ -243,8 +245,14 @@ ENTRY(_start)
 
 file: entry.S
 function: _start
+> enter C program
 
-!!!
+1. detect stack, if no arguments, then push 0
+2. call libmain
+
+file: libmain.c
+function: libmain
+> call 'main' entry of user program, and then self-exit
 
 ### Fork
 
@@ -275,6 +283,30 @@ function: duppage
 1. share PTE_SHARE pages directly
 2. adopt copy-on-write strategy on pages set with PTE_W or PTE_COW
 3. share read-only pages directly
+
+### Spawn
+
+file: spawn.c
+function: spawnl
+> taking command-line arguments array directly on the stack
+
+function: spawn
+> Spawn a child process from a program image loaded from the file system
+
+1. open user program image in read-only way
+2. create child env
+3. initialize stack (init_stack)
+4. read ELF program segments and map them (map_segment)
+5. copy shared pages
+6. set child eip & esp
+7. set child ENV_RUNNABLE
+
+function: init_stack
+> Set up the initial stack page for the new child process
+
+1. calculate total size of arguments
+2. copy argv to temp page
+3. map page to child's stack
 
 ## Trap
 
@@ -473,8 +505,98 @@ function: syscall
 
 1. sys_chdir: switch working dir of current env
 
-### Timer
+## Timer
+
+### Initialize
+
+!!!
+time_init
+
+when receives a timer signal:
 
 1. increase time tick (if this CPU is boot one)
 2. acknowledge interrupt
 3. schedule
+
+## Multiple Processor
+
+### Initialize LAPIC
+
+file: mpconfig.c
+function: mp_init
+> gain local APIC base address from BIOS(Basic Input Output System) or EBDA(Extended BIOS Data Area)
+
+file: lapic.c
+function: lapic_init
+> map LAPIC base address and initialize the local APIC hardware
+
+### Startup AP
+
+file: init.c
+function: boot_aps
+> start the non-boot processors(AP)
+
+1. copy mpentry_start to AP entry point
+2. figure out per-core kernel stack
+3. send startup IPI(Inter-Processor Interrupts) to boot up (lapic_startap)
+4. wait until this AP is started
+
+### Boot-up
+
+start pa: 0x7000
+
+~~~ C
+#define MPENTRY_PADDR 0x7000
+
+code = KADDR(MPENTRY_PADDR);
+lapic_startap(c->cpu_id, PADDR(code));
+~~~
+
+file: mpentry.S
+function: mpentry_start
+
+1. turn on protection mode
+2. turn on paging (load entry_pgdir)
+3. switch to the per-cpu stack
+4. call mp_main
+
+file: init.c
+function: mp_main
+
+1. load kern_pgdir
+2. initialize local APIC
+3. load GDT and segment descriptors
+4. initialize and load the per-CPU TSS and IDT
+5. set CPU status
+6. lock kernel for making sure only one process can enter the scheduler
+7. schedule
+
+## Concurrency
+
+### Spin-lock
+
+file: spinlock.c
+
+function: spin_lock
+> acquire the lock
+
+1. detect whether holding by self
+2. exchange lock status
+3. record info
+
+function: spin_unlock
+> release the lock
+
+1. detect whether holding by self, if no holding then print info
+2. exchange lock status
+
+file: x86.h
+function: xchg
+> 'xchg' instruction is atomic and x86 CPUs will not reorder loads/stores across 'lock' instructions
+
+~~~ C
+asm volatile("lock; xchgl %0, %1"
+            : "+m" (*addr), "=a" (result)
+            : "1" (newval)
+            : "cc");
+~~~

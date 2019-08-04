@@ -94,7 +94,7 @@ error:
 
 static int
 map_segment(envid_t child, uintptr_t va, size_t memsz,
-				int fd, size_t filesz, off_t file_offset, int perm)
+		int fd, size_t filesz, off_t file_offset, int perm)
 {
 	int i, ret;
 	void *blk;
@@ -112,7 +112,7 @@ map_segment(envid_t child, uintptr_t va, size_t memsz,
 
 	for (i = 0; i < memsz; i += PGSIZE) {
 		if (i >= filesz) {
-			// allocate a blank page
+			// allocate a zero page
 			ret = sys_page_alloc(child, (void *)(va + i), perm);
 			if (ret < 0)
 				return ret;
@@ -275,7 +275,7 @@ spawn(const char *prog, const char **argv)
 			perm = 0;
 
 		ret = map_segment(child, ph->p_va, ph->p_memsz, fd,
-							ph->p_filesz, ph->p_offset, perm);
+					ph->p_filesz, ph->p_offset, perm);
 		if (ret < 0)
 			goto error;
 	}
