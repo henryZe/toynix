@@ -30,8 +30,8 @@
 
 struct OpenFile {
 	uint32_t o_fileid;		// file id
-	struct File *o_file;	// mapped descriptor for open file
-	int o_mode;				// open mode
+	struct File *o_file;		// mapped descriptor for open file
+	int o_mode;			// open mode
 	struct Fd *o_fd;		// Fd page
 };
 

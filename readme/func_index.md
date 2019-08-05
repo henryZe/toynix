@@ -629,3 +629,164 @@ function: sys_ipc_try_send
 1. find target env by env id
 2. pass data page
 3. restore target env running
+
+## File System
+
+### Initialize
+
+file: init.c
+function: ENV_CREATE
+> create file system task, and this env can access IO ports
+
+file: serv.c
+function: umain
+
+1. initialize opentab (serve_init)
+2. set block cache handler, initialize super block & bitmap (fs_init)
+3. trigger fs server (serve)
+
+function: serve
+> fs server
+
+1. wait fs request
+2. dispatch proper handler
+3. response to request
+
+### Block Cache
+
+file: block_cache.c
+
+function: bc_pgfault
+> Fault any disk block that is read in to memory by loading it from disk
+
+1. find block num by page fault va
+2. allocate a page
+3. read ide device 4 sectors as 1 block(page)
+4. clear dirty bit of page by remapping, because we just read from disk and write to memory
+5. check the block was allocated in bitmap
+
+function: flush_block
+> Flush the contents of the block containing VA out to disk
+
+1. if the block is not cached or is not dirty, then skip
+2. write back to disk
+3. remap this block for cleaning dirty bit
+
+### Block Bitmap
+
+file: fs.c
+
+function: alloc_block
+> Search the bitmap for a free block and allocate it
+
+1. search free block in bitmap
+2. get it and set it occupied
+3. update bitmap
+
+function: free_block
+> Mark a block free in the bitmap
+
+1. reset free bit
+2. update bitmap
+
+### File Operations
+
+function: file_block_walk
+> Find the disk block number slot for the 'filebno'th block in file 'f'
+
+1. find block from direct array
+2. find block from indirect array
+
+function: file_get_block
+> Set *blk to the address in memory where the filebno'th block of file 'f' would be mapped
+
+1. find the block num
+2. if not allocated yet, then allocate one and map
+3. return va of this block
+
+### File Interface
+
+~~~
+      Regular env           FS env
+   +---------------+   +---------------+
+   |      read     |   |   file_read   |
+   |   (lib/fd.c)  |   |   (fs/fs.c)   |
+...|.......|.......|...|.......^.......|...............
+   |       v       |   |       |       | RPC mechanism
+   |  devfile_read |   |  serve_read   |
+   |  (lib/file.c) |   |  (fs/serv.c)  |
+   |       |       |   |       ^       |
+   |       v       |   |       |       |
+   |     fsipc     |   |     serve     | User Space
+   |  (lib/file.c) |   |  (fs/serv.c)  |
+   |       |       |   |       ^       |
+   |       v       |   |       |       |
+   |   ipc_send    |   |   ipc_recv    |
+   |       |       |   |       ^       |
+   +-------|-------+   +-------|-------+
+           |    Kernel Space   |
+           +-------------------+
+
+                        +---- struct File                : acts as file meta-data
+  struct OpenFile  <----|
+ (max 1024 at once)     +---- struct Fd(file descriptor) : associate with process (max 32 per env)
+~~~
+
+#### Lib File Interface
+
+file: file.c
+function: fsipc
+> Send an inter-environment request to the file server, and wait for a reply
+
+file: file.c
+function: open
+
+1. allocate struct fd
+2. send fd to fs server (fsipc)
+3. return fd num
+
+file: fd.c
+function: read write
+
+1. find fd by fd num
+2. find device by device-id of fd
+3. call read/write function of device(devfile_read/devfile_write)
+
+file: fd.c
+function: close
+
+1. find fd by fd num
+2. call close function of device(devfile_flush)
+3. free fd
+
+#### Server Handler
+
+file: serv.c
+function: serve_open
+
+1. find a free open file, and return file-id(openfile_alloc)
+2. if file not exist, then create
+3. open struct File from disk (call file_open)
+4. initialize struct Fd
+5. send back struct Fd
+
+function: serve_read serve_write
+
+1. find struct open file by file-id
+2. call file_read/file_write
+3. update offset
+
+function: serve_flush
+
+1. find struct open file by file-id
+2. flush file (call flush_block)
+
+#### File System Env
+
+function: file_read/file_write
+
+1. get specific block
+2. copy data from/to block cache
+
+## keyboard !!!
+## shell !!!
