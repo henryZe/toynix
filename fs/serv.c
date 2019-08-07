@@ -172,6 +172,14 @@ try_open:
 		return ret;
 	}
 
+	if ((f->f_type == FTYPE_DIR) &&
+		(req->req_omode & (O_RDWR | O_WRONLY))) {
+		if (debug)
+			cprintf("directory file is read-only\n");
+
+		return -E_INVAL;
+	}
+
 	// Save the struct file pointer
 	o->o_file = f;
 

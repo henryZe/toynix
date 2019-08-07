@@ -5,8 +5,8 @@
 #define PIPEBUFSIZ 32		// small to provoke races
 
 struct Pipe {
-	off_t p_rpos;				// read position
-	off_t p_wpos;				// write position
+	off_t p_rpos;			// read position
+	off_t p_wpos;			// write position
 	uint8_t p_buf[PIPEBUFSIZ];	// data buffer
 };
 
@@ -126,7 +126,7 @@ devpipe_read(struct Fd *fd, void *vbuf, size_t n)
 			// if we got any data, return it
 			if (i > 0)
 				return i;
-			
+
 			// if all the writers are gone, not EOF
 			if (_pipeisclosed(fd, p))
 				return 0;

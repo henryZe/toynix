@@ -1,4 +1,4 @@
-# Toynix Index
+# Toynix
 
 ## Boot Flow
 
@@ -218,8 +218,8 @@ function: sched_yield
 > Choose a user environment to run and run it
 
 1. select a suspending env by specific strategy and run it
-    a. Round-Robin strategy
-    b. Least-Run-Time strategy
+    a. `Round-Robin` strategy
+    b. `Least-Run-Time` strategy
 2. if there is no other runnable task, run current task
 3. if no task, then halt this CPU (sched_halt)
 
@@ -450,7 +450,7 @@ function: set_pgfault_handler
 
 ### System Call
 
-#### Flow
+#### Software Interrupt
 
 file: lib/syscall.c
 function: syscall
@@ -464,7 +464,7 @@ file: kernel/syscall.c
 function: syscall
 > dispatches to the correct kernel function
 
-#### Console
+#### Console Operation
 
 1. sys_cputs: print string
 2. sys_cgetc: read a character from the system console
@@ -498,12 +498,12 @@ function: syscall
 
 1. sys_debug_info: gain info of CPU & memory
 
-#### Network
+#### Transmit/Receive Packet
 
 1. sys_tx_pkt: transmit packet to e1000
 2. sys_rx_pkt: receive packet from e1000
 
-#### File System
+#### Working Path
 
 1. sys_chdir: switch working dir of current env
 
@@ -533,7 +533,7 @@ file: lapic.c
 function: lapic_init
 > map LAPIC base address and initialize the local APIC hardware
 
-### Startup AP
+### Startup APs
 
 file: init.c
 function: boot_aps
@@ -544,7 +544,7 @@ function: boot_aps
 3. send startup IPI(Inter-Processor Interrupts) to boot up (lapic_startap)
 4. wait until this AP is started
 
-### Boot-up
+### AP Boot-up
 
 start pa: 0x7000
 
@@ -606,9 +606,8 @@ asm volatile("lock; xchgl %0, %1"
 
 ### Inter-Process Communication
 
-#### User space
-
 file: lib/ipc.c
+> User space
 
 function: ipc_recv
 > receive a value via IPC and return it, call sys_ipc_recv
@@ -616,9 +615,8 @@ function: ipc_recv
 function: ipc_send
 > Send 'val' to 'env', call sys_ipc_try_send
 
-#### Kernel space
-
 file: kernel/syscall.c
+> Kernel space
 
 function: sys_ipc_recv
 > pending self until data is ready
@@ -689,7 +687,7 @@ function: free_block
 1. reset free bit
 2. update bitmap
 
-### File Operations
+### Locate File Block
 
 function: file_block_walk
 > Find the disk block number slot for the 'filebno'th block in file 'f'
@@ -704,16 +702,16 @@ function: file_get_block
 2. if not allocated yet, then allocate one and map
 3. return va of this block
 
-### File Interface
+### Regular File Interface
 
 ~~~
       Regular env           FS env
    +---------------+   +---------------+
    |      read     |   |   file_read   |
    |   (lib/fd.c)  |   |   (fs/fs.c)   |
-...|.......|.......|...|.......^.......|...............
-   |       v       |   |       |       | RPC mechanism
-   |  devfile_read |   |  serve_read   |
+...|.......|.......|...|.......^.......|.........................
+   |       v       |   |       |       |      RPC mechanism
+   |  devfile_read |   |  serve_read   | (Remote Procedure Call)
    |  (lib/file.c) |   |  (fs/serv.c)  |
    |       |       |   |       ^       |
    |       v       |   |       |       |
@@ -727,9 +725,21 @@ function: file_get_block
            |    Kernel Space   |
            +-------------------+
 
-                        +---- struct File                : acts as file meta-data
-  struct OpenFile  <----|
- (max 1024 at once)     +---- struct Fd(file descriptor) : associate with process (max 32 per env)
+
+               +--------------------+
+               |  struct OpenFile   |
+               | (max 1024 at once) |
+               +--------------------+
+                          |
+                          |
+        +-----------------+-----------------+
+        |                                   |
+        |                                   |
+        V                                   V
++-----------------+     +-----------------------------------------+
+|   struct File   |     |       struct Fd (file descriptor)       |
+|  file meta-data |     | associate with process (max 32 per env) |
++-----------------+     +-----------------------------------------+
 ~~~
 
 #### Lib File Interface
@@ -781,12 +791,101 @@ function: serve_flush
 1. find struct open file by file-id
 2. flush file (call flush_block)
 
-#### File System Env
+#### File System Operation
 
 function: file_read/file_write
 
 1. get specific block
-2. copy data from/to block cache
+2. copy data from/to block cache by fs
 
-## keyboard !!!
-## shell !!!
+### Pipe
+
+file: pipe.c
+
+function: pipe
+> open pipe read/write sides
+
+1. allocate struct fd0 & fd1
+2. map pipe data (twice)
+3. return fd1 & fd2 num
+
+function: devpipe_read
+
+1. if pipe is empty(read pos == write pos)
+    a. if no writers, then return
+    b. or yield
+2. copy from pipe buffer
+3. update read pos
+
+function: devpipe_write
+
+1. if pipe is full(write pos >= read pos + sizeof(pipe buf))
+    a. if no readers, then return
+    b. or yield
+2. copy to pipe buffer
+3. update write pos
+
+function: devpipe_close
+
+1. free fd
+2. free pipe data
+
+function: pipeisclosed
+
+1. make sure detecting in the same timer interrupt
+2. if pageref(fd) equals to pageref(pipe data), then writer/reader is closed already
+
+### Console
+
+file: console.c
+
+function: opencons
+> allocate fd, and return fd num
+
+function: devcons_read
+> call sys_cgetc, get only one character from console
+
+function: devcons_write
+> call sys_cputs, put a string to console
+
+function: devcons_close
+> free fd
+
+## Shell
+
+### Initialize
+
+file: initsh.c
+
+1. make sure close fd0
+2. open console as 0
+3. duplicate 0 to 1 (standard input/output)
+4. spawn sh
+
+### Run Command Line
+
+file: sh.c
+
+1. read command line
+2. if 'cd', then need to change workpath
+3. fork child
+4. child run command
+5. parent wait child done
+
+function: runcmd
+
+1. parse shell command
+    1. 'w': argument
+    2. '<': input redirection, open file and dup to 0
+    3. '>': output redirection, open file and dup to 1
+    4. '|': pipe, fork child, tranfer parent output to child input
+    5. '&': run background, no need to wait this child process done
+    6. ';': separate command, need to wait this child process done
+2. spawn child
+3. close all file descriptors
+4. wait child
+5. exit
+
+## Network
+
+!!!

@@ -106,8 +106,7 @@ devcons_write(struct Fd *fd, const void *vbuf, size_t n)
 static int
 devcons_close(struct Fd *fd)
 {
-	USED(fd);
-	return 0;
+	return sys_page_unmap(0, fd);
 }
 
 static int

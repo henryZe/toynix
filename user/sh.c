@@ -353,9 +353,11 @@ umain(int argc, char **argv)
 
 	while (1) {
 		char *buf;
+		char temp[MAXNAMELEN];
 
+		snprintf(temp, sizeof(temp), "%s$ ", thisenv->currentpath);
 		/* read input until '\n' */
-		buf = readline(inter_active ? "$ " : NULL);
+		buf = readline(inter_active ? temp : NULL);
 		if (buf == NULL) {
 			if (debug)
 				cprintf("EXITING\n");
