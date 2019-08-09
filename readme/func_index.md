@@ -142,8 +142,18 @@ function: page_remove
 2. decrease page ref count
 3. invalidate TLB entry
 
+### User Memory
+
 function: user_mem_check
 > Check that an environment is allowed to access the range of memory with specific permission
+
+function: user_mem_phy_addr
+> transfer user address into physical address
+
+### IO Ports
+
+function: mmio_map_region
+> Reserve size bytes in the MMIO region and map [pa,pa+size) at this location with PTE_PCD & PTE_PWT bit (cache-disable and write-through)
 
 ## Environment
 
@@ -388,7 +398,7 @@ function: trap_dispatch
 1. [page fault](#Page-Fault)
 2. breakpoint & debug
 3. [system call](#System-Call)
-4. [timer](#Timer)
+4. [time](#Time-Tick)
 5. spurious
 6. key board
 7. serial port
@@ -500,8 +510,8 @@ function: syscall
 
 #### Transmit/Receive Packet
 
-1. sys_tx_pkt: transmit packet to e1000
-2. sys_rx_pkt: receive packet from e1000
+1. sys_tx_pkt: transmit packet to e1000 ([Network](#Network))
+2. sys_rx_pkt: receive packet from e1000 ([Network](#Network))
 
 #### Working Path
 
@@ -573,6 +583,18 @@ function: mp_main
 5. set CPU status
 6. lock kernel for making sure only one process can enter the scheduler
 7. schedule
+
+## Thread
+
+!!!
+
+## ITC
+
+!!!
+
+## Malloc
+
+!!!
 
 ## Concurrency
 
@@ -875,12 +897,12 @@ file: sh.c
 function: runcmd
 
 1. parse shell command
-    1. 'w': argument
-    2. '<': input redirection, open file and dup to 0
-    3. '>': output redirection, open file and dup to 1
-    4. '|': pipe, fork child, tranfer parent output to child input
-    5. '&': run background, no need to wait this child process done
-    6. ';': separate command, need to wait this child process done
+    * 'w': argument
+    * '<': input redirection, open file and dup to 0
+    * '>': output redirection, open file and dup to 1
+    * '|': pipe, fork child, tranfer parent output to child input
+    * '&': run background, no need to wait this child process done
+    * ';': separate command, need to wait this child process done
 2. spawn child
 3. close all file descriptors
 4. wait child
@@ -888,4 +910,104 @@ function: runcmd
 
 ## Network
 
+* core network server
+* input env
+* output env
+* timer env
+
+![network server](pic/ns.png)
+
+function: nsipc
+> send an IP request to the network server, and wait for a reply
+
+### PCI Bus Initialize
+
+file: pci.c
+function: pci_init
+
+function: pci_scan_bus
+> read configuration and irq line
+
+function: pci_attach pci_attach_match
+> when matches info of device class & vendor, then call `attachfn` to initialize
+
+file: e1000.c
+function: pci_e1000_attach
+> initialize e1000 net card
+
+function: pci_func_enable
+> allocate resource to this PCI device
+
+### E1000 Interface
+
+file: e1000.c
+function: e1000_put_tx_desc
+> wait until Descriptor Done, then configure DMA registers, fill descriptor and update `e1000_tdt` pointer
+
+function: e1000_get_rx_desc
+> wait until Descriptor Done, then copy data, clean status and update `e1000_rdt` pointer
+
+### User Interface
+
+file: syscall.c
+function: sys_tx_pkt
+
+1. use `user_mem_assert` checking whether the buffer come from user space
+2. if it is the last descriptor, then mark E1000_TXD_CMD_EOP flag
+3. call e1000_put_tx_desc, if busy then yield
+
+function: sys_rx_pkt
+
+1. use `user_mem_assert` checking whether the buffer come from user space
+2. call e1000_get_rx_desc
+
+### Network Output/Input Env
+
+file: output.c
+
+1. ipc receive from network server
+2. call sys_tx_pkt
+
+file: input.c
+> When you IPC a page to the network server, it will be reading from it for a while, so don't immediately receive another packet in to the same physical page
+
+1. allocate nsipcbuf
+2. call sys_rx_pkt
+3. ipc send to network server
+
+### Core Server Env
+
 !!!
+
+### Network Timer Env
+
+!!!
+
+### HTTPD server
+
+file: httpd.c
+
+1. Receive message from client
+2. Parse url & version of request
+3. open url
+4. if file no exist or is dir, then send back 404
+5. send header
+6. send file size
+7. send content type (e.g. text/html)
+8. send header fin
+9. send data of file
+
+~~~
+Request:
+GET www.url.com/index.html V1.0
+~~~
+
+~~~
+Response:
+HTTP/1.0 200 OK
+Server: jhttpd/0.1
+Content-Length: 123
+Content-Type: text/html
+
+"Content of File"
+~~~

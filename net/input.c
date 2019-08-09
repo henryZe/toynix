@@ -37,6 +37,11 @@ input(envid_t ns_envid)
 				else
 					panic("input: sys_ipc_try_send failed\n");
 			} else {
+				/*
+				 * Actually we don't need to unmap nsipcbuf,
+				 * because it will be remapped in next routine.
+				 */
+				sys_page_unmap(0, &nsipcbuf);
 				break;
 			}
 		}

@@ -476,13 +476,10 @@ sys_tx_pkt(const uint8_t *content, uint32_t length)
 			flag = 0;
 
 		while (1) {
-			/*
-			 * Suspend the task should be better,
-			 * sys_yield would lead to leave the kernel
-			 * and lost the state on the stack.
-			 */
 			if (!e1000_put_tx_desc(addr, len, flag))
 				break;
+
+			sys_yield();
 		}
 	}
 

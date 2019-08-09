@@ -22,10 +22,8 @@ output(envid_t ns_envid)
 			continue;
 
 		//	- send the packet to the device driver
-		if (thisenv->env_ipc_value == NSREQ_OUTPUT) {
-			ret = sys_tx_pkt((const uint8_t *)nsipcbuf.pkt.jp_data, nsipcbuf.pkt.jp_len);
-			if (ret)
-				panic("Output ENV fail to transmit packets");
-		}
+		ret = sys_tx_pkt((const uint8_t *)nsipcbuf.pkt.jp_data, nsipcbuf.pkt.jp_len);
+		if (ret)
+			panic("Output ENV fail to transmit packets");
 	}
 }
