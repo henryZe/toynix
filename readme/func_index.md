@@ -975,13 +975,34 @@ file: input.c
 2. call sys_rx_pkt
 3. ipc send to network server
 
-### Core Server Env
+### Core Net-Server Env
 
-!!!
+file: net/serv.c
 
-### Network Timer Env
+1. setup timer env (as thread's time-scheduler)
+2. setup input env
+3. setup output env
+4. setup thread to run tmain
 
-!!!
+function: tmain
+
+1. TCP/IP initialize
+2. call serve
+
+function: serve
+
+1. wake up all threads
+2. receive requests
+3. if it's timer request, then schedule other threads and reset timer
+4. create thread to deal with other type of request (serve_thread)
+5. thread yield
+
+function: serve_thread
+
+1. if it's request from ns(net-server) client (such as accept, bind, shutdown, close):
+    1. transmit to lwip stack
+    2. send back return-value by ipc_send
+2. if comes from input env, call jif_input
 
 ### HTTPD server
 

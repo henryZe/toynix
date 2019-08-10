@@ -49,7 +49,7 @@ static err_t
 jif_output(struct netif *netif, struct pbuf *p,
 			struct ip_addr *ipaddr)
 {
-    /* resolve hardware address, then send (or queue) packet */
+	/* resolve hardware address, then send (or queue) packet */
 	return etharp_output(netif, p, ipaddr);
 }
 
@@ -62,20 +62,20 @@ jif_output(struct netif *netif, struct pbuf *p,
 static struct pbuf *
 low_level_input(void *va)
 {
-    struct jif_pkt *pkt = (struct jif_pkt *)va;
-    s16_t len = pkt->jp_len;
+	struct jif_pkt *pkt = (struct jif_pkt *)va;
+	s16_t len = pkt->jp_len;
 
-    struct pbuf *p = pbuf_alloc(PBUF_RAW, len, PBUF_POOL);
-    if (p == NULL)
+	struct pbuf *p = pbuf_alloc(PBUF_RAW, len, PBUF_POOL);
+	if (p == NULL)
 		return 0;
 
-    /* We iterate over the pbuf chain until we have read the entire
-     * packet into the pbuf. */
-    void *rxbuf = (void *)pkt->jp_data;
-    int copied = 0;
-    struct pbuf *q;
+	/* We iterate over the pbuf chain until we have read the entire
+	* packet into the pbuf. */
+	void *rxbuf = (void *)pkt->jp_data;
+	int copied = 0;
+	struct pbuf *q;
 
-    for (q = p; q != NULL; q = q->next) {
+	for (q = p; q != NULL; q = q->next) {
 		/* Read enough bytes to fill this pbuf in the chain.
 		 * The available data in the pbuf is given by the
 		 * q->len variable.
@@ -108,16 +108,16 @@ jif_input(struct netif *netif, void *va)
 
 	jif = netif->state;
 
-    /* move received packet into a new pbuf */
-    p = low_level_input(va);
+	/* move received packet into a new pbuf */
+	p = low_level_input(va);
 
-    /* no packet could be read, silently ignore this */
-    if (p == NULL) return;
-    /* points to packet payload, which starts with an Ethernet header */
-    ethhdr = p->payload;
+	/* no packet could be read, silently ignore this */
+	if (p == NULL) return;
+	/* points to packet payload, which starts with an Ethernet header */
+	ethhdr = p->payload;
 
-    switch (htons(ethhdr->type)) {
-    case ETHTYPE_IP:
+	switch (htons(ethhdr->type)) {
+	case ETHTYPE_IP:
 		/* update ARP table */
 		etharp_ip_input(netif, p);
 		/* skip Ethernet header */
@@ -126,7 +126,7 @@ jif_input(struct netif *netif, void *va)
 		netif->input(p, netif);
 		break;
 
-    case ETHTYPE_ARP:
+	case ETHTYPE_ARP:
 		/* pass p to ARP module  */
 		etharp_arp_input(netif, jif->ethaddr, p);
 		break;
@@ -148,16 +148,16 @@ static err_t
 low_level_output(struct netif *netif, struct pbuf *p)
 {
 	int r = sys_page_alloc(0, (void *)PKTMAP, PTE_U|PTE_W|PTE_P);
-    if (r < 0)
+	if (r < 0)
 		panic("jif: could not allocate page of memory");
 
 	struct jif_pkt *pkt = (struct jif_pkt *)PKTMAP;
-    struct jif *jif = netif->state;
+	struct jif *jif = netif->state;
 
-    char *txbuf = pkt->jp_data;
-    int txsize = 0;
-    struct pbuf *q;
-    for (q = p; q != NULL; q = q->next) {
+	char *txbuf = pkt->jp_data;
+	int txsize = 0;
+	struct pbuf *q;
+	for (q = p; q != NULL; q = q->next) {
 		/*
 		 * Send the data from the pbuf to the interface, one pbuf at a
 		 * time. The size of the data in each pbuf is kept in the ->len
@@ -170,10 +170,10 @@ low_level_output(struct netif *netif, struct pbuf *p)
 		txsize += q->len;
 	}
 
-    pkt->jp_len = txsize;
+	pkt->jp_len = txsize;
 
-    ipc_send(jif->envid, NSREQ_OUTPUT, (void *)pkt, PTE_P|PTE_W|PTE_U);
-    sys_page_unmap(0, (void *)pkt);
+	ipc_send(jif->envid, NSREQ_OUTPUT, (void *)pkt, PTE_P|PTE_W|PTE_U);
+	sys_page_unmap(0, (void *)pkt);
 
 	return ERR_OK;
 }
