@@ -296,6 +296,7 @@ load_icode(struct Env *e, uint8_t *binary)
 	struct Elf *ELFHDR = (struct Elf *)binary;
 	struct Proghdr *ph, *eph;
 	int i;
+	uintptr_t va;
 
 	/* switch address space */
 	lcr3(PADDR(e->env_pgdir));
@@ -331,6 +332,13 @@ load_icode(struct Env *e, uint8_t *binary)
 	ret = page_insert(e->env_pgdir, p, (void *)(USTACKTOP - PGSIZE), PTE_U | PTE_W);
 	if (ret)
 		panic("page_insert %e\n", ret);
+
+	for (va = USTACKTOP - USTKSIZE; va < (USTACKTOP - PGSIZE); va += PGSIZE) {
+		// map zero page
+		ret = page_insert(e->env_pgdir, pages, (void *)va, PTE_U | PTE_COW);
+		if (ret)
+			panic("page_insert %e\n", ret);
+	}
 
 	/* switch back to kern_pgdir */
 	lcr3(PADDR(kern_pgdir));

@@ -2,13 +2,9 @@
 
 #include <lib.h>
 
-// PTE_COW marks copy-on-write page table entries.
-// It is one of the bits explicitly allocated to user processes (PTE_AVAIL).
-#define PTE_COW		0x800
-
 // Custom page fault handler - if faulting page is copy-on-write,
 // map in our own private writable copy.
-static void
+void
 pgfault(struct UTrapframe *utf)
 {
 	void *addr = (void *)utf->utf_fault_va;
@@ -123,13 +119,6 @@ fork(void)
 		return 0;
 	}
 
-	/*
-	 * Set _pgfault_upcall call back function for parent.
-	 * Must be set in the first because dup stack later
-	 * would cause page fault.
-	 */
-	set_pgfault_handler(pgfault);
-
 	/* only dup-page from 0 to USTACKTOP */
 	for (va = 0; va < USTACKTOP; va += PGSIZE) {
 		if ((uvpd[PDX(va)] & PTE_P) &&
@@ -183,8 +172,6 @@ sfork(void)
 	if (!envid)
 		/* child */
 		return 0;
-
-	set_pgfault_handler(pgfault);
 
 	/* only dup-page from 0 to (FILEDATA + MAXFD * PGSIZE) */
 	for (va = 0; va < (FILEDATA + MAXFD * PGSIZE); va += PGSIZE) {

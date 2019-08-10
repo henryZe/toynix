@@ -19,6 +19,7 @@ USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/testpiperace2 \
 		$(OBJDIR)/$(USRDIR)/pingpongs \
 		$(OBJDIR)/$(USRDIR)/pingpong \
+		$(OBJDIR)/$(USRDIR)/testuserstack \
 
 FSIMGTXTFILES := \
 		$(FSDIR)/newmotd \

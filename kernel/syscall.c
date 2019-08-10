@@ -237,13 +237,19 @@ sys_page_map(envid_t srcenv_id, void *src,
 		(envid2env(dtsenv_id, &dst_env, 1) < 0))
 		return -E_BAD_ENV;
 
-	page = page_lookup(src_env->env_pgdir, src, &pte);
-	if (!page)
-		return -E_INVAL;
+	if (!src) {
+		page = pages;	// zero page, read-only
+		if (perm & PTE_W)
+			return -E_INVAL;
+	} else {
+		page = page_lookup(src_env->env_pgdir, src, &pte);
+		if (!page)
+			return -E_INVAL;
 
-	/* src va is read-only but attempt set perm PTE_W */
-	if ((~(*pte) & PTE_W) && (perm & PTE_W))
-		return -E_INVAL;
+		/* src va is read-only but attempt set perm PTE_W */
+		if ((~(*pte) & PTE_W) && (perm & PTE_W))
+			return -E_INVAL;
+	}
 
 	ret = page_insert(dst_env->env_pgdir, page, dst, perm | PTE_U);
 	if (ret < 0)

@@ -16,6 +16,9 @@ libmain(int argc, char **argv)
 	if (argc > 0)
 		binaryname = argv[0];
 
+	/* set default page fault handler */
+	set_pgfault_handler(pgfault);
+
 	// call user main routine
 	umain(argc, argv);
 

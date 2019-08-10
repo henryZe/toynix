@@ -126,6 +126,7 @@
 // Next page left invalid to guard against exception stack overflow; then:
 // Top of normal user stack
 #define USTACKTOP	(UTOP - 2*PGSIZE)
+#define USTKSIZE	(8*PGSIZE)
 
 // Where user programs generally begin
 #define UTEXT		(2*PTSIZE)

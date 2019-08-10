@@ -65,6 +65,10 @@
 #define PTE_PS		0x080	// Page Size
 #define PTE_G		0x100	// Global
 
+// PTE_COW marks copy-on-write page table entries.
+// It is one of the bits explicitly allocated to user processes (PTE_AVAIL).
+#define PTE_COW		0x800
+
 // The PTE_AVAIL bits aren't used by the kernel or interpreted by the
 // hardware, so user processes are allowed to set them arbitrarily.
 #define PTE_AVAIL	0xE00	// Available for software use

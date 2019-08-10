@@ -17,6 +17,7 @@ init_stack(envid_t child, const char **argv, uintptr_t *init_esp)
 	int argc, i, ret;
 	char *string_store;
 	uintptr_t *argv_store;
+	uintptr_t va;
 
 	// Count the number of arguments (argc)
 	// and the total amount of space needed for strings (string_size).
@@ -82,6 +83,13 @@ init_stack(envid_t child, const char **argv, uintptr_t *init_esp)
 	ret = sys_page_unmap(0, UTEMP);
 	if (ret < 0)
 		return ret;
+
+	for (va = USTACKTOP - USTKSIZE; va < (USTACKTOP - PGSIZE); va += PGSIZE) {
+		// map zero page
+		ret = sys_page_map(0, 0, child, (void *)va, PTE_COW);
+		if (ret < 0)
+			return ret;
+	}
 
 	return 0;
 

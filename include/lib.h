@@ -46,6 +46,7 @@ void _pgfault_upcall(void);
 
 // fork.c
 #define	PTE_SHARE	0x400
+void pgfault(struct UTrapframe *utf);
 envid_t fork(void);
 envid_t sfork(void);
 
