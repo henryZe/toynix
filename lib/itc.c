@@ -32,7 +32,7 @@ struct sys_mbox_entry {
 	int freed;
 	int head, nextq;		/* free msg index */
 	void *msg[MBOXSLOTS];
-	sys_sem_t queued_msg;	/* sem of queued */
+	sys_sem_t queued_msg;		/* sem of queued */
 	sys_sem_t free_msg;		/* sem of free */
 	LIST_ENTRY(sys_mbox_entry) link;
 };
@@ -288,7 +288,7 @@ timeout_cleanup(thread_id_t tid)
 {
 	struct sys_thread *t;
 
-    lwip_core_lock();
+	lwip_core_lock();
 
 	LIST_FOREACH(t, &threads[tid % thread_hash_size], link) {
 		if (t->tid == tid) {

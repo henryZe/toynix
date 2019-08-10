@@ -155,6 +155,13 @@ function: user_mem_phy_addr
 function: mmio_map_region
 > Reserve size bytes in the MMIO region and map [pa,pa+size) at this location with PTE_PCD & PTE_PWT bit (cache-disable and write-through)
 
+### Malloc
+
+file: lib/malloc.c
+
+function: malloc
+function: free
+
 ## Environment
 
 ### Initialize
@@ -586,15 +593,60 @@ function: mp_main
 
 ## Thread
 
-!!!
+### Thread Period
 
-## ITC
+file: lib/thread.c
 
-!!!
+function: thread_init
+> initialize thread-queue
 
-## Malloc
+function: thread_create
 
-!!!
+1. allocate thread context, thread id, stack
+2. set thread esp & eip(thread_entry), entry & arg
+3. push this thread into thread-queue
+4. return thread id
+
+function: thread_entry
+
+1. call tc_entry with tc_arg
+2. exit by thread_halt
+
+function: thread_halt
+
+1. pop one element from kill_queue, call hook(tc_onhalt, which set by thread_onhalt) and free resources
+2. push self into kill_queue
+3. thread yield
+4. if no other threads, then the whole env exit
+
+### Thread Yield
+
+function: thread_yield
+
+1. pop one element from thread-queue
+2. if no other thread, then return
+3. store jump point(toynix_setjmp), and push self into thread-queue
+4. load thread context and yield(toynix_longjmp)
+
+function: toynix_setjmp
+> store current context and return 0
+
+function: toynix_longjmp
+> load context and return arg2
+
+### Thread Wait & Wakeup
+
+function: thread_wait
+
+1. sleep until:
+    * condition no meet
+    * already waken up
+2. clean wakeup bit
+
+function: thread_wakeup
+
+1. find all of target thread
+2. set wakeup bit
 
 ## Concurrency
 
@@ -649,6 +701,62 @@ function: sys_ipc_try_send
 1. find target env by env id
 2. pass data page
 3. restore target env running
+
+### Inter-Thread Communication
+
+file: itc.c
+
+function: sys_init
+> initialize sems & mboxes, and insert into free list
+
+#### Semaphore
+
+function: sys_sem_new
+
+1. get free sem from list
+2. set counter number
+3. return sem id
+
+function: sys_sem_free
+> insert back to free list
+
+function: sys_arch_sem_wait
+
+1. if counter > 0, then request counter and return back
+2. if counter = 0, return when:
+    * thread wait counter changed
+    * sleep until time-out
+
+function: sys_sem_signal
+
+1. post counter
+2. if there are someone waiting, then wakeup them([thread_wakeup](#Thread-Wait-&-Wakeup))
+
+#### Mail Box
+
+function: sys_mbox_new
+
+1. get a free mailbox
+2. allocate semaphores for queued message and free message
+
+function: sys_mbox_free
+
+1. free semaphores
+2. insert mailbox back to free list
+
+function: sys_mbox_post
+
+1. wait sem of free msg
+2. put msg into mailbox slot
+3. update `nextq` of mailbox
+4. post sem of queued msg
+
+function: sys_arch_mbox_fetch
+
+1. wait sem of queued msg
+2. gain msg from mailbox slot
+3. update `head` of mailbox
+4. post sem of free msg
 
 ## File System
 

@@ -59,16 +59,17 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 
 ## 8 Todo List
 
-### 8.1 Features
+### 8.1 Optimize
 
-1. fix lwip connect function by user/echotest.c
+1. optimize malloc with buddy allocator
 2. convert organization of fs data block into LIST
 3. replace static lib with share lib
 4. fine-gained lock instead of global kernel lock (page allocator, console driver, scheduler, IPC state)
 
-### 8.2 Bug Report
+### 8.2 Bug
 
-1. Kernel lock sometimes is illegally unlocked.
+1. lwip connect function by user/echotest.c
+2. Kernel lock sometimes is illegally unlocked.
 
 ## 9 Ported Modules Claim
 

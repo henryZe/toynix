@@ -30,7 +30,7 @@ ENTRY(toynix_setjmp)
 	movl	%esi, 16(%ecx)		// esi -> jb_esi
 	movl	%edi, 20(%ecx)		// edi -> jb_edi
 
-	movl	$0, %eax			// return 0
+	movl	$0, %eax		// return 0
 	ret
 
 ENTRY(toynix_longjmp)
@@ -44,5 +44,5 @@ ENTRY(toynix_longjmp)
 	movl	16(%eax), %esi
 	movl	20(%eax), %edi
 
-	movl	%edx, %eax			// return value
-	jmp		*%ecx
+	movl	%edx, %eax		// return value
+	jmp	*%ecx

@@ -62,6 +62,7 @@ thread_wakeup(volatile uint32_t *addr)
 	}
 }
 
+/* return how many wakeup threads in total */
 int
 thread_wakeups_pending(void)
 {
