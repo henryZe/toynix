@@ -2,7 +2,7 @@
 
 ## 0 Introduction
 
-Toynix is a tiny kernel (which was programmed just for fun) in Unix-like interface. It is composed of simplified fs and network module in micro-kernel spirit. [Function Index](./readme/func_index.md)
+Toynix is a tiny kernel (which was programmed just for fun) in Unix-like interface. It is composed of simplified fs and network module in micro-kernel spirit. [[Function Index]](./readme/func_index.md)
 
 Here are some critical features you might be concerned about:
 

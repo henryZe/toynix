@@ -158,6 +158,7 @@ function: mmio_map_region
 ### Malloc
 
 file: lib/malloc.c
+> buddy allocator + page reference + copy-on-write + zero page
 
 function: malloc
 function: free
@@ -271,7 +272,10 @@ function: _start
 
 file: libmain.c
 function: libmain
-> call 'main' entry of user program, and then self-exit
+
+1. set page fault handler (handle user stack page)
+2. call 'main' entry of user program
+3. exit by self
 
 ### Fork
 
@@ -281,20 +285,18 @@ function: fork
 > User-level fork with copy-on-write.
 
 1. generate new blank env (sys_exofork)
-2. set page fault handler for this env (set_pgfault_handler)
-3. duplicate pages in user space (duppage)
-4. set page fault handler for child
-5. set env as ENV_RUNNABLE
+2. duplicate pages in user space (duppage)
+3. set page fault handler for child
+4. set env as ENV_RUNNABLE
 
 function: sfork
 > User-level fork with shared-memory.
 
 1. generate new blank env (sys_exofork)
-2. set page fault handler for this env (set_pgfault_handler)
-3. share pages with child
-4. duplicate pages in user stack area (duppage)
-5. set page fault handler for child
-6. set env as ENV_RUNNABLE
+2. share pages with child
+3. duplicate pages in user stack area (duppage)
+4. set page fault handler for child
+5. set env as ENV_RUNNABLE
 
 function: duppage
 > duplicate page in copy-on-write strategy
@@ -325,7 +327,7 @@ function: init_stack
 
 1. calculate total size of arguments
 2. copy argv to temp page
-3. map page to child's stack
+3. map page(and COW zero page) to child's stack
 
 ## Trap
 
