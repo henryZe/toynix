@@ -1,8 +1,10 @@
 # Toynix
 
-## Boot Flow
+![Toynix](pic/Toynix.png)
 
-### x86 boot ROM
+## Boot
+
+### x86 Boot ROM
 
 start pa: 0xffff0
 
@@ -939,7 +941,7 @@ function: pipe
 
 1. allocate struct fd0 & fd1
 2. map pipe data (twice)
-3. return fd1 & fd2 num
+3. return fd0 & fd1 num
 
 function: devpipe_read
 
