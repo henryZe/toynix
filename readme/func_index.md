@@ -2,13 +2,13 @@
 
 ![Toynix](pic/Toynix.png)
 
-## Boot
+## 1 Boot
 
-### x86 Boot ROM
+### 1.1 x86 Boot ROM
 
 start pa: 0xffff0
 
-### Bootloader
+### 1.2 Bootloader
 
 start pa: 0x7c00
 
@@ -19,17 +19,17 @@ file: boot/Makefile
 ld -e start -Ttext 0x7C00
 ~~~
 
-file: boot.S function: start
+file: boot/boot.S function: start
 
 1. switch to 32-bit protected mode
 2. jump into bootmain
 
-file: bootmain.c function: bootmain
+file: boot/bootmain.c function: bootmain
 
 1. load elf file, include elf header & program headers
 2. jump into kernel entry
 
-### Kernel
+### 1.3 Kernel
 
 start pa: 0x00100000 va: 0xF0100000
 
@@ -45,13 +45,13 @@ ENTRY(_start)
     }
 ~~~
 
-file: entry.S function: _start
+file: kernel/entry.S function: _start
 
 1. load entry_pgdir into cr3 and turn on paging
 2. initialize kernel stack(8 pages) in data segment
 3. call init
 
-file: init.c function: init
+file: kernel/init.c function: init
 
 1. initialize bss segment
 2. initialize console devices including CGA, keyboard and serial port (cons_init)
@@ -67,11 +67,11 @@ file: init.c function: init
 12. start network server (net serve)
 13. start init process (user initsh)
 
-## Monitor
+## 2 Monitor
 
-file: monitor.c
+file: kernel/monitor.c
 
-### Trace of Stack
+### 2.1 Trace of Stack
 
 function: mon_backtrace
 > Display the trace of function call
@@ -102,11 +102,11 @@ function: mon_backtrace
             +---------------+
 ~~~
 
-## Memory Management
+## 3 Memory Management
 
-### Initialize
+### 3.1 Initialize
 
-file: pmap.c function: mem_init
+file: kernel/pmap.c function: mem_init
 
 1. detect available physical memory size
 2. allocate kern_pgdir by simplified allocator(boot_alloc)
@@ -121,9 +121,9 @@ file: pmap.c function: mem_init
 11. load kern_pgdir into cr3 register
 12. enable paging by loading cr0 register
 
-### Page Management
+### 3.2 Page Management
 
-file: pmap.c
+file: kernel/pmap.c
 
 function: page_alloc
 > Allocates a physical page
@@ -144,7 +144,7 @@ function: page_remove
 2. decrease page ref count
 3. invalidate TLB entry
 
-### User Memory
+### 3.3 User Memory
 
 function: user_mem_check
 > Check that an environment is allowed to access the range of memory with specific permission
@@ -152,12 +152,12 @@ function: user_mem_check
 function: user_mem_phy_addr
 > transfer user address into physical address
 
-### IO Ports
+### 3.4 IO Ports
 
 function: mmio_map_region
 > Reserve size bytes in the MMIO region and map [pa,pa+size) at this location with PTE_PCD & PTE_PWT bit (cache-disable and write-through)
 
-### Malloc
+### 3.5 Malloc
 
 file: lib/malloc.c
 > buddy allocator + page reference + copy-on-write + zero page
@@ -165,11 +165,11 @@ file: lib/malloc.c
 function: malloc
 function: free
 
-## Environment
+## 4 Environment
 
-### Initialize
+### 4.1 Initialize
 
-file: pmap.c
+file: kernel/pmap.c
 
 function: env_init
 > Initialize all of the Env structures in the envs array and add them to the env_free_list
@@ -177,7 +177,7 @@ function: env_init
 function: env_init_percpu
 > Configure the segmentation hardware with separate segments for privilege level 0 (kernel) and privilege level 3 (user)
 
-### Create New Environment
+### 4.2 Create New Environment
 
 function: env_setup_vm
 > Initialize the kernel virtual memory layout for environment e
@@ -230,9 +230,9 @@ function: env_free
 3. free the page dir
 4. set env free and add it into free list
 
-### Schedule
+### 4.3 Schedule
 
-file: sched.c
+file: kernel/sched.c
 
 function: sched_yield
 > Choose a user environment to run and run it
@@ -252,11 +252,11 @@ function: sched_halt
 4. unlock kernel
 5. clean stack & restore interrupt & halt this CPU (until next interrupt comes)
 
-### User-mode Startup
+### 4.4 User-mode Startup
 
 start va: 0x800020
 
-file: user.ld
+file: user/user.ld
 > point out entry of user programs
 
 ~~~ ld
@@ -265,23 +265,23 @@ ENTRY(_start)
     . = 0x800020;
 ~~~
 
-file: entry.S
+file: lib/entry.S
 function: _start
 > enter C program
 
 1. detect stack, if no arguments, then push 0
 2. call libmain
 
-file: libmain.c
+file: lib/libmain.c
 function: libmain
 
 1. set page fault handler (handle user stack page)
 2. call 'main' entry of user program
 3. exit by self
 
-### Fork
+### 4.5 Fork
 
-file: fork.c
+file: lib/fork.c
 
 function: fork
 > User-level fork with copy-on-write.
@@ -307,9 +307,9 @@ function: duppage
 2. adopt copy-on-write strategy on pages set with PTE_W or PTE_COW
 3. share read-only pages directly
 
-### Spawn
+### 4.6 Spawn
 
-file: spawn.c
+file: lib/spawn.c
 function: spawnl
 > taking command-line arguments array directly on the stack
 
@@ -331,11 +331,13 @@ function: init_stack
 2. copy argv to temp page
 3. map page(and COW zero page) to child's stack
 
-## Trap
+## 5 Trap
 
-### Initialize
+![Exception & Interrupt](pic/exception_interrupt.jpg)
 
-file: trap.c
+### 5.1 Initialize
+
+file: kernel/trap.c
 
 function: trap_init
 > set trap, soft interrupt, interrupt handler, and initialize TSS for each CPU, load tss selector & idt
@@ -343,9 +345,9 @@ function: trap_init
 1. set handler in idt
 2. load tss & idt in each CPU
 
-### Exception & Interruption
+### 5.2 Flow
 
-file: trapentry.S
+file: kernel/trapentry.S
 
 function: TRAPHANDLER_NOEC TRAPHANDLER
 > It pushes a trap number onto the stack, then jumps to alltraps
@@ -393,7 +395,7 @@ function: alltraps
     +--------------------+ <---- ESP
 ~~~
 
-file: trap.c
+file: kernel/trap.c
 
 function: trap
 > handle the exception/interrupt
@@ -414,9 +416,9 @@ function: trap_dispatch
 6. key board
 7. serial port
 
-### Page Fault
+### 5.3 Page Fault
 
-file: trap.c
+file: kernel/trap.c
 function: page_fault_handler
 > handle page fault signal in kernel
 
@@ -425,7 +427,7 @@ function: page_fault_handler
 3. prepare User Trapframe in stack
 4. set eip as _pgfault_upcall and return to user (env_run)
 
-file: pfentry.S
+file: lib/pfentry.S
 function: _pgfault_upcall
 > call user handler and restore original field
 
@@ -450,7 +452,7 @@ first time trap into exception stack case:
 +-------------------+
 ~~~
 
-file: fork.c
+file: lib/fork.c
 function: pgfault
 > handle page fault accident in user
 
@@ -461,7 +463,7 @@ function: pgfault
 3. copy original page to new one
 4. remap this page
 
-file: pgfault.c
+file: lib/pgfault.c
 function: set_pgfault_handler
 > set page fault handler entry
 
@@ -469,15 +471,15 @@ function: set_pgfault_handler
 2. set _pgfault_upcall entry
 3. set page fault handler for user
 
-### System Call
+### 5.4 System Call
 
-#### Software Interrupt
+#### 5.4.1 Flow
 
 file: lib/syscall.c
 function: syscall
 > generic system call in user, use 'int $T_SYSCALL'
 
-file: trap.c
+file: kernel/trap.c
 function: trap_dispatch
 > parse trap num and call the relevant handler in kernel
 
@@ -485,12 +487,12 @@ file: kernel/syscall.c
 function: syscall
 > dispatches to the correct kernel function
 
-#### Console Operation
+#### 5.4.2 Console
 
 1. sys_cputs: print string
 2. sys_cgetc: read a character from the system console
 
-#### Env
+#### 5.4.3 Env
 
 1. sys_getenvid: returns the current environment's envid
 2. sys_env_destroy: [env_destroy](#Create-New-Environment)
@@ -499,42 +501,42 @@ function: syscall
 5. sys_env_set_status: set the status of a specified environment (ENV_RUNNABLE or ENV_NOT_RUNNABLE)
 6. sys_env_set_trapframe: set env's eip & esp (enable interrupts, set IOPL as 0)
 
-#### Memory
+#### 5.4.4 Memory
 
 1. sys_page_alloc: allocate a page of memory and map it at 'va' with permission
 2. sys_page_map: map the page of memory at 'src va' in src env's address space at 'dst va' in dst env's address space with permission 'perm'
 3. sys_page_unmap: unmap the page of memory at 'va' in the address space of 'env'
 4. sys_env_set_pgfault_upcall: [set the page fault upcall](#Page-Fault)
 
-#### IPC
+#### 5.4.5 IPC
 
 1. sys_ipc_try_send: try to send 'value' to the target env 'envid' ([IPC](#Inter-Process-Communication))
 2. sys_ipc_recv: block until a value is ready ([IPC](#Inter-Process-Communication))
 
-#### Time
+#### 5.4.6 Time
 
 1. sys_time_msec: gain time, unit: millisecond ([Time Tick](#Time-Tick))
 
-#### Debug Information
+#### 5.4.7 Debug
 
 1. sys_debug_info: gain info of CPU & memory
 
-#### Transmit/Receive Packet
+#### 5.4.8 Network
 
 1. sys_tx_pkt: transmit packet to e1000 ([Network](#Network))
 2. sys_rx_pkt: receive packet from e1000 ([Network](#Network))
 
-#### Working Path
+#### 5.4.9 FS
 
 1. sys_chdir: switch working dir of current env
 
-## Time Tick
+## 6 Tick
 
-file: time.c
+file: kernel/time.c
 function: time_init
 > clean time-counter
 
-file: trap.c
+file: kernel/trap.c
 function: trap_dispatch
 
 * when receives IRQ_TIMER:
@@ -542,21 +544,21 @@ function: trap_dispatch
     2. acknowledge interrupt
     3. schedule
 
-## Multiple Processor
+## 7 Multiple Processor
 
-### Initialize LAPIC
+### 7.1 Initialize LAPIC
 
-file: mpconfig.c
+file: kernel/mpconfig.c
 function: mp_init
 > gain local APIC base address from BIOS(Basic Input Output System) or EBDA(Extended BIOS Data Area)
 
-file: lapic.c
+file: kernel/lapic.c
 function: lapic_init
 > map LAPIC base address and initialize the local APIC hardware
 
-### Startup APs
+### 7.2 Startup APs
 
-file: init.c
+file: kernel/init.c
 function: boot_aps
 > start the non-boot processors(AP)
 
@@ -565,7 +567,7 @@ function: boot_aps
 3. send startup IPI(Inter-Processor Interrupts) to boot up (lapic_startap)
 4. wait until this AP is started
 
-### AP Boot-up
+### 7.3 AP Boot-up
 
 start pa: 0x7000
 
@@ -576,7 +578,7 @@ code = KADDR(MPENTRY_PADDR);
 lapic_startap(c->cpu_id, PADDR(code));
 ~~~
 
-file: mpentry.S
+file: kernel/mpentry.S
 function: mpentry_start
 
 1. turn on protection mode
@@ -584,7 +586,7 @@ function: mpentry_start
 3. switch to the per-cpu stack
 4. call mp_main
 
-file: init.c
+file: kernel/init.c
 function: mp_main
 
 1. load kern_pgdir
@@ -595,9 +597,9 @@ function: mp_main
 6. lock kernel for making sure only one process can enter the scheduler
 7. schedule
 
-## Thread
+## 8 Thread
 
-### Thread Period
+### 8.1 Thread Period
 
 file: lib/thread.c
 
@@ -623,7 +625,7 @@ function: thread_halt
 3. thread yield
 4. if no other threads, then the whole env exit
 
-### Thread Yield
+### 8.2 Thread Yield
 
 function: thread_yield
 
@@ -638,7 +640,7 @@ function: toynix_setjmp
 function: toynix_longjmp
 > load context and return arg2
 
-### Thread Wait & Wakeup
+### 8.3 Thread Wait & Wakeup
 
 function: thread_wait
 
@@ -652,11 +654,11 @@ function: thread_wakeup
 1. find all of target thread
 2. set wakeup bit
 
-## Concurrency
+## 9 Concurrency
 
-### Spin-lock
+### 9.1 Spin-lock
 
-file: spinlock.c
+file: kernel/spinlock.c
 
 function: spin_lock
 > acquire the lock
@@ -671,7 +673,7 @@ function: spin_unlock
 1. detect whether holding by self, if no holding then print info
 2. exchange lock status
 
-file: x86.h
+file: include/x86.h
 function: xchg
 > 'xchg' instruction is atomic and x86 CPUs will not reorder loads/stores across 'lock' instructions
 
@@ -682,7 +684,7 @@ asm volatile("lock; xchgl %0, %1"
             : "cc");
 ~~~
 
-### Inter-Process Communication
+### 9.2 Inter-Process Communication
 
 file: lib/ipc.c
 > User space
@@ -706,14 +708,14 @@ function: sys_ipc_try_send
 2. pass data page
 3. restore target env running
 
-### Inter-Thread Communication
+### 9.3 Inter-Thread Communication
 
-file: itc.c
+file: lib/itc.c
 
 function: sys_init
 > initialize sems & mboxes, and insert into free list
 
-#### Semaphore
+#### 9.4 Semaphore
 
 function: sys_sem_new
 
@@ -736,7 +738,7 @@ function: sys_sem_signal
 1. post counter
 2. if there are someone waiting, then wakeup them([thread_wakeup](#Thread-Wait-&-Wakeup))
 
-#### Mail Box
+#### 9.5 Mail Box
 
 function: sys_mbox_new
 
@@ -762,15 +764,15 @@ function: sys_arch_mbox_fetch
 3. update `head` of mailbox
 4. post sem of free msg
 
-## File System
+## 10 File System
 
-### Initialize
+### 10.1 Initialize
 
-file: init.c
+file: kernel/init.c
 function: ENV_CREATE
 > create file system task, and this env can access IO ports
 
-file: serv.c
+file: fs/serv.c
 function: umain
 
 1. initialize opentab (serve_init)
@@ -784,9 +786,9 @@ function: serve
 2. dispatch proper handler
 3. response to request
 
-### Block Cache
+### 10.2 Block Cache
 
-file: block_cache.c
+file: fs/block_cache.c
 
 function: bc_pgfault
 > Fault any disk block that is read in to memory by loading it from disk
@@ -804,9 +806,9 @@ function: flush_block
 2. write back to disk
 3. remap this block for cleaning dirty bit
 
-### Block Bitmap
+### 10.3 Block & Bitmap
 
-file: fs.c
+file: fs/fs.c
 
 function: alloc_block
 > Search the bitmap for a free block and allocate it
@@ -821,13 +823,7 @@ function: free_block
 1. reset free bit
 2. update bitmap
 
-### Locate File Block
-
-function: file_block_walk
-> Find the disk block number slot for the 'filebno'th block in file 'f'
-
-1. find block from direct array
-2. find block from indirect array
+### 10.4  File & Block
 
 function: file_get_block
 > Set *blk to the address in memory where the filebno'th block of file 'f' would be mapped
@@ -836,7 +832,16 @@ function: file_get_block
 2. if not allocated yet, then allocate one and map
 3. return va of this block
 
-### Regular File Interface
+function: file_free_block
+> Remove a block from file
+
+function: file_block_walk
+> Find the disk block number slot for the 'filebno'th block in file 'f'
+
+1. find block from direct array
+2. find block from indirect array
+
+### 10.5 Regular File Interface
 
 ~~~
       Regular env           FS env
@@ -876,36 +881,36 @@ function: file_get_block
 +-----------------+     +-----------------------------------------+
 ~~~
 
-#### Lib File Interface
+#### 10.5.1 Lib File Interface
 
-file: file.c
+file: lib/file.c
 function: fsipc
 > Send an inter-environment request to the file server, and wait for a reply
 
-file: file.c
+file: lib/file.c
 function: open
 
 1. allocate struct fd
 2. send fd to fs server (fsipc)
 3. return fd num
 
-file: fd.c
+file: lib/fd.c
 function: read write
 
 1. find fd by fd num
 2. find device by device-id of fd
 3. call read/write function of device(devfile_read/devfile_write)
 
-file: fd.c
+file: lib/fd.c
 function: close
 
 1. find fd by fd num
 2. call close function of device(devfile_flush)
 3. free fd
 
-#### Server Handler
+#### 10.5.2 Server Handler
 
-file: serv.c
+file: fs/serv.c
 function: serve_open
 
 1. find a free open file, and return file-id(openfile_alloc)
@@ -925,16 +930,16 @@ function: serve_flush
 1. find struct open file by file-id
 2. flush file (call flush_block)
 
-#### File System Operation
+#### 10.5.3 File System Operation
 
 function: file_read/file_write
 
 1. get specific block
 2. copy data from/to block cache by fs
 
-### Pipe
+### 10.6 Pipe
 
-file: pipe.c
+file: lib/pipe.c
 
 function: pipe
 > open pipe read/write sides
@@ -969,9 +974,9 @@ function: pipeisclosed
 1. make sure detecting in the same timer interrupt
 2. if pageref(fd) equals to pageref(pipe data), then writer/reader is closed already
 
-### Console
+### 10.7 Console
 
-file: console.c
+file: lib/console.c
 
 function: opencons
 > allocate fd, and return fd num
@@ -985,20 +990,20 @@ function: devcons_write
 function: devcons_close
 > free fd
 
-## Shell
+## 11 Shell
 
-### Initialize
+### 11.1 Initialize
 
-file: initsh.c
+file: user/initsh.c
 
 1. make sure close fd0
 2. open console as 0
 3. duplicate 0 to 1 (standard input/output)
 4. spawn sh
 
-### Run Command Line
+### 11.2 Run Command Line
 
-file: sh.c
+file: user/sh.c
 
 1. read command line
 2. if 'cd', then need to change workpath
@@ -1020,7 +1025,7 @@ function: runcmd
 4. wait child
 5. exit
 
-## Network
+## 12 Network
 
 * core network server
 * input env
@@ -1029,12 +1034,13 @@ function: runcmd
 
 ![network server](pic/ns.png)
 
+file: lib/nsipc.c
 function: nsipc
 > send an IP request to the network server, and wait for a reply
 
-### PCI Bus Initialize
+### 12.1 PCI Bus Initialize
 
-file: pci.c
+file: kernel/pci.c
 function: pci_init
 
 function: pci_scan_bus
@@ -1043,25 +1049,25 @@ function: pci_scan_bus
 function: pci_attach pci_attach_match
 > when matches info of device class & vendor, then call `attachfn` to initialize
 
-file: e1000.c
+file: kernel/e1000.c
 function: pci_e1000_attach
 > initialize e1000 net card
 
 function: pci_func_enable
 > allocate resource to this PCI device
 
-### E1000 Interface
+### 12.2 E1000 Interface
 
-file: e1000.c
+file: kernel/e1000.c
 function: e1000_put_tx_desc
 > wait until Descriptor Done, then configure DMA registers, fill descriptor and update `e1000_tdt` pointer
 
 function: e1000_get_rx_desc
 > wait until Descriptor Done, then copy data, clean status and update `e1000_rdt` pointer
 
-### User Interface
+### 12.3 User Interface
 
-file: syscall.c
+file: lib/syscall.c
 function: sys_tx_pkt
 
 1. use `user_mem_assert` checking whether the buffer come from user space
@@ -1073,21 +1079,21 @@ function: sys_rx_pkt
 1. use `user_mem_assert` checking whether the buffer come from user space
 2. call e1000_get_rx_desc
 
-### Network Output/Input Env
+### 12.4 Network Output/Input Env
 
-file: output.c
+file: net/output.c
 
 1. ipc receive from network server
 2. call sys_tx_pkt
 
-file: input.c
+file: net/input.c
 > When you IPC a page to the network server, it will be reading from it for a while, so don't immediately receive another packet in to the same physical page
 
 1. allocate nsipcbuf
 2. call sys_rx_pkt
 3. ipc send to network server
 
-### Core Net-Server Env
+### 12.5 Core Net-Server Env
 
 file: net/serv.c
 
@@ -1116,9 +1122,9 @@ function: serve_thread
     2. send back return-value by ipc_send
 2. if comes from input env, call jif_input
 
-### HTTPD server
+### 12.6 HTTPD server
 
-file: httpd.c
+file: user/httpd.c
 
 1. Receive message from client
 2. Parse url & version of request
