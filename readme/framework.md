@@ -2,6 +2,78 @@
 
 ![Toynix](pic/Toynix.png)
 
+## Catalogue
+
+- [1 Boot](#1-Boot)
+  - [1.1 x86 Boot ROM](#11-x86-Boot-ROM)
+  - [1.2 Bootloader](#12-Bootloader)
+  - [1.3 Kernel](#13-Kernel)
+- [2 Monitor](#2-Monitor)
+  - [2.1 Trace of Stack](#21-Trace-of-Stack)
+- [3 Memory Management](#3-Memory-Management)
+  - [3.1 Initialize](#31-Initialize)
+  - [3.2 Page Management](#32-Page-Management)
+  - [3.3 User Memory](#33-User-Memory)
+  - [3.4 IO Ports](#34-IO-Ports)
+  - [3.5 Malloc](#35-Malloc)
+- [4 Environment](#4-Environment)
+  - [4.1 Initialize](#41-Initialize)
+  - [4.2 Create New Environment](#42-Create-New-Environment)
+  - [4.3 Schedule](#43-Schedule)
+  - [4.4 User-mode Startup](#44-User-mode-Startup)
+  - [4.5 Fork](#45-Fork)
+  - [4.6 Spawn](#46-Spawn)
+- [5 Trap](#5-Trap)
+  - [5.1 Initialize](#51-Initialize)
+  - [5.2 Flow](#52-Flow)
+  - [5.3 Page Fault](#53-Page-Fault)
+  - [5.4 System Call](#54-System-Call)
+    - [5.4.1 Flow](#541-Flow)
+    - [5.4.2 Console](#542-Console)
+    - [5.4.3 Env](#543-Env)
+    - [5.4.4 Memory](#544-Memory)
+    - [5.4.5 IPC](#545-IPC)
+    - [5.4.6 Time](#5.4.6-Time)
+    - [5.4.7 Debug](#5.4.7-Debug)
+    - [5.4.8 Network](#548-Network)
+    - [5.4.9 FS](#549-FS)
+- [6 Time Tick](#6-Time-Tick)
+- [7 Multiple Processor](#7-Multiple-Processor)
+  - [7.1 Initialize LAPIC](#71-Initialize-LAPIC)
+  - [7.2 Startup APs](#72-Startup-APs)
+  - [7.3 AP Boot-up](#73-AP-Boot-up)
+- [8 Thread](#8-Thread)
+  - [8.1 Thread Period](#81-Thread-Period)
+  - [8.2 Thread Yield](#82-Thread-Yield)
+  - [8.3 Thread Wait & Wakeup](#83-Thread-Wait--Wakeup)
+- [9 Concurrency](#9-Concurrency)
+  - [9.1 Spin-lock](#91-Spin-lock)
+  - [9.2 Inter-Process Communication](#92-Inter-Process-Communication)
+  - [9.3 Inter-Thread Communication](#93-Inter-Thread-Communication)
+    - [9.3.1 Semaphore](#931-Semaphore)
+    - [9.3.2 Mail Box](#932-Mail-Box)
+- [10 File System](#10-File-System)
+  - [10.1 Initialize](#101-Initialize)
+  - [10.2 Block Cache](#102-Block-Cache)
+  - [10.3 Block & Bitmap](#103-Block--Bitmap)
+  - [10.4 File & Block](#104-File--Block)
+  - [10.5 Regular File Interface](#105-Regular-File-Interface)
+    - [10.5.1 Lib File Interface](#1051-Lib-File-Interface)
+    - [10.5.2 Server Handler](#1052-Server-Handler)
+    - [10.5.3 File System Operation](#1053-File-System-Operation)
+  - [10.6 Pipe](#106-Pipe)
+  - [10.7 Console](#107-Console)
+- [11 Shell](#11-Shell)
+  - [11.1 Initialize](#111-Initialize)
+  - [11.2 Run Command Line](#112-Run-Command-Line)
+- [12 Network](#12-Network)
+  - [12.1 PCI Bus Initialize](#121-PCI-Bus-Initialize)
+  - [12.2 E1000 Interface](#122-E1000-Interface)
+  - [12.3 User Interface](#123-User-Interface)
+  - [12.4 Network Output/Input Env](#124-Network-OutputInput-Env)
+  - [12.5 Core Net-Server Env](#125-Core-Net-Server-Env)
+  - [12.6 HTTPD server](#126-HTTPD-server)
+
 ## 1 Boot
 
 ### 1.1 x86 Boot ROM
@@ -55,17 +127,17 @@ file: kernel/init.c function: init
 
 1. initialize bss segment
 2. initialize console devices including CGA, keyboard and serial port (cons_init)
-3. initialize memory ([mem_init](#Memory-Management))
-4. initialize task ([env_init](#Environment))
-5. initialize trap ([trap_init](#Trap))
-6. initialize multiprocessor (mp_init)
-7. initialize interrupt controller (lapic_init & pic_init)
-8. initialize clock (time_init)
-9. initialize PCI bus (pci_init)
-10. lock kernel before waking up non-boot CPUs (boot_aps)
-11. start file system server (fs serve)
-12. start network server (net serve)
-13. start init process (user initsh)
+3. initialize memory ([mem_init](#3-Memory-Management))
+4. initialize task ([env_init](#4-Environment))
+5. initialize trap ([trap_init](#5-Trap))
+6. initialize multiprocessor ([mp_init](#7.1-Initialize-LAPIC))
+7. initialize interrupt controller ([lapic_init & pic_init](#7.1-Initialize-LAPIC))
+8. initialize clock ([time_init](#6-Time-Tick))
+9. initialize PCI bus ([pci_init](#12.1-PCI-Bus-Initialize))
+10. lock kernel before waking up non-boot CPUs ([boot_aps](7.2-Startup-APs))
+11. start file system server ([fs serve](#10.1-Initialize))
+12. start network server ([net serve](#12-Network))
+13. start init process ([user initsh](#11-Shell))
 
 ## 2 Monitor
 
@@ -408,10 +480,10 @@ function: trap
 function: trap_dispatch
 > dispatch based on trap num
 
-1. [page fault](#Page-Fault)
+1. [page fault](#5.3-Page-Fault)
 2. breakpoint & debug
-3. [system call](#System-Call)
-4. [time](#Time-Tick)
+3. [system call](#5.4-System-Call)
+4. [time](#6-Time-Tick)
 5. spurious
 6. key board
 7. serial port
@@ -495,9 +567,9 @@ function: syscall
 #### 5.4.3 Env
 
 1. sys_getenvid: returns the current environment's envid
-2. sys_env_destroy: [env_destroy](#Create-New-Environment)
-3. sys_yield: [schedule](#Schedule)
-4. sys_exofork: [fork](#Fork)
+2. sys_env_destroy: [env_destroy](#4.2-Create-New-Environment)
+3. sys_yield: [schedule](#4.3-Schedule)
+4. sys_exofork: [fork](#4.5-Fork)
 5. sys_env_set_status: set the status of a specified environment (ENV_RUNNABLE or ENV_NOT_RUNNABLE)
 6. sys_env_set_trapframe: set env's eip & esp (enable interrupts, set IOPL as 0)
 
@@ -506,16 +578,16 @@ function: syscall
 1. sys_page_alloc: allocate a page of memory and map it at 'va' with permission
 2. sys_page_map: map the page of memory at 'src va' in src env's address space at 'dst va' in dst env's address space with permission 'perm'
 3. sys_page_unmap: unmap the page of memory at 'va' in the address space of 'env'
-4. sys_env_set_pgfault_upcall: [set the page fault upcall](#Page-Fault)
+4. sys_env_set_pgfault_upcall: [set the page fault upcall](#5.3-Page-Fault)
 
 #### 5.4.5 IPC
 
-1. sys_ipc_try_send: try to send 'value' to the target env 'envid' ([IPC](#Inter-Process-Communication))
-2. sys_ipc_recv: block until a value is ready ([IPC](#Inter-Process-Communication))
+1. sys_ipc_try_send: try to send 'value' to the target env 'envid' ([IPC](#5.4.5-Inter-Process-Communication))
+2. sys_ipc_recv: block until a value is ready ([IPC](#5.4.5-Inter-Process-Communication))
 
 #### 5.4.6 Time
 
-1. sys_time_msec: gain time, unit: millisecond ([Time Tick](#Time-Tick))
+1. sys_time_msec: gain time, unit: millisecond ([Time Tick](#6-Time-Tick))
 
 #### 5.4.7 Debug
 
@@ -523,14 +595,14 @@ function: syscall
 
 #### 5.4.8 Network
 
-1. sys_tx_pkt: transmit packet to e1000 ([Network](#Network))
-2. sys_rx_pkt: receive packet from e1000 ([Network](#Network))
+1. sys_tx_pkt: transmit packet to e1000 ([Network](#12-Network))
+2. sys_rx_pkt: receive packet from e1000 ([Network](#12-Network))
 
 #### 5.4.9 FS
 
 1. sys_chdir: switch working dir of current env
 
-## 6 Tick
+## 6 Time Tick
 
 file: kernel/time.c
 function: time_init
@@ -539,7 +611,7 @@ function: time_init
 file: kernel/trap.c
 function: trap_dispatch
 
-* when receives IRQ_TIMER:
+- when receives IRQ_TIMER:
     1. increase time tick (if this CPU is boot one)
     2. acknowledge interrupt
     3. schedule
@@ -645,8 +717,8 @@ function: toynix_longjmp
 function: thread_wait
 
 1. sleep until:
-    * condition no meet
-    * already waken up
+    - condition no meet
+    - already waken up
 2. clean wakeup bit
 
 function: thread_wakeup
@@ -715,7 +787,7 @@ file: lib/itc.c
 function: sys_init
 > initialize sems & mboxes, and insert into free list
 
-#### 9.4 Semaphore
+#### 9.3.1 Semaphore
 
 function: sys_sem_new
 
@@ -730,15 +802,15 @@ function: sys_arch_sem_wait
 
 1. if counter > 0, then request counter and return back
 2. if counter = 0, return when:
-    * thread wait counter changed
-    * sleep until time-out
+    - thread wait counter changed
+    - sleep until time-out
 
 function: sys_sem_signal
 
 1. post counter
-2. if there are someone waiting, then wakeup them([thread_wakeup](#Thread-Wait-&-Wakeup))
+2. if there are someone waiting, then wakeup them([thread_wakeup](#8.3-Thread-Wait-&-Wakeup))
 
-#### 9.5 Mail Box
+#### 9.3.2 Mail Box
 
 function: sys_mbox_new
 
@@ -1014,12 +1086,12 @@ file: user/sh.c
 function: runcmd
 
 1. parse shell command
-    * 'w': argument
-    * '<': input redirection, open file and dup to 0
-    * '>': output redirection, open file and dup to 1
-    * '|': pipe, fork child, tranfer parent output to child input
-    * '&': run background, no need to wait this child process done
-    * ';': separate command, need to wait this child process done
+    - 'w': argument
+    - '<': input redirection, open file and dup to 0
+    - '>': output redirection, open file and dup to 1
+    - '|': pipe, fork child, tranfer parent output to child input
+    - '&': run background, no need to wait this child process done
+    - ';': separate command, need to wait this child process done
 2. spawn child
 3. close all file descriptors
 4. wait child
@@ -1027,10 +1099,10 @@ function: runcmd
 
 ## 12 Network
 
-* core network server
-* input env
-* output env
-* timer env
+- core network server
+- input env
+- output env
+- timer env
 
 ![network server](pic/ns.png)
 
