@@ -40,7 +40,7 @@ devdebug_write(struct Fd *fd, const void *vbuf, size_t n)
 	}
 
 	if (i == MAXDEBUGOPT)
-		return -EINVAL;
+		return -E_INVAL;
 
 	printf("select option: %s\n", debug_option[i]);
 	return n;
