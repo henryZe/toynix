@@ -16,7 +16,7 @@ time_tick(void)
 {
 	ticks++;
 	if ((ticks << 1) < ticks)
-		panic("time_tick: time overflowed");
+		panic("%s: time overflowed", __func__);
 }
 
 unsigned int

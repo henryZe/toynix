@@ -115,7 +115,8 @@ serve_open(envid_t envid, struct Fsreq_open *req,
 	struct OpenFile *o;
 
 	if (debug)
-		cprintf("serve_open %08x %s 0x%x\n", envid, req->req_path, req->req_omode);
+		cprintf("%s %08x %s 0x%x\n",
+			__func__, envid, req->req_path, req->req_omode);
 
 	// Copy in the path, making sure it's null-terminated
 	memmove(path, req->req_path, MAXPATHLEN);
@@ -195,7 +196,9 @@ try_open:
 	// Share the FD page with the caller by setting *pg_store,
 	// store its permission in *perm_store
 	*pg_store = o->o_fd;
-	/* !Notion: PTE_SHARE indicates share the page mapping(struct Fd) with process */
+	/* !Notion:
+	 *   PTE_SHARE indicates share the page mapping(struct Fd) with process
+	 */
 	*perm_store = PTE_P | PTE_U | PTE_W | PTE_SHARE;
 
 	return 0;
@@ -210,8 +213,8 @@ serve_set_size(envid_t envid, struct Fsreq_set_size *req)
 	int ret;
 
 	if (debug)
-		cprintf("serve_set_size %08x %08x %08x\n",
-				envid, req->req_fileid, req->req_size);
+		cprintf("%s %08x %08x %08x\n",
+			__func__, envid, req->req_fileid, req->req_size);
 
 	// Every file system IPC call has the same general structure.
 	// Here's how it goes.
@@ -240,8 +243,8 @@ serve_read(envid_t envid, union Fsipc *ipc)
 	int ret;
 
 	if (debug)
-		cprintf("serve_read %08x %08x %08x\n",
-				envid, req->req_fileid, req->req_n);
+		cprintf("%s %08x %08x %08x\n",
+			__func__, envid, req->req_fileid, req->req_n);
 
 	ret = openfile_lookup(envid, req->req_fileid, &o);
 	if (ret < 0)
@@ -265,8 +268,8 @@ int serve_write(envid_t envid, struct Fsreq_write *req)
 	int ret;
 
 	if (debug)
-		cprintf("serve_write %08x %08x %08x\n",
-				envid, req->req_fileid, req->req_n);
+		cprintf("%s %08x %08x %08x\n",
+			__func__, envid, req->req_fileid, req->req_n);
 
 	ret = openfile_lookup(envid, req->req_fileid, &o);
 	if (ret < 0)
@@ -291,8 +294,8 @@ serve_stat(envid_t envid, union Fsipc *ipc)
 	int ret;
 
 	if (debug)
-		cprintf("serve_stat %08x %08x\n",
-				envid, req->req_fileid);
+		cprintf("%s %08x %08x\n",
+			__func__, envid, req->req_fileid);
 
 	ret = openfile_lookup(envid, req->req_fileid, &o);
 	if (ret < 0)
@@ -312,7 +315,7 @@ serve_flush(envid_t envid, struct Fsreq_flush *req)
 	int ret;
 
 	if (debug)
-		cprintf("serve_flush %08x %08x\n", envid, req->req_fileid);
+		cprintf("%s %08x %08x\n", __func__, envid, req->req_fileid);
 
 	ret = openfile_lookup(envid, req->req_fileid, &o);
 	if (ret < 0)
@@ -379,7 +382,7 @@ serve_remove(envid_t envid, struct Fsreq_remove *req)
 	struct File *f;
 
 	if (debug)
-		cprintf("serve_remove %08x %s\n", envid, req->req_path);
+		cprintf("%s %08x %s\n", __func__, envid, req->req_path);
 
 	// Copy in the path, making sure it's null-terminated
 	memmove(path, req->req_path, MAXPATHLEN);

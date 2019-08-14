@@ -68,7 +68,7 @@ spin_lock(struct spinlock *lk)
 
 	// The xchg is atomic.
 	// It also serializes, so that reads after acquire are not
-	// reordered before it. 
+	// reordered before it.
 	while (xchg(&lk->locked, 1) != 0)
 		asm volatile("pause");
 
@@ -100,6 +100,7 @@ spin_unlock(struct spinlock *lk)
 
 		for (i = 0; i < DEBUG_PCS && pcs[i]; i++) {
 			struct Eipdebuginfo info;
+
 			if (debuginfo_eip(pcs[i], &info) >= 0)
 				cprintf("\t%08x %s:%d: %.*s + 0x%x\n", pcs[i],
 						info.eip_file, info.eip_line,

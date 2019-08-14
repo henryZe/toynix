@@ -405,6 +405,7 @@ trap(struct Trapframe *tf)
 
 	// Halt the CPU if some other CPU has called panic()
 	extern char *panicstr;
+
 	if (panicstr)
 		asm volatile("hlt");
 

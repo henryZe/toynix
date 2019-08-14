@@ -154,8 +154,10 @@ void
 readn(int fd, void *out, size_t n)
 {
 	size_t p = 0;
+
 	while (p < n) {
 		ssize_t m = read(fd, out + p, n - p);
+
 		if (m < 0)
 			panic("read: %s", strerror(errno));
 		if (m == 0)
@@ -175,6 +177,7 @@ finishfile(struct File *file, uint32_t start_blk, uint32_t len)
 		file->f_direct[i] = start_blk + i;
 	if (i == NDIRECT) {
 		uint32_t *index = alloc(BLKSIZE);
+
 		file->f_indirect = blockof(index);
 		for (; i < len / BLKSIZE; ++i)
 			index[i - NDIRECT] = start_blk + i;
@@ -234,6 +237,7 @@ void
 finishdisk(void)
 {
 	int ret, i;
+
 	for (i = 0; i < blockof(diskpos); ++i)
 		/* clear block-free bit */
 		bitmap[i / 32] &= ~(1 << (i % 32));

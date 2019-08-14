@@ -248,7 +248,7 @@ dir_lookup(struct File *dir, const char *name, struct File **file)
 		ret = file_get_block(dir, i, &blk);
 		if (ret < 0)
 			return ret;
-		
+
 		fp = (struct File *)blk;
 		for (j = 0; j < BLKFILES; j++) {
 			if (strcmp(fp[j].f_name, name) == 0) {

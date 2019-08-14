@@ -25,7 +25,7 @@ sys_cputs(const char *s, size_t len)
 	// Check that the user has permission to read memory [s, s+len).
 	// Destroy the environment if not.
 	user_mem_assert(curenv, s, len, 0);
-	
+
 	// Print the string supplied by the user.
 	cprintf("%.*s", len, s);
 
@@ -165,14 +165,14 @@ sys_env_set_trapframe(envid_t envid, struct Trapframe *tf)
  * side effect.
  *
  * perm -- PTE_U | PTE_P must be set, PTE_AVAIL | PTE_W may or may not be set,
- * 		but no other bits may be set.
+ *		but no other bits may be set.
  *
  * Return 0 on success, < 0 on error.	Errors are:
- * 	-E_BAD_ENV if environment envid doesn't currently exist,
- * 			or the caller doesn't have permission to change envid.
- * 	-E_INVAL if va >= UTOP, or va is not page-aligned.
- * 	-E_NO_MEM if there's no memory to allocate the new page,
- * 			or to allocate any necessary page tables.
+ *	-E_BAD_ENV if environment envid doesn't currently exist,
+ *			or the caller doesn't have permission to change envid.
+ *	-E_INVAL if va >= UTOP, or va is not page-aligned.
+ *	-E_NO_MEM if there's no memory to allocate the new page,
+ *			or to allocate any necessary page tables.
  */
 static int
 sys_page_alloc(envid_t envid, void *va, int perm)
@@ -350,7 +350,7 @@ sys_env_set_pgfault_upcall(envid_t envid, void *upcall)
 //		address space.
 static int
 sys_ipc_try_send(envid_t envid, int value,
-		void *srcva, unsigned perm)
+		void *srcva, int perm)
 {
 	struct Env *env;
 	int ret;
@@ -465,6 +465,7 @@ sys_tx_pkt(const uint8_t *content, uint32_t length)
 	const uint8_t *addr;
 	uint32_t len;
 	uint8_t flag;
+
 	user_mem_assert(curenv, content, length, PTE_U);
 
 	/* Align the packet length to jp_len

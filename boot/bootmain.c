@@ -17,7 +17,7 @@ void
 waitdisk(void)
 {
 	/* Wait for disk ready. */
-	while((inb(0x1F7) & 0xC0) != 0x40);
+	while ((inb(0x1F7) & 0xC0) != 0x40);
 }
 
 /* Read a single sector at offset into dst. */
@@ -56,10 +56,10 @@ readseg(uchar *pa, uint count, uint offset)
 	offset = (offset / SECTSIZE) + 1;
 
 	/* If this is too slow, we could read lots of sectors at a time.
-	* We'd write more to memory than asked, but it doesn't matter --
-	* we load in increasing order.
-	*/
-	for(; pa < epa; pa += SECTSIZE, offset++)
+	 * We'd write more to memory than asked, but it doesn't matter --
+	 * we load in increasing order.
+	 */
+	for (; pa < epa; pa += SECTSIZE, offset++)
 		readsect(pa, offset);
 }
 

@@ -26,7 +26,7 @@ void argstart(int *argc, char **argv, struct Argstate *args);
 // the first call to argnext will return 'i' and change the array to
 // ["sh", "foo"].  Thus, when argnext returns -1, the argc/argv array
 // contains just the non-flag arguments.
-int argnext(struct Argstate *);
+int argnext(struct Argstate *args);
 
 // Example:
 //

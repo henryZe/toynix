@@ -6,7 +6,7 @@ void *
 diskaddr(uint32_t blockno)
 {
 	if (blockno == 0 || (super && blockno >= super->s_nblocks))
-		panic("bad block number %08x in diskaddr", blockno);
+		panic("bad block number %08x in %s", blockno, __func__);
 
 	return (char *)DISKMAP + blockno * BLKSIZE;
 }
@@ -59,10 +59,11 @@ bc_pgfault(struct UTrapframe *utf)
 	ret = sys_page_map(0, block_addr, 0, block_addr,
 				uvpt[PGNUM(block_addr)] & PTE_SYSCALL);
 	if (ret < 0)
-		panic("in bc_pgfault, sys_page_map: %e", ret);
+		panic("in %s, sys_page_map: %e", __func__, ret);
 
 	// Check that the block we read was allocated.
-	// (exercise for the reader: why do we do this *after* reading the block in?)
+	// (exercise for the reader:
+	//    why do we do this *after* reading the block in?)
 	// A: when we read bitmap, we need to check after reading block
 	if (bitmap && block_is_free(blockno))
 		panic("reading free block %08x\n", blockno);
@@ -80,7 +81,7 @@ flush_block(void *addr)
 	uint32_t blockno = ((uint32_t)addr - DISKMAP) / BLKSIZE;
 
 	if (addr < (void *)DISKMAP || addr >= (void *)(DISKMAP + DISKSIZE))
-		panic("flush_block of bad va %08x", addr);
+		panic("%s of bad va %08x", __func__, addr);
 
 	if (!va_is_mapped(addr) || !va_is_dirty(addr))
 		return;
@@ -90,7 +91,8 @@ flush_block(void *addr)
 		panic("%s: ide_write %e", __func__, ret);
 
 	/* clear dirty bit */
-	ret = sys_page_map(0, block_addr, 0, block_addr, uvpt[PGNUM(block_addr)] & PTE_SYSCALL);
+	ret = sys_page_map(0, block_addr, 0, block_addr,
+				uvpt[PGNUM(block_addr)] & PTE_SYSCALL);
 	if (ret < 0)
 		panic("%s: sys_page_map %e", __func__, ret);
 }
@@ -139,7 +141,7 @@ check_bc(void)
 	// Skip the !va_is_dirty() check because it makes the bug somewhat
 	// obscure and hence harder to debug.
 	//assert(!va_is_dirty(diskaddr(1)));
-	
+
 	// clear it out
 	sys_page_unmap(0, diskaddr(1));
 	assert(!va_is_mapped(diskaddr(1)));

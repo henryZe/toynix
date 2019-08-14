@@ -15,10 +15,10 @@
 # memory at physical address 0x7c00 and starts executing in real mode
 # with %cs=0 %ip=7c00.
 
-.code16					# Assemble for 16-bit mode
+.code16				# Assemble for 16-bit mode
 .global start
 start:
-	cli					# close interrupt (BIOS enabled interrupts)
+	cli			# close interrupt (BIOS enabled interrupts)
 
 	# clean segment registers
 	xorw    %ax, %ax	# set %ax to zero
@@ -71,7 +71,7 @@ start32:
 	movw    %ax, %gs                # -> GS
 
 	# Set up the stack pointer and call into C.
-	movl    $start, %esp			# scratch space as stack
+	movl    $start, %esp		# scratch space as stack
 	call    bootmain
 
 	# If bootmain returns (it shouldn't), trigger a Bochs
@@ -87,7 +87,7 @@ spin:
 	jmp     spin
 
 # Bootstrap GDT
-.p2align 2                                  # force 4 byte alignment
+.p2align 2				# force 4 byte alignment
 gdt:
 	SEG_NULLASM                             # null seg
 	SEG_ASM(STA_X | STA_R, 0x0, 0xffffffff) # code seg, index 1, +x/+r, 0 ~ 0xffffffff
