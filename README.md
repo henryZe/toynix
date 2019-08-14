@@ -47,11 +47,11 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 ### 7.2 Built Option
 
 * make qemu-nox
-  > Run the kernel within terminal mode
+  * Run the kernel within terminal mode
 * make qemu-nox-gdb
-  > Run the kernel with debug mode
+  * Run the kernel with debug mode
 * make gdb
-  > Run gdb and auto-link target QEMU
+  * Run gdb and auto-link target QEMU
 
 ### 7.3 Shell Command Line
 
@@ -61,15 +61,23 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 
 ### 8.1 Optimize
 
-1. optimize malloc with buddy allocator
-2. convert organization of fs data block into LIST
-3. replace static lib with share lib
-4. fine-gained lock instead of global kernel lock (page allocator, console driver, scheduler, IPC state)
+* optimize malloc with buddy allocator
+* add VMA structure which describes a memory area:
+  * including start and end addresses
+  * flags to determine access rights and behaviors(such as page fault)
+  * specifies which file is being mapped by the area, if any
+* convert organization of fs data block into LIST
+* replace static lib with share lib
+* fine-gained lock instead of global kernel lock:
+  * page allocator
+  * console driver
+  * scheduler
+  * IPC state
 
 ### 8.2 Bug
 
-1. lwip connect function by user/echotest.c
-2. Kernel lock sometimes is illegally unlocked.
+* lwip connect function by user/echotest.c
+* Kernel lock sometimes is illegally unlocked.
 
 ## 9 Ported Modules Claim
 
