@@ -23,7 +23,7 @@ struct buddy_pool {
 	} *manager; /* manager controls the child's order */
 	size_t manager_size;
 	size_t curr_size;
-	struct spinlock lock;
+	int lock;
 };
 
 int buddy_init(struct buddy_pool *buddy,

@@ -122,6 +122,7 @@ thread_clean(struct thread_context *tc)
 	free(tc);
 }
 
+/* non-preempt thread scheduler */
 void
 thread_yield(void)
 {

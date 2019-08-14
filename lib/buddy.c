@@ -6,6 +6,7 @@
 #include <error.h>
 #include <assert.h>
 #include <math.h>
+#include <spinlock.h>
 
 #define lchild_of(x) ((((x) + 1) << 1) - 1)
 #define rchild_of(x) (((x) + 1) << 1)
@@ -15,6 +16,7 @@ int buddy_init(struct buddy_pool *buddy,
 		unsigned long start, size_t size,
 		void *manager_area, size_t node_size)
 {
+	int ret;
 	unsigned long i = 0;
 	unsigned long child_order = 0;
 
@@ -31,7 +33,11 @@ int buddy_init(struct buddy_pool *buddy,
 		return -E_INVAL;
 	}
 
-	spin_lock_init(&buddy->lock);
+	ret = sys_spin_lock_init("malloc");
+	if (ret < 0)
+		return ret;
+
+	buddy->lock = ret;
 	buddy->start = start;
 	buddy->size = size;
 	buddy->order = log_of_2(size);
@@ -60,7 +66,6 @@ void *buddy_alloc(struct buddy_pool *buddy,
 	unsigned long offset = 0;
 	unsigned long lchild_order = 0;
 	unsigned long rchild_order = 0;
-	unsigned long flags = 0;
 
 	if (!buddy || !buddy->manager || !size)
 		return NULL;
@@ -72,7 +77,7 @@ void *buddy_alloc(struct buddy_pool *buddy,
 		return NULL;
 
 	order = log_of_2(size);
-	flags = spin_lock_irqsave(&buddy->lock);
+	sys_spin_lock(buddy->lock);
 	while ((i < buddy->manager_size) &&
 		 (buddy->manager[i].order >= order)) {
 		if ((rchild_of(i) < buddy->manager_size) &&
@@ -98,7 +103,7 @@ void *buddy_alloc(struct buddy_pool *buddy,
 		buddy->manager[i].order = MAX(lchild_order, rchild_order);
 	}
 
-	sys_spin_unlock(&buddy->lock, flags);
+	sys_spin_unlock(buddy->lock);
 	return (void *)(buddy->start + offset);
 }
 
@@ -110,7 +115,6 @@ void buddy_free(struct buddy_pool *buddy,
 	unsigned long offset = 0;
 	unsigned long lchild_order = 0;
 	unsigned long rchild_order = 0;
-	unsigned long flags = 0;
 
 	if ((!buddy) || (!buddy->manager) || (!addr))
 		return;
@@ -119,7 +123,7 @@ void buddy_free(struct buddy_pool *buddy,
 	if (offset > buddy->size)
 		panic("buddy invalid addr\n");
 
-	flags = spin_lock_irqsave(&buddy->lock);
+	sys_spin_lock(buddy->lock);
 
 	/* start from the youngest child */
 	i = (offset + buddy->size) / buddy->node_size - 1;
@@ -145,5 +149,5 @@ void buddy_free(struct buddy_pool *buddy,
 			buddy->manager[i].order++;
 		order++;
 	}
-	spin_unlock_irqrestore(&buddy->lock, flags);
+	sys_spin_unlock(buddy->lock);
 }

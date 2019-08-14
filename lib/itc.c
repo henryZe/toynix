@@ -343,3 +343,21 @@ lwip_core_unlock(void)
 {
 	return;
 }
+
+int
+sys_spin_lock_init(const char *name)
+{
+	return 0;
+}
+
+void
+sys_spin_lock(int lk)
+{
+	return;
+}
+
+void
+sys_spin_unlock(int lk)
+{
+	return;
+}
