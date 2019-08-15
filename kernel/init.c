@@ -18,15 +18,6 @@ static void boot_aps(void);
 void
 init(void)
 {
-	extern char edata[], end[];
-
-	/*
-	* Before doing anything else, complete the ELF loading process.
-	* Clear the uninitialized global data (BSS) section of our program.
-	* This ensures that all static/global variables start out zero.
-	*/
-	memset(edata, 0, end - edata);
-
 	/*
 	* Initialize the console.
 	* Can't call printf until after we do this!
