@@ -91,6 +91,10 @@ init_stack(envid_t child, const char **argv, uintptr_t *init_esp)
 			return ret;
 	}
 
+	ret = sys_add_vma(child, USTACKTOP - USTKSIZE, USTKSIZE, PTE_W);
+	if (ret < 0)
+		return ret;
+
 	return 0;
 
 error:
@@ -144,6 +148,10 @@ map_segment(envid_t child, uintptr_t va, size_t memsz,
 			sys_page_unmap(0, UTEMP);
 		}
 	}
+
+	ret = sys_add_vma(child, va, memsz, perm);
+	if (ret < 0)
+		return ret;
 
 	return 0;
 }

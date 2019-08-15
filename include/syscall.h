@@ -22,6 +22,8 @@ enum {
 	SYS_tx_pkt,
 	SYS_rx_pkt,
 	SYS_chdir,
+	SYS_add_vma,
+	SYS_copy_vma,
 	NUM_SYSCALLS
 };
 

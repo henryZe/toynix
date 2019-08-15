@@ -36,7 +36,7 @@ The network module follows micro-kernel spirit, which is relied on an independen
 
 The only one thing done by bootloader is reading the kernel image from disk. This tiny boot is based on x86 architecture (that only occupies one sector(512 bytes)).
 
-## 7 User Guideline
+## 7 How to Build it
 
 ### 7.1 Install Tool Chain
 

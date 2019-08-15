@@ -68,6 +68,8 @@ int sys_env_set_trapframe(envid_t envid, struct Trapframe *tf);
 unsigned int sys_time_msec(void);
 int sys_debug_info(int option, char *buf, size_t size);
 int sys_chdir(const char *path);
+int sys_add_vma(envid_t envid, uintptr_t va, size_t memsz, int perm);
+int sys_copy_vma(envid_t src_env, envid_t dst_env);
 
 static inline envid_t __attribute__((always_inline))
 sys_exofork(void)

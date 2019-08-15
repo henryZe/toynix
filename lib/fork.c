@@ -130,6 +130,10 @@ fork(void)
 		}
 	}
 
+	ret = sys_copy_vma(0, envid);
+	if (ret < 0)
+		panic("fork: %e", ret);
+
 	/* allocate page for child exception stack */
 	ret = sys_page_alloc(envid, (void *)(UXSTACKTOP - PGSIZE), PTE_W);
 	if (ret < 0)
@@ -150,8 +154,7 @@ fork(void)
 static int
 share_page(envid_t dst_env, unsigned pn)
 {
-	int perm = PGOFF(uvpt[pn]);
-	int ret;
+	int ret, perm = PGOFF(uvpt[pn]);
 
 	ret = sys_page_map(0, (void *)(pn << PGSHIFT),
 			dst_env, (void *)(pn << PGSHIFT), perm);
@@ -194,6 +197,10 @@ sfork(void)
 				return ret;
 		}
 	}
+
+	ret = sys_copy_vma(0, envid);
+	if (ret < 0)
+		panic("fork: %e", ret);
 
 	/* allocate page for child exception stack */
 	ret = sys_page_alloc(envid, (void *)(UXSTACKTOP - PGSIZE), PTE_W);

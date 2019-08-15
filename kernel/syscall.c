@@ -508,6 +508,40 @@ sys_chdir(const char *path)
 	return 0;
 }
 
+static int
+sys_add_vma(envid_t envid, uintptr_t va, size_t memsz, int perm)
+{
+	int ret;
+	struct Env *e;
+
+	ret = envid2env(envid, &e, 1);
+	if (ret)
+		return ret;
+
+	return env_add_vma(e, va, memsz, PTE_U | perm);
+}
+
+static int
+sys_copy_vma(envid_t src_env, envid_t dst_env)
+{
+	int i, ret;
+	struct Env *src_e, *dst_e;
+
+	ret = envid2env(src_env, &src_e, 1);
+	if (ret)
+		return ret;
+
+	ret = envid2env(dst_env, &dst_e, 1);
+	if (ret)
+		return ret;
+
+	for (i = 0; i < src_e->vma_valid; i++)
+		dst_e->vma[i] = src_e->vma[i];
+	dst_e->vma_valid = src_e->vma_valid;
+
+	return 0;
+}
+
 // Dispatches to the correct kernel function, passing the arguments.
 int32_t
 syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
@@ -573,6 +607,12 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 
 	case SYS_chdir:
 		return sys_chdir((const char *)a1);
+
+	case SYS_add_vma:
+		return sys_add_vma(a1, a2, a3, a4);
+
+	case SYS_copy_vma:
+		return sys_copy_vma(a1, a2);
 
 	default:
 		return -E_INVAL;

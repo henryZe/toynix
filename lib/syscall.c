@@ -148,3 +148,15 @@ sys_chdir(const char *path)
 {
 	return syscall(SYS_chdir, 0, (uint32_t)path, 0, 0, 0, 0);
 }
+
+int
+sys_add_vma(envid_t envid, uintptr_t va, size_t memsz, int perm)
+{
+	return syscall(SYS_add_vma, 0, envid, va, memsz, perm, 0);
+}
+
+int
+sys_copy_vma(envid_t src_env, envid_t dst_env)
+{
+	return syscall(SYS_copy_vma, 0, src_env, dst_env, 0, 0, 0);
+}
