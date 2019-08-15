@@ -61,6 +61,7 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 
 ### 8.1 Optimize
 
+* implement mmap syscall
 * modify map_segment from copy to mmap method
 * optimize malloc with heap allocator
 * add VMA structure which describes a memory area:
