@@ -227,16 +227,14 @@ region_alloc(struct Env *e, void *va, size_t len)
 	if ((unsigned long)end & (PGSIZE - 1))
 		end = ROUNDUP(end, PGSIZE);
 
-	while (va < end) {
+	for (; va < end; va += PGSIZE) {
 		p = page_alloc(0);
 		if (!p)
 			panic("page_alloc failed\n");
 
-		ret = page_insert(e->env_pgdir, p, va, PTE_U | PTE_W);
+		ret = page_insert(e->env_pgdir, p, va, PTE_W);
 		if (ret)
 			panic("page_insert %e\n", ret);
-
-		va += PGSIZE;
 	}
 }
 
@@ -295,8 +293,8 @@ load_icode(struct Env *e, uint8_t *binary)
 
 	struct Elf *ELFHDR = (struct Elf *)binary;
 	struct Proghdr *ph, *eph;
-	int i;
-	uintptr_t va;
+	int ret, perm;
+	uintptr_t va, i;
 
 	/* switch address space */
 	lcr3(PADDR(e->env_pgdir));
@@ -313,7 +311,21 @@ load_icode(struct Env *e, uint8_t *binary)
 		if (ph->p_type == ELF_PROG_LOAD) {
 			region_alloc(e, (void *)ph->p_va, ph->p_memsz);
 			memcpy((void *)ph->p_va, binary + ph->p_offset, ph->p_filesz);
-			memset((void *)(ph->p_va + ph->p_filesz), 0, ph->p_memsz - ph->p_filesz);
+			memset((void *)(ph->p_va + ph->p_filesz),
+				0, ph->p_memsz - ph->p_filesz);
+
+			if (ph->p_flags & ELF_PROG_FLAG_WRITE)
+				perm = PTE_U | PTE_W;
+			else
+				perm = PTE_U;
+
+			for (i = ROUNDDOWN(ph->p_va, PGSIZE);
+				i < ph->p_va + ph->p_memsz; i += PGSIZE) {
+				/* remap perm */
+				ret = page_insert(e->env_pgdir, NULL, (void *)i, perm);
+				if (ret)
+					panic("page_insert %e\n", ret);
+			}
 		}
 	}
 
@@ -323,7 +335,6 @@ load_icode(struct Env *e, uint8_t *binary)
 	// Now map one page for the program's initial stack
 	// at virtual address USTACKTOP - PGSIZE.
 	struct PageInfo *p = NULL;
-	int ret;
 
 	p = page_alloc(0);
 	if (!p)

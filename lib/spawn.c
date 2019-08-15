@@ -105,7 +105,6 @@ map_segment(envid_t child, uintptr_t va, size_t memsz,
 		int fd, size_t filesz, off_t file_offset, int perm)
 {
 	int i, ret;
-	void *blk;
 
 	if (debug)
 		cprintf("map_segment %x + %x\n", va, memsz);
