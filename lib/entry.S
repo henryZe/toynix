@@ -20,6 +20,8 @@
 .text
 .globl _start
 _start:
+	movl  $0, %ebp
+
 	// See if we were started with arguments on the stack
 	cmpl $USTACKTOP, %esp
 	jne args_exist
@@ -33,4 +35,3 @@ _start:
 args_exist:
 	call libmain
 1:	jmp 1b
-
