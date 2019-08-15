@@ -46,16 +46,21 @@ mon_help(int argc, char **argv, struct Trapframe *tf)
 int
 mon_kerninfo(int argc, char **argv, struct Trapframe *tf)
 {
-	extern char _start[], entry[], etext[], edata[], end[];
+	extern char _start[], entry[], stext[], etext[], srodata[], erodata[];
+	extern char __STAB_BEGIN__[], __STAB_END__[];
+	extern char __STABSTR_BEGIN__[], __STABSTR_END__[];
+	extern char sdata[], edata[], sbss[], end[];
 
 	cprintf("Special kernel symbols:\n");
-	cprintf("  _start              %08x (phys)\n", _start);
-	cprintf("  entry  %08x (virt)  %08x (phys)\n", entry, entry - KERNBASE);
-	cprintf("  etext  %08x (virt)  %08x (phys)\n", etext, etext - KERNBASE);
-	cprintf("  edata  %08x (virt)  %08x (phys)\n", edata, edata - KERNBASE);
-	cprintf("  end    %08x (virt)  %08x (phys)\n", end, end - KERNBASE);
+	cprintf("  entry   %08x (_start)         %08x (entry)\n", _start, entry);
+	cprintf("  text    %08x (stext)          %08x (etext)\n", stext, etext);
+	cprintf("  rodata  %08x (srodata)        %08x (erodata)\n", srodata, erodata);
+	cprintf("  stab    %08x (STAB_BEGIN)     %08x (STAB_END)\n", __STAB_BEGIN__, __STAB_END__);
+	cprintf("  stabstr %08x (STABSTR_BEGIN)  %08x (STABSTR_END)\n", __STABSTR_BEGIN__, __STABSTR_END__);
+	cprintf("  data    %08x (sdata)          %08x (edata)\n", sdata, edata);
+	cprintf("  bss     %08x (sbss)           %08x (end)\n", sbss, end);
 	cprintf("Kernel executable memory footprint: %dKB\n",
-		ROUNDUP(end - entry, 1024) / 1024);
+		ROUNDUP(end - stext, 1024) / 1024);
 	return 0;
 }
 

@@ -61,11 +61,13 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 
 ### 8.1 Optimize
 
-* optimize malloc with buddy allocator
+* modify map_segment from copy to mmap method
+* optimize malloc with heap allocator
 * add VMA structure which describes a memory area:
   * including start and end addresses
   * flags to determine access rights and behaviors(such as page fault)
   * specifies which file is being mapped by the area, if any
+* distinguish anonymous and mmap pages (without/with copy original one)
 * convert organization of fs data block into LIST
 * replace static lib with share lib
 * fine-gained lock instead of global kernel lock:

@@ -7,19 +7,21 @@ ENTRY(_start)
 
 SECTIONS
 {
-	/* set entry address; Link the kernel at this address: "." means the current address */
+	/* Link the kernel at this address: "." means the current address */
 	. = 0xF0100000;
 
 	/* AT(...) gives the load address of this section, which tells
 	   the boot loader where to load the kernel in physical memory */
 	.text : AT(0x100000) {
+		PROVIDE(stext = .);
 		*(.text .stub .text.* .gnu.linkonce.t.*)
+		PROVIDE(etext = .);	/* Define the 'etext' symbol to this value */
 	}
 
-	PROVIDE(etext = .);	/* Define the 'etext' symbol to this value */
-
 	.rodata : {
+		PROVIDE(srodata = .);
 		*(.rodata .rodata.* .gnu.linkonce.r.*)
+		PROVIDE(erodata = .);
 	}
 
 	/* Include debugging information in kernel memory */
@@ -44,18 +46,21 @@ SECTIONS
 
 	/* The data segment */
 	.data : {
-		*(.data)
+		PROVIDE(sdata = .);
+		*(.data .data.*)
+		PROVIDE(edata = .);
 	}
-
-	PROVIDE(edata = .);
 
 	.bss : {
-		*(.bss)
+		PROVIDE(sbss = .);
+		*(.dynbss)
+		*(.bss .bss.*)
+		*(COMMON)
+		PROVIDE(end = .);
 	}
 
-	PROVIDE(end = .);
 
 	/DISCARD/ : {
-		*(.eh_frame .note.GNU-stack)
+		*(.eh_frame .note.GNU-stack .comment .note)
 	}
 }

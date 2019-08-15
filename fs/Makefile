@@ -20,6 +20,7 @@ USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/pingpongs \
 		$(OBJDIR)/$(USRDIR)/pingpong \
 		$(OBJDIR)/$(USRDIR)/testuserstack \
+		$(OBJDIR)/$(USRDIR)/breakpoint \
 
 FSIMGTXTFILES := \
 		$(FSDIR)/newmotd \
