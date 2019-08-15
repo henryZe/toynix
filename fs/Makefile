@@ -62,6 +62,7 @@ $(OBJDIR)/$(FSDIR)/fs: $(FSOFILES) $(OBJDIR)/$(LIBDIR)/entry.o $(OBJDIR)/$(LIBDI
 		$(OBJDIR)/$(LIBDIR)/entry.o $(FSOFILES) \
 		-L$(OBJDIR)/$(LIBDIR) -ltoynix $(GCC_LIB)
 	$(OBJDUMP) -S $@ > $@.asm
+	$(NM) -n $@ > $@.sym
 
 # How to build the file system image
 $(OBJDIR)/$(FSDIR)/fsformat: $(FSDIR)/fsformat.c

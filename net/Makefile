@@ -20,14 +20,15 @@ $(OBJDIR)/$(NETDIR)/%.o: $(NETDIR)/%.c $(OBJDIR)/.vars.USER_CFLAGS $(OBJDIR)/.va
 
 $(OBJDIR)/$(NETDIR)/ns: $(OBJDIR)/$(NETDIR)/serv.o $(NET_OBJFILES) $(OBJDIR)/$(LIBDIR)/entry.o $(OBJDIR)/$(LIBDIR)/libtoynix.a $(OBJDIR)/$(LIBDIR)/liblwip.a $(USRDIR)/user.ld
 	@echo + ld $@
-	$(LD) -o $@ $(ULDFLAGS) $(LDFLAGS) -nostdlib \
+	$(LD) -o $@ $(USR_LDFLAGS) $(LDFLAGS) -nostdlib \
 		$(OBJDIR)/$(LIBDIR)/entry.o $< $(NET_OBJFILES) \
 		-L$(OBJDIR)/$(LIBDIR) -llwip -ltoynix $(GCC_LIB)
-	$(OBJDUMP) -S $@ >$@.asm
+	$(OBJDUMP) -S $@ > $@.asm
+	$(NM) -n $@ > $@.sym
 
 $(OBJDIR)/$(NETDIR)/test%: $(OBJDIR)/$(NETDIR)/test%.o $(NET_OBJFILES) $(OBJDIR)/$(LIBDIR)/entry.o $(OBJDIR)/$(LIBDIR)/libtoynix.a $(OBJDIR)/$(LIBDIR)/liblwip.a $(USRDIR)/user.ld
 	@echo + ld $@
 	$(LD) -o $@ $(ULDFLAGS) $(LDFLAGS) -nostdlib \
 		$(OBJDIR)/$(LIBDIR)/entry.o $< $(NET_OBJFILES) \
 		-L$(OBJDIR)/$(LIBDIR) -llwip -ltoynix $(GCC_LIB)
-	$(OBJDUMP) -S $@ >$@.asm
+	$(OBJDUMP) -S $@ > $@.asm

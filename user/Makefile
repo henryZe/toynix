@@ -64,4 +64,5 @@ $(OBJDIR)/$(USRDIR)/%: $(OBJDIR)/$(USRDIR)/%.o $(OBJDIR)/$(LIBDIR)/entry.o $(OBJ
 	$(LD) -o $@.debug $(USR_LDFLAGS) $(OBJDIR)/$(LIBDIR)/entry.o $@.o -L$(OBJDIR)/$(LIBDIR) -ltoynix -llwip $(GCC_LIB)
 	$(OBJDUMP) -S $@.debug > $@.asm
 	$(NM) -n $@.debug > $@.sym
-	$(OBJCOPY) -R .stab -R .stabstr --add-gnu-debuglink=$(basename $@.debug) $@.debug $@
+	$(OBJCOPY) $@.debug $@
+	#$(OBJCOPY) -R .stab -R .stabstr --add-gnu-debuglink=$(basename $@.debug) $@.debug $@
