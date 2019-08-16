@@ -1,150 +1,138 @@
 #include <lib.h>
 
-/*
- * Simple malloc/free.
- *
- * Uses the address space to do most of the hard work.
- * The address space from mbegin to mend is scanned
- * in order.  Pages are allocated, used to fill successive
- * malloc requests, and then left alone.  Free decrements
- * a ref count maintained in the page; the page is freed
- * when the ref count hits zero.
- *
- * If we need to allocate a large amount (more than a page)
- * we can't put a ref count at the end of each page,
- * so we mark the pte entry with the bit PTE_CONTINUED.
- */
 enum {
 	MAXMALLOC = 1024 * 1024,    /* max size of one allocated chunk */
 };
 
-#define PTE_CONTINUED 0x200
+static void *base = NULL;
 
-static uint8_t *mbegin = (uint8_t *)0x08000000;
-static uint8_t *mend   = (uint8_t *)0x10000000;
-static uint8_t *mptr;
+struct m_block {
+	size_t size;
+	struct m_block *prev;
+	struct m_block *next;
+	int free;
+	void *ptr;
+	uint8_t data[0];
+};
 
-void
-free(void *v)
+#define BLOCK_SIZE sizeof(struct m_block)
+#define align4(x) ((((x) + 3) >> 2) << 2)
+
+static struct m_block*
+find_block(struct m_block **last, size_t s)
 {
-	uint8_t *c;
-	uint32_t *ref;
-
-	if (v == NULL)
-		return;
-
-	assert(mbegin <= (uint8_t *)v && (uint8_t *)v < mend);
-
-	c = ROUNDDOWN(v, PGSIZE);
-
-	while (uvpt[PGNUM(c)] & PTE_CONTINUED) {
-		sys_page_unmap(0, c);
-		c += PGSIZE;
-		assert(mbegin <= c && c < mend);
+	struct m_block *b = base;
+	/* first fit algorithm */
+	while (b && !(b->free && b->size >= s)) {
+		*last = b;
+		b = b->next;
 	}
 
-	/*
-	 * c is just a piece of this page, so dec the ref count
-	 * and maybe free the page.
-	 */
-	ref = (uint32_t *)(c + PGSIZE - 4);
-	if (--(*ref) == 0)
-		sys_page_unmap(0, c);
+	return b;
 }
 
-static int
-isfree(void *v, size_t n)
+/* Split block according to size */
+static void
+split_block(struct m_block *b, size_t s)
 {
-	uintptr_t va, end_va = (uintptr_t)v + n;
+	if (!b)
+		return;
 
-	for (va = (uintptr_t)v; va < end_va; va += PGSIZE) {
-		if (va >= (uintptr_t)mend)
-			return 0;
+	struct m_block *new = (struct m_block *)(b->data + s);
+	new->size = b->size - s - BLOCK_SIZE;
+	new->next = b->next;
+	new->prev = b;
+	new->free = 1;
+	new->ptr = new->data;
 
-		if ((uvpd[PDX(va)] & PTE_P) && (uvpt[PGNUM(va)] & PTE_P))
-			return 0;
-	}
+	b->size = s;
+	b->next = new;
 
-	return 1;
+	if (new->next)
+		new->next->prev = new;
+}
+
+/* Add a new block at the of heap */
+static struct m_block*
+extend_heap(struct m_block *last, size_t s)
+{
+	struct m_block *b = sbrk(0);
+
+	if (sbrk(BLOCK_SIZE + s) == (void *)-1)
+		return NULL;
+
+	b->size = s;
+	b->next = NULL;
+	b->prev = last;
+	b->ptr = b->data;
+	b->free = 0;
+	if (last)
+		last->next = b;
+
+	return b;
 }
 
 void *
 malloc(size_t n)
 {
-	int i, cont;
-	int nwrap;
-	uint32_t *ref;
-	void *v;
-
-	if (mptr == NULL)
-		mptr = mbegin;
-
-	n = ROUNDUP(n, 4);
+	size_t s = align4(n);
+	struct m_block *b, *last;
 
 	if (n >= MAXMALLOC)
 		return NULL;
 
-	if ((uintptr_t)mptr % PGSIZE) {
-		/*
-		 * we're in the middle of a partially
-		 * allocated page - can we add this chunk?
-		 * the +4 below is for the ref count.
-		 */
-		ref = (uint32_t *)(ROUNDUP(mptr, PGSIZE) - 4);
-		if ((uintptr_t)mptr / PGSIZE ==
-			((uintptr_t)mptr + n + 4 - 1) / PGSIZE) {
-
-			(*ref)++;
-			v = mptr;
-			mptr += n;
-			return v;
+	if (base) {
+		/* First find a block */
+		last = base;
+		b = find_block(&last, s);
+		if (b) {
+			/* can we split */
+			if ((b->size - s) >= (BLOCK_SIZE + 4))
+				split_block(b, s);
+			b->free = 0;
+		} else {
+			/* No fitting block, extend the heap */
+			b = extend_heap(last, s);
+			if (!b)
+				return NULL;
 		}
-
-		/*
-		 * stop working on this page and move on.
-		 */
-		free(mptr);	/* drop ref of mptr to this page */
-		mptr = ROUNDDOWN(mptr + PGSIZE, PGSIZE);
+	} else {
+		/* first time */
+		b = extend_heap(NULL, s);
+		if (!b)
+			return NULL;
+		base = b;		
 	}
 
-	/*
-	 * now we need to find some address space for this chunk.
-	 * if it's less than a page we leave it open for allocation.
-	 * runs of more than a page can't have ref counts so we
-	 * flag the PTE entries instead.
-	 */
-	nwrap = 0;
-	while (1) {
-		if (isfree(mptr, n + 4))
-			break;
-
-		mptr += PGSIZE;
-		if (mptr == mend) {
-			/* re-scan address space */
-			mptr = mbegin;
-			if (++nwrap == 2)
-				/* already re-scan */
-				return NULL;	/* out of address space */
-		}
-	}
-
-	/*
-	 * allocate at mptr - the +4 makes sure we allocate a ref count.
-	 */
-	for (i = 0; i < n + 4; i += PGSIZE) {
-		cont = (i + PGSIZE < n + 4) ? PTE_CONTINUED : 0;
-		if (sys_page_alloc(0, mptr + i, PTE_W | cont) < 0) {
-			for (; i >= 0; i -= PGSIZE)
-				sys_page_unmap(0, mptr + i);
-
-			return NULL;	/* out of physical memory */
-		}
-	}
-
-	ref = (uint32_t *)(mptr + i - 4);
-	*ref = 2;	/* one reference is for mptr, another reference is for returned block */
-	v = mptr;
-	mptr += n;
-
-	return v;
+	return b->data;	
 }
+
+
+
+// void
+// free(void *v)
+// {
+// 	uint8_t *c;
+// 	uint32_t *ref;
+
+// 	if (v == NULL)
+// 		return;
+
+// 	assert(mbegin <= (uint8_t *)v && (uint8_t *)v < mend);
+
+// 	c = ROUNDDOWN(v, PGSIZE);
+
+// 	while (uvpt[PGNUM(c)] & PTE_CONTINUED) {
+// 		sys_page_unmap(0, c);
+// 		c += PGSIZE;
+// 		assert(mbegin <= c && c < mend);
+// 	}
+
+// 	/*
+// 	 * c is just a piece of this page, so dec the ref count
+// 	 * and maybe free the page.
+// 	 */
+// 	ref = (uint32_t *)(c + PGSIZE - 4);
+// 	if (--(*ref) == 0)
+// 		sys_page_unmap(0, c);
+// }
