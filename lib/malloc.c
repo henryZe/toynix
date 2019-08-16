@@ -75,15 +75,14 @@ extend_heap(struct m_block *last, size_t s)
 void *
 malloc(size_t n)
 {
-	size_t s = align4(n);
 	struct m_block *b, *last;
+	size_t s = align4(n);
 
 	if (n >= MAXMALLOC)
 		return NULL;
 
 	if (base) {
 		/* First find a block */
-		last = base;
 		b = find_block(&last, s);
 		if (b) {
 			/* can we split */
@@ -107,32 +106,63 @@ malloc(size_t n)
 	return b->data;	
 }
 
+/* Get the block from addr */
+static struct m_block*
+get_block(void *p)
+{
+	uint8_t *temp = p;
+	temp -= BLOCK_SIZE;
+	p = temp;
+	return p;
+}
 
+static int
+valid_addr(void *v)
+{
+	assert(base);
+	assert(base < v && v < sbrk(0));
+	assert(v == get_block(v)->ptr);
+	return 1;
+}
 
-// void
-// free(void *v)
-// {
-// 	uint8_t *c;
-// 	uint32_t *ref;
+static struct m_block *
+fusion(struct m_block *b)
+{
+	if (b->next && b->next->free) {
+		b->size += BLOCK_SIZE + b->next->size;
+		b->next = b->next->next;
 
-// 	if (v == NULL)
-// 		return;
+		if (b->next)
+			b->next->prev = b;
+	}
 
-// 	assert(mbegin <= (uint8_t *)v && (uint8_t *)v < mend);
+	return b;
+}
 
-// 	c = ROUNDDOWN(v, PGSIZE);
+void
+free(void *v)
+{
+	struct m_block *b;
 
-// 	while (uvpt[PGNUM(c)] & PTE_CONTINUED) {
-// 		sys_page_unmap(0, c);
-// 		c += PGSIZE;
-// 		assert(mbegin <= c && c < mend);
-// 	}
+	if (valid_addr(v)) {
+		b = get_block(v);
+		b->free = 1;
 
-// 	/*
-// 	 * c is just a piece of this page, so dec the ref count
-// 	 * and maybe free the page.
-// 	 */
-// 	ref = (uint32_t *)(c + PGSIZE - 4);
-// 	if (--(*ref) == 0)
-// 		sys_page_unmap(0, c);
-// }
+		/* fusion with previous if possible */
+		if (b->prev && b->prev->free)
+			b = fusion(b->prev);
+
+		/* then fusion with next */
+		if (b->next)
+			fusion(b);
+		else {
+			/* free the end of the heap */
+			if (b->prev)
+				b->prev->next = NULL;
+			else
+				/* No more block */
+				base = NULL;
+			sbrk(-(b->size + BLOCK_SIZE));
+		}
+	}
+}
