@@ -166,3 +166,76 @@ free(void *v)
 		}
 	}
 }
+
+void *
+calloc(size_t nmemb, size_t size)
+{
+	size_t *new;
+	size_t i, s4;
+
+	new = malloc(nmemb * size);
+	if (new) {
+		s4 = align4(nmemb * size) >> 2;
+		for (i = 0; i < s4; i++)
+			new[i] = 0;
+	}
+
+	return new;
+}
+
+/* Copy data from block to block */
+static void
+copy_block(struct m_block *src , struct m_block *dst)
+{
+	int *sdata, *ddata;
+	size_t i;
+
+	sdata = src->ptr;
+	ddata = dst->ptr;
+	for (i = 0; (i << 2) < src->size && (i << 2) < dst->size; i++)
+		ddata[i] = sdata[i];
+}
+
+void *
+realloc(void *ptr, size_t size)
+{
+	size_t s;
+	struct m_block *b, *new;
+	void *newp;
+
+	if (!ptr)
+		return malloc(size);
+
+	if (valid_addr(ptr)) {
+		s = align4(size);
+		b = get_block(ptr);
+
+		if (b->size >= s) {
+			if (b->size - s >= BLOCK_SIZE + 4)
+				split_block(b, s);
+		} else {
+			/* Try fusion with next if possible */
+			if (b->next && b->next->free
+				&& (b->size + BLOCK_SIZE + b->next->size) >= s) {
+				fusion(b);
+				if (b->size - s >= BLOCK_SIZE + 4)
+					split_block(b, s);
+			} else {
+				/* realloc with a new block */
+				newp = malloc(s);
+				if (!newp)
+					return NULL;
+
+				new = get_block(newp);
+				/* Copy data */
+				copy_block(b, new);
+				/* free the old one */
+				free(ptr);
+
+				return newp;
+			}
+		}
+		return ptr;
+	}
+	return NULL;
+}
