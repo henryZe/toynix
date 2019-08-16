@@ -160,3 +160,9 @@ sys_copy_vma(envid_t src_env, envid_t dst_env)
 {
 	return syscall(SYS_copy_vma, 0, src_env, dst_env, 0, 0, 0);
 }
+
+void *
+sbrk(intptr_t increment)
+{
+	return (void *)syscall(SYS_sbrk, 0, increment, 0, 0, 0, 0);
+}

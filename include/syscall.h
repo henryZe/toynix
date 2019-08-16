@@ -24,6 +24,7 @@ enum {
 	SYS_chdir,
 	SYS_add_vma,
 	SYS_copy_vma,
+	SYS_sbrk,
 	NUM_SYSCALLS
 };
 
