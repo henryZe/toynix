@@ -113,6 +113,10 @@ map_segment(envid_t child, uintptr_t va, size_t memsz,
 	if (debug)
 		cprintf("map_segment %x + %x\n", va, memsz);
 
+	ret = sys_add_vma(child, va, memsz, perm);
+	if (ret < 0)
+		return ret;
+
 	i = PGOFF(va);
 	if (i) {
 		va -= i;
@@ -148,10 +152,6 @@ map_segment(envid_t child, uintptr_t va, size_t memsz,
 			sys_page_unmap(0, UTEMP);
 		}
 	}
-
-	ret = sys_add_vma(child, va, memsz, perm);
-	if (ret < 0)
-		return ret;
 
 	return 0;
 }
