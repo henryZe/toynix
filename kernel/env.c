@@ -2,6 +2,7 @@
 #include <string.h>
 #include <error.h>
 #include <elf.h>
+#include <vm.h>
 #include <kernel/env.h>
 #include <kernel/pmap.h>
 #include <kernel/monitor.h>
@@ -238,6 +239,35 @@ region_alloc(struct Env *e, void *va, size_t len)
 	}
 }
 
+static void
+init_stack(struct Env *e)
+{
+	// Now map one page for the program's initial stack
+	// at virtual address USTACKTOP - PGSIZE.
+	struct PageInfo *p = NULL;
+	int ret;
+	uintptr_t va;
+
+	p = page_alloc(0);
+	if (!p)
+		panic("page_alloc failed\n");
+
+	ret = page_insert(e->env_pgdir, p, (void *)(USTACKTOP - PGSIZE), PTE_U | PTE_W);
+	if (ret)
+		panic("page_insert %e\n", ret);
+
+	for (va = USTACKTOP - USTKSIZE; va < (USTACKTOP - PGSIZE); va += PGSIZE) {
+		// map zero page
+		ret = page_insert(e->env_pgdir, pages, (void *)va, PTE_U | PTE_COW);
+		if (ret)
+			panic("page_insert %e\n", ret);
+	}
+
+	ret = env_add_vma(e, USTACKTOP - USTKSIZE, USTKSIZE, PTE_U | PTE_W);
+	if (ret)
+		panic("add_vma %e\n", ret);
+}
+
 //
 // Set up the initial program binary, stack, and processor flags
 // for a user process.
@@ -294,7 +324,7 @@ load_icode(struct Env *e, uint8_t *binary)
 	struct Elf *ELFHDR = (struct Elf *)binary;
 	struct Proghdr *ph, *eph;
 	int ret, perm;
-	uintptr_t va, i;
+	uintptr_t i;
 
 	/* switch address space */
 	lcr3(PADDR(e->env_pgdir));
@@ -326,30 +356,17 @@ load_icode(struct Env *e, uint8_t *binary)
 				if (ret)
 					panic("page_insert %e\n", ret);
 			}
+
+			ret = env_add_vma(e, ph->p_va, ph->p_memsz, perm);
+			if (ret)
+				panic("add_vma %e\n", ret);
 		}
 	}
 
 	cprintf("ELFHDR->e_entry %08x\n", ELFHDR->e_entry);
 	e->env_tf.tf_eip = ELFHDR->e_entry;
 
-	// Now map one page for the program's initial stack
-	// at virtual address USTACKTOP - PGSIZE.
-	struct PageInfo *p = NULL;
-
-	p = page_alloc(0);
-	if (!p)
-		panic("page_alloc failed\n");
-
-	ret = page_insert(e->env_pgdir, p, (void *)(USTACKTOP - PGSIZE), PTE_U | PTE_W);
-	if (ret)
-		panic("page_insert %e\n", ret);
-
-	for (va = USTACKTOP - USTKSIZE; va < (USTACKTOP - PGSIZE); va += PGSIZE) {
-		// map zero page
-		ret = page_insert(e->env_pgdir, pages, (void *)va, PTE_U | PTE_COW);
-		if (ret)
-			panic("page_insert %e\n", ret);
-	}
+	init_stack(e);
 
 	/* switch back to kern_pgdir */
 	lcr3(PADDR(kern_pgdir));
@@ -388,6 +405,7 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 	e->env_type = ENV_TYPE_USER;
 	e->env_status = ENV_RUNNABLE;
 	e->env_runs = 0;
+	e->vma_valid = 0;
 
 	// Clear out all the saved register state,
 	// to prevent the register values

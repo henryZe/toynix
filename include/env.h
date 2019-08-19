@@ -6,6 +6,7 @@
 #include <types.h>
 #include <trap.h>
 #include <memlayout.h>
+#include <vm.h>
 
 typedef int32_t envid_t;
 
@@ -57,6 +58,9 @@ struct Env {
 
 	// Address space
 	pde_t *env_pgdir;		// Kernel virtual address of page dir
+	// VMA
+	int vma_valid;
+	struct vm_area_struct vma[VMA_PER_ENV];
 
 	// Exception handling
 	void *env_pgfault_upcall;	// Page fault upcall entry point

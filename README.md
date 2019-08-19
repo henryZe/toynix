@@ -61,14 +61,16 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 
 ### 8.1 Optimize
 
-* implement mmap syscall
-* modify map_segment from copy to mmap method
 * optimize malloc with heap allocator
+
 * add VMA structure which describes a memory area:
-  * including start and end addresses
-  * flags to determine access rights and behaviors(such as page fault)
+  * including start address and size
+  * flags to determine access rights and behaviors(such as page_fault handler)
   * specifies which file is being mapped by the area, if any
-* distinguish anonymous and mmap pages (without/with copy original one)
+* use VMA pg_fault handler to replace global pg_fault handler
+* distinguish anonymous and mmap pages (whether need to copy original page)
+* modify map_segment from read to mmap images
+
 * convert organization of fs data block into LIST
 * replace static lib with share lib
 * fine-gained lock instead of global kernel lock:

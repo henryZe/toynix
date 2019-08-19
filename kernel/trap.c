@@ -269,8 +269,8 @@ page_fault_handler(struct Trapframe *tf)
 			/*
 			 * trap-time UTrapframe already in exception stack
 			 *
-			 * In non-recursive case:
-			 * Regular Stack & Exception Stack status
+			 * In recursive case:
+			 * Exception Stack status
 			 *
 			 * +-----------------------+
 			 * | Exception Stack n     |
@@ -285,8 +285,8 @@ page_fault_handler(struct Trapframe *tf)
 			/*
 			 * first time trap into exception stack
 			 *
-			 * In recursive case:
-			 * Exception Stack status
+			 * In non-recursive case:
+			 * Regular Stack & Exception Stack status
 			 *
 			 * +-------------------+            +-------------------+
 			 * | Regular Stack     |            | Exception Stack 1 |
