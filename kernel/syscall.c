@@ -542,44 +542,6 @@ sys_copy_vma(envid_t src_env, envid_t dst_env)
 	return 0;
 }
 
-static uint8_t *mbegin = (uint8_t *)0x08000000;
-static uint8_t *mend   = (uint8_t *)0x10000000;
-static uint8_t *heap_break = NULL;
-
-static void *
-sys_sbrk(intptr_t increment)
-{
-	int ret;
-	uint8_t *new_break, *i;
-
-	if (heap_break == NULL) {
-		env_add_vma(curenv, (unsigned long)mbegin, mend - mbegin, PTE_U | PTE_W);
-		heap_break = mbegin;
-	}
-
-	if (!increment)
-		return heap_break;
-
-	new_break = heap_break + increment;
-	if ((new_break < mbegin) || (new_break > mend))
-		return (void *)-E_INVAL;
-
-	if (new_break > heap_break) {
-		for (i = ROUNDUP(heap_break, PGSIZE); i < ROUNDUP(new_break, PGSIZE); i += PGSIZE) {
-			// mmap zero page
-			ret = page_insert(curenv->env_pgdir, pages, i, PTE_U | PTE_COW);
-			if (ret < 0)
-				return (void *)ret;
-		}
-	} else {
-		for (i = ROUNDDOWN(heap_break, PGSIZE); i >= ROUNDUP(new_break, PGSIZE); i -= PGSIZE)
-			page_remove(curenv->env_pgdir, i);
-	}
-
-	heap_break = new_break;
-	return heap_break;
-}
-
 // Dispatches to the correct kernel function, passing the arguments.
 int32_t
 syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
@@ -651,9 +613,6 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 
 	case SYS_copy_vma:
 		return sys_copy_vma(a1, a2);
-
-	case SYS_sbrk:
-		return (int32_t)sys_sbrk(a1);
 
 	default:
 		return -E_INVAL;

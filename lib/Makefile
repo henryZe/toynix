@@ -32,6 +32,7 @@ LIB_SRCFILES :=	\
 	$(LIBDIR)/sleep.c \
 	$(LIBDIR)/math.c \
 	$(LIBDIR)/buddy.c \
+	$(LIBDIR)/sbrk.c \
 
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.c, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_SRCFILES))
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.S, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_OBJFILES))

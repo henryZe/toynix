@@ -50,6 +50,9 @@ void pgfault(struct UTrapframe *utf);
 envid_t fork(void);
 envid_t sfork(void);
 
+// sbrk.c
+void *sbrk(intptr_t increment);
+
 // syscall.c
 void sys_cputs(const char *string, size_t len);
 int	sys_cgetc(void);
@@ -70,7 +73,6 @@ int sys_debug_info(int option, char *buf, size_t size);
 int sys_chdir(const char *path);
 int sys_add_vma(envid_t envid, uintptr_t va, size_t memsz, int perm);
 int sys_copy_vma(envid_t src_env, envid_t dst_env);
-void *sbrk(intptr_t increment);
 
 static inline envid_t __attribute__((always_inline))
 sys_exofork(void)
