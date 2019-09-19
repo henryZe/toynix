@@ -162,6 +162,7 @@ bc_init(void)
 	struct Super super;
 
 	set_pgfault_handler(bc_pgfault);
+	sys_add_vma(0, DISKMAP, DISKSIZE, PTE_W);
 	check_bc();
 
 	// cache the super block by reading it once
