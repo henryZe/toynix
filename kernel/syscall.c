@@ -436,13 +436,6 @@ sys_debug_info(int option, char *buf, size_t size)
 {
 	int i, ret = 0;
 	struct PageInfo *p = page_free_list;
-	const char *env_status[] = {
-		"free",
-		"dying",
-		"waiting",
-		"running",
-		"pending",
-	};
 
 	switch (option) {
 	case CPU_INFO:
@@ -457,23 +450,6 @@ sys_debug_info(int option, char *buf, size_t size)
 				"Free Pages Num: %d\n"
 				"Used Pages Num: %d\n",
 				npages, i, npages - i);
-		break;
-
-	case ENV_INFO:
-		for (i = 0; i < NENV; i++) {
-			if (envs[i].env_status != ENV_FREE) {
-				cprintf("Env: %x Name: %16s Status: %8s Run Times: %8d Father: %x",
-					envs[i].env_id, envs[i].binaryname,
-					env_status[envs[i].env_status], envs[i].env_runs,
-					envs[i].env_parent_id);
-				if (envs[i].env_parent_id)
-					cprintf(" %16s", envs[ENVX(envs[i].env_parent_id)].binaryname);
-				cprintf("\n");
-			}
-		}
-		break;
-
-	case VMA_INFO:
 		break;
 
 	default:

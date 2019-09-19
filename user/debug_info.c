@@ -10,9 +10,17 @@ usage(void)
 void
 umain(int argc, char **argv)
 {
-	int i, fd, ret;
+	int i, fd, ret, envid;
 	char buf[128] = {0};
 	uint32_t *tmp = UTEMP;
+	struct vm_area_struct *vma;
+	const char *env_status[] = {
+		"free",
+		"dying",
+		"waiting",
+		"running",
+		"pending",
+	};
 
 	if (argc == 1)
 		usage();
@@ -26,7 +34,6 @@ umain(int argc, char **argv)
 	switch (i) {
 	case CPU_INFO:
 	case MEM_INFO:
-	case ENV_INFO:
 		fd = opendebug();
 		if (fd < 0)
 			return;
@@ -51,6 +58,34 @@ umain(int argc, char **argv)
 				tmp[0], tmp[1]);
 
 		sys_page_unmap(0, tmp);
+		break;
+
+	case ENV_INFO:
+		for (i = 0; i < NENV; i++) {
+			if (envs[i].env_status != ENV_FREE) {
+				printf("Env: %x Name: %16s Status: %8s Run Times: %8d Father: %x",
+					envs[i].env_id, envs[i].binaryname,
+					env_status[envs[i].env_status], envs[i].env_runs,
+					envs[i].env_parent_id);
+				if (envs[i].env_parent_id)
+					printf(" %16s", envs[ENVX(envs[i].env_parent_id)].binaryname);
+				printf("\n");
+			}
+		}
+		break;
+
+	case VMA_INFO:
+		envid = strtol(argv[2], NULL, 16);
+
+		if (envs[ENVX(envid)].env_status == ENV_FREE)
+			return;
+
+		printf("Env %x:\n", envid);
+		for (i = 0; i < envs[ENVX(envid)].vma_valid; i++) {
+			vma = (void *)&(envs[ENVX(envid)].vma[i]);
+			printf("VMA%d Begin: %08x Size: %8x Perm: %x\n",
+				i, vma->vm_start, vma->size, vma->vm_page_prot);
+		}
 		break;
 
 	default:
