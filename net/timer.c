@@ -6,7 +6,7 @@ timer(envid_t envid, uint32_t initial_to)
 	int ret;
 	uint32_t stop = sys_time_msec() + initial_to;
 
-	binaryname = "ns_timer";
+	sys_env_name(0, "ns_timer");
 
 	while (1) {
 		while (1) {

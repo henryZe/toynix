@@ -160,3 +160,9 @@ sys_copy_vma(envid_t src_env, envid_t dst_env)
 {
 	return syscall(SYS_copy_vma, 0, src_env, dst_env, 0, 0, 0);
 }
+
+int
+sys_env_name(envid_t envid, const char *name)
+{
+	return syscall(SYS_env_name, 0, envid, (uint32_t)name, 0, 0, 0);
+}

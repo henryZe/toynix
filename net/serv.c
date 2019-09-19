@@ -318,7 +318,7 @@ umain(int argc, char **argv)
 {
 	envid_t ns_envid = sys_getenvid();	/* get self id */
 
-	binaryname = "ns";
+	sys_env_name(0, "ns");
 
 	// fork off the timer thread which will send us periodic messages
 	timer_envid = fork();

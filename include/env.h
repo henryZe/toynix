@@ -73,6 +73,7 @@ struct Env {
 
 	// File System
 	char currentpath[1024];		// current fs path
+	char binaryname[64];
 };
 
 #endif // !INC_ENV_H

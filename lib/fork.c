@@ -148,6 +148,10 @@ fork(void)
 	if (ret < 0)
 		panic("fork: %e", ret);
 
+	ret = sys_env_name(envid, (const char *)thisenv->binaryname);
+	if (ret < 0)
+		panic("fork: %e", ret);
+
 	return envid;
 }
 
@@ -213,6 +217,10 @@ sfork(void)
 		panic("fork: %e", ret);
 
 	ret = sys_env_set_status(envid, ENV_RUNNABLE);
+	if (ret < 0)
+		panic("fork: %e", ret);
+
+	ret = sys_env_name(envid, (const char *)thisenv->binaryname);
 	if (ret < 0)
 		panic("fork: %e", ret);
 

@@ -12,8 +12,6 @@ umain(int argc, char **argv)
 {
 	int f, i;
 
-	binaryname = "rm";
-
 	if (argc == 1)
 		usage();
 

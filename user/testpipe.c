@@ -8,8 +8,7 @@ umain(int argc, char **argv)
 	char buf[100];
 	int i, pid, p[2];
 
-	binaryname = "pipereadeof";
-
+	sys_env_name(0, "pipereadeof");
 	if ((i = pipe(p)) < 0)
 		panic("pipe: %e", i);
 
@@ -39,7 +38,7 @@ umain(int argc, char **argv)
 	}
 	wait(pid);
 
-	binaryname = "pipewriteeof";
+	sys_env_name(0, "pipewriteeof");
 	if ((i = pipe(p)) < 0)
 		panic("pipe: %e", i);
 

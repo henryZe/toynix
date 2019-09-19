@@ -6,7 +6,7 @@ extern union Nsipc nsipcbuf;
 void
 output(envid_t ns_envid)
 {
-	binaryname = "ns_output";
+	sys_env_name(0, "ns_output");
 
 	struct tx_desc td = {0};
 	int ret;

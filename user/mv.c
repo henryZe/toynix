@@ -13,8 +13,6 @@ umain(int argc, char **argv)
 	int ret;
 	char *src, *dst;
 
-	binaryname = "mv";
-
 	if (argc != 3)
 		usage();
 

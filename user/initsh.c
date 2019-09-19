@@ -5,6 +5,7 @@ umain(int argc, char **argv)
 {
 	int i, r, x, want;
 
+	sys_env_name(0, "initsh");
 	cprintf("initsh: running sh\n");
 
 	// being run directly from kernel, so no file descriptors open yet

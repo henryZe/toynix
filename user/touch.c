@@ -12,8 +12,6 @@ umain(int argc, char **argv)
 {
 	int f, i;
 
-	binaryname = "touch";
-
 	if (argc == 1)
 		usage();
 

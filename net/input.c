@@ -5,7 +5,7 @@ extern union Nsipc nsipcbuf;
 void
 input(envid_t ns_envid)
 {
-	binaryname = "ns_input";
+	sys_env_name(0, "ns_input");
 
 	int ret;
 	uint32_t length;

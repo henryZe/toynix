@@ -12,8 +12,6 @@ umain(int argc, char **argv)
 {
 	int ret, i;
 
-	binaryname = "mkdir";
-
 	if (argc == 1)
 		usage();
 

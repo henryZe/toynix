@@ -13,8 +13,6 @@ umain(int argc, char **argv)
     envid_t ns_envid = sys_getenvid();
     int i, ret;
 
-    binaryname = "testoutput";
-
     output_envid = fork();
     if (output_envid < 0)
         panic("error forking");

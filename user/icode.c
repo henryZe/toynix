@@ -6,8 +6,6 @@ umain(int argc, char **argv)
 	int fd, n, ret;
 	char buf[512 + 1];
 
-	binaryname = "icode";
-
 	cprintf("icode startup\n");
 
 	cprintf("icode: open /motd\n");

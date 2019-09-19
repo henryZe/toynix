@@ -98,6 +98,7 @@ sys_exofork(void)
 	env->env_status = ENV_NOT_RUNNABLE;
 	env->env_tf.tf_regs.reg_eax = 0;	/* return 0 back to child */
 	strcpy(env->currentpath, curenv->currentpath);
+	env->binaryname[0] = '\0';
 
 	return env->env_id;
 }
@@ -433,8 +434,15 @@ sys_time_msec(void)
 static int
 sys_debug_info(int option, char *buf, size_t size)
 {
-	int i, ret;
+	int i, ret = 0;
 	struct PageInfo *p = page_free_list;
+	const char *env_status[] = {
+		"free",
+		"dying",
+		"waiting",
+		"running",
+		"pending",
+	};
 
 	switch (option) {
 	case CPU_INFO:
@@ -449,6 +457,23 @@ sys_debug_info(int option, char *buf, size_t size)
 				"Free Pages Num: %d\n"
 				"Used Pages Num: %d\n",
 				npages, i, npages - i);
+		break;
+
+	case ENV_INFO:
+		for (i = 0; i < NENV; i++) {
+			if (envs[i].env_status != ENV_FREE) {
+				cprintf("Env: %x Name: %16s Status: %8s Run Times: %8d Father: %x",
+					envs[i].env_id, envs[i].binaryname,
+					env_status[envs[i].env_status], envs[i].env_runs,
+					envs[i].env_parent_id);
+				if (envs[i].env_parent_id)
+					cprintf(" %16s", envs[ENVX(envs[i].env_parent_id)].binaryname);
+				cprintf("\n");
+			}
+		}
+		break;
+
+	case VMA_INFO:
 		break;
 
 	default:
@@ -542,6 +567,21 @@ sys_copy_vma(envid_t src_env, envid_t dst_env)
 	return 0;
 }
 
+static int
+sys_env_name(envid_t envid, const char *name)
+{
+	int ret;
+	struct Env *env;
+
+	ret = envid2env(envid, &env, 1);
+	if (ret)
+		return ret;
+
+	user_mem_assert(curenv, name, strlen(name) + 1, PTE_U);
+	strcpy(env->binaryname, name);
+	return 0;
+}
+
 // Dispatches to the correct kernel function, passing the arguments.
 int32_t
 syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
@@ -613,6 +653,9 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 
 	case SYS_copy_vma:
 		return sys_copy_vma(a1, a2);
+
+	case SYS_env_name:
+		return sys_env_name(a1, (const char *)a2);
 
 	default:
 		return -E_INVAL;

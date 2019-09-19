@@ -41,8 +41,6 @@ umain(int argc, char **argv)
 {
 	int f, i;
 
-	binaryname = "num";
-
 	if (argc == 1)
 		num(0, "<stdin>");
 	else {

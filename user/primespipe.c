@@ -61,8 +61,6 @@ umain(int argc, char **argv)
 {
 	int i, id, p[2], ret;
 
-	binaryname = "primespipe";
-
 	i = pipe(p);
 	if (i < 0)
 		panic("pipe: %e", i);

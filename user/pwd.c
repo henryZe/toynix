@@ -10,8 +10,6 @@ usage(void)
 void
 umain(int argc, char **argv)
 {
-	binaryname = "pwd";
-
 	if (argc != 1)
 		usage();
 

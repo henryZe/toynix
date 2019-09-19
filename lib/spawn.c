@@ -312,6 +312,10 @@ spawn(const char *prog, const char **argv)
 	if (ret < 0)
 		panic("sys_env_set_status: %e", ret);
 
+	ret = sys_env_name(child, argv[0]);
+	if (ret < 0)
+		panic("sys_env_name: %e", ret);
+
 	return child;
 
 error:

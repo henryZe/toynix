@@ -26,6 +26,7 @@ umain(int argc, char **argv)
 	switch (i) {
 	case CPU_INFO:
 	case MEM_INFO:
+	case ENV_INFO:
 		fd = opendebug();
 		if (fd < 0)
 			return;
@@ -46,7 +47,8 @@ umain(int argc, char **argv)
 
 		snprintf(buf, sizeof(buf),
 				"Total Blocks Num: %d\n"
-				"Used Blocks Num: %d\n", tmp[0], tmp[1]);
+				"Used Blocks Num: %d\n",
+				tmp[0], tmp[1]);
 
 		sys_page_unmap(0, tmp);
 		break;

@@ -299,8 +299,6 @@ umain(int argc, char **argv)
 {
 	int serversock, clientsock, ret;
 	struct sockaddr_in server, client;
-	
-	binaryname = "jhttpd";
 
 	// Create the TCP socket
 	serversock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);

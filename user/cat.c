@@ -27,8 +27,6 @@ umain(int argc, char **argv)
 {
 	int f, i;
 
-	binaryname = "cat";
-
 	if (argc == 1)
 		cat(0, "<stdin>");
 	else {

@@ -26,7 +26,6 @@
 void umain(int argc, char **argv);
 
 // libmain.c or entry.S
-extern const char *binaryname;
 extern volatile struct Env envs[NENV];
 extern const volatile struct PageInfo pages[];
 /* extern const volatile struct Env *thisenv; */
@@ -73,6 +72,7 @@ int sys_debug_info(int option, char *buf, size_t size);
 int sys_chdir(const char *path);
 int sys_add_vma(envid_t envid, uintptr_t va, size_t memsz, int perm);
 int sys_copy_vma(envid_t src_env, envid_t dst_env);
+int sys_env_name(envid_t envid, const char *name);
 
 static inline envid_t __attribute__((always_inline))
 sys_exofork(void)

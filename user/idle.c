@@ -3,8 +3,6 @@
 void
 umain(int argc, char **argv)
 {
-	binaryname = "idle";
-
 	// Loop forever, simply trying to yield to a different environment.
 	// Instead of busy-waiting like this,
 	// a better way would be to use the processor's HLT instruction
