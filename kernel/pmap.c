@@ -521,8 +521,10 @@ page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 
 	if (*pt_entry & PTE_P) {
 		/* remap perm */
-		if (pp == NULL)
+		if (pp == NULL) {
 			pp = page_lookup(pgdir, va, NULL);
+			goto out;
+		}
 
 		/* the same pp is re-inserted at the same virtual address */
 		if (page_lookup(pgdir, va, NULL) == pp)
