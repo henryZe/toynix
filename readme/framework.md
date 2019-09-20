@@ -16,6 +16,7 @@
   - [3.3 User Memory](#33-User-Memory)
   - [3.4 IO Ports](#34-IO-Ports)
   - [3.5 Malloc](#35-Malloc)
+  - [3.6 VMA](#36-Vma)
 - [4 Environment](#4-Environment)
   - [4.1 Initialize](#41-Initialize)
   - [4.2 Create New Environment](#42-Create-New-Environment)
@@ -220,10 +221,28 @@ function: mmio_map_region
 ### 3.5 Malloc
 
 file: lib/malloc.c
-> buddy allocator + page reference + copy-on-write + zero page
+> based on sbrk()
 
 function: malloc
+> adopt first-fit / COW
+
 function: free
+> free specific area
+
+function: calloc
+> allocate area and the memory is set to zero
+
+function: realloc
+> changes the size of the memory block pointed to by ptr to size bytes
+
+### 3.6 VMA
+
+file: kernel/vm.c
+> create virtual memory area
+
+function: add_vma
+
+function: copy_vma
 
 ## 4 Environment
 
@@ -567,6 +586,8 @@ function: syscall
 2. sys_page_map: map the page of memory at 'src va' in src env's address space at 'dst va' in dst env's address space with permission 'perm'
 3. sys_page_unmap: unmap the page of memory at 'va' in the address space of 'env'
 4. sys_env_set_pgfault_upcall: [set the page fault upcall](#5.3-Page-Fault)
+5. sys_add_vma: add virtual memory area (by spawn)
+6. sys_copy_vma: copy VMAs of source env to destination env (by fork)
 
 #### 5.4.5 IPC
 

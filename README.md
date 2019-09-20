@@ -61,8 +61,6 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 
 ### 8.1 Optimize
 
-* optimize malloc with heap allocator
-
 * add VMA structure which describes a memory area:
   * including start address and size
   * flags to determine access rights and behaviors(such as page_fault handler)
@@ -70,8 +68,6 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 * use VMA pg_fault handler to replace global pg_fault handler
 * distinguish anonymous and mmap pages (whether need to copy original page)
 * modify map_segment from read to mmap images
-
-* convert organization of fs data block into LIST
 * replace static lib with share lib
 * fine-gained lock instead of global kernel lock:
   * page allocator
