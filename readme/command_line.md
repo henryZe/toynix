@@ -1,43 +1,43 @@
 # Command Line
 
-* sh - command interpreter  
+1. sh - command interpreter  
   `$ sh [OPTIONS]...`
 
-* echo - display a line of text  
+2. echo - display a line of text  
   `$ echo [STRING]...`
 
-* cat - concatenate files and print on the standard output  
+3. cat - concatenate files and print on the standard output  
   `$ cat [FILE]...`
 
-* num - show line number of the specified file  
+4. num - show line number of the specified file  
   `$ cat file | num`
 
-* lsfd - display the occupying file descriptor and its property  
+5. lsfd - display the occupying file descriptor and its property  
   `$ lsfd`
 
-* ls - list directory contents  
+6. ls - list directory contents  
   `$ ls [-dFl] [file...]`
 
-* debug_info - show the current running status  
+7. debug_info - show the current running status  
   `$ debug_info [cpu|mem|fs]`
 
-* httpd - a web server and waits for the incoming client requests  
+8. httpd - a web server and waits for the incoming client requests  
   `$ httpd &`
 
-* pwd - print name of current/working directory  
+9. pwd - print name of current/working directory  
   `$ pwd`
 
-* touch - create empty file  
+10. touch - create empty file  
   `$ touch FILE...`
 
-* rm - remove files or directories  
+11. rm - remove files or directories  
   `$ rm [FILE]...`
 
-* mkdir - make directories  
+12. mkdir - make directories  
   `$ mkdir DIRECTORY...`
 
-* cd - switch current working directory  
+13. cd - switch current working directory  
   `$ cd DIRECTORY`
 
-* mv - move (rename) files  
+14. mv - move (rename) files  
   `$ mv SOURCE DIRECTORY`

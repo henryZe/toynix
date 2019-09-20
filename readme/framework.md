@@ -579,6 +579,7 @@ function: syscall
 4. sys_exofork: [fork](#4.5-Fork)
 5. sys_env_set_status: set the status of a specified environment (ENV_RUNNABLE or ENV_NOT_RUNNABLE)
 6. sys_env_set_trapframe: set env's eip & esp (enable interrupts, set IOPL as 0)
+7. sys_env_name: set env's binary name (for debug)
 
 #### 5.4.4 Memory
 
