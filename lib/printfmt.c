@@ -59,6 +59,45 @@ printnum(void (*putch)(int, void*), void *putdat,
 	putch("0123456789abcdef"[num % base], putdat);
 }
 
+static void
+printfloat(void (*putch)(int, void*), void *putdat, double num)
+{
+
+#define double_sign_mask     0x8000000000000000
+#define double_exponent_mask 0x7FF0000000000000
+#define double_mantissa_mask 0x000FFFFFFFFFFFFF
+
+	unsigned int temp, i;
+	unsigned long long valid_bit, ull_num;
+	memcpy(&ull_num, &num, sizeof(num));
+
+	unsigned int sign = (ull_num & double_sign_mask) >> 63;
+	int exponent = (ull_num & double_exponent_mask) >> 52;
+	unsigned long long mantissa = (ull_num & double_mantissa_mask);
+
+	exponent -= 0x3FF;
+
+	for (i = 500000, temp = 0, valid_bit = ((unsigned long long)1 << 51);
+		mantissa && i && valid_bit; i = i >> 1, valid_bit = valid_bit >> 1) {
+		if (mantissa & valid_bit) {
+			temp += i;
+			mantissa &= ~valid_bit;
+		}
+	}
+
+	if (sign)
+		putch('-', putdat);
+	putch('1', putdat);
+	putch('.', putdat);
+	printnum(putch, putdat, temp, 10, 6, '0');
+	putch('*', putdat);
+	putch('2', putdat);
+	putch('^', putdat);
+	printnum(putch, putdat, exponent, 10, -1, ' ');
+
+	return;
+}
+
 // Get an unsigned int of various possible sizes from a varargs list,
 // depending on the lflag parameter.
 static unsigned long long
@@ -85,6 +124,11 @@ getint(va_list *ap, int lflag)
 		return va_arg(*ap, int);
 }
 
+static double
+getfloat(va_list *ap)
+{
+	return va_arg(*ap, double);
+}
 
 // Main function to format and print a string.
 void printfmt(void (*putch)(int, void*), void *putdat, const char *fmt, ...);
@@ -95,6 +139,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 	register const char *p;
 	register int ch, err;
 	unsigned long long num;
+	double float_num;
 	int base, lflag, width, precision, altflag;
 	char padc;
 
@@ -234,6 +279,12 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 			base = 16;
 		number:
 			printnum(putch, putdat, num, base, width, padc);
+			break;
+
+		// float
+		case 'f':
+			float_num = getfloat(&ap);
+			printfloat(putch, putdat, float_num);
 			break;
 
 		// escaped '%' character
