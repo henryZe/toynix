@@ -92,7 +92,7 @@ boot_aps(void)
 		mpentry_kstack = percpu_kstacks[c - cpus] + KSTKSIZE;
 
 		// Start the CPU at mpentry_start
-		lapic_startap(c->cpu_id, PADDR(code));
+		lapic_startap(c->cpu_id, MPENTRY_PADDR);
 
 		// Wait for the CPU to finish some basic setup in mp_main()
 		while (c->cpu_status != CPU_STARTED);

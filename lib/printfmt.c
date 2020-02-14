@@ -60,41 +60,16 @@ printnum(void (*putch)(int, void*), void *putdat,
 }
 
 static void
-printfloat(void (*putch)(int, void*), void *putdat, double num)
+printdouble(void (*putch)(int, void*), void *putdat, double num,
+		int width, int padc)
 {
 
-#define double_sign_mask     0x8000000000000000
-#define double_exponent_mask 0x7FF0000000000000
-#define double_mantissa_mask 0x000FFFFFFFFFFFFF
+	int Inte = (int)num;
+	int Deci = (int)(100000 * (num - Inte));
 
-	unsigned int temp, i;
-	unsigned long long valid_bit, ull_num;
-	memcpy(&ull_num, &num, sizeof(num));
-
-	unsigned int sign = (ull_num & double_sign_mask) >> 63;
-	int exponent = (ull_num & double_exponent_mask) >> 52;
-	unsigned long long mantissa = (ull_num & double_mantissa_mask);
-
-	exponent -= 0x3FF;
-
-	for (i = 500000, temp = 0, valid_bit = ((unsigned long long)1 << 51);
-		mantissa && i && valid_bit; i = i >> 1, valid_bit = valid_bit >> 1) {
-		if (mantissa & valid_bit) {
-			temp += i;
-			mantissa &= ~valid_bit;
-		}
-	}
-
-	if (sign)
-		putch('-', putdat);
-	putch('1', putdat);
+	printnum(putch, putdat, Inte, 10, width, padc);
 	putch('.', putdat);
-	printnum(putch, putdat, temp, 10, 6, '0');
-	putch('*', putdat);
-	putch('2', putdat);
-	putch('^', putdat);
-	printnum(putch, putdat, exponent, 10, -1, ' ');
-
+	printnum(putch, putdat, Deci, 10, width, padc);
 	return;
 }
 
@@ -125,7 +100,7 @@ getint(va_list *ap, int lflag)
 }
 
 static double
-getfloat(va_list *ap)
+getdouble(va_list *ap)
 {
 	return va_arg(*ap, double);
 }
@@ -283,8 +258,8 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 
 		// float
 		case 'f':
-			float_num = getfloat(&ap);
-			printfloat(putch, putdat, float_num);
+			float_num = getdouble(&ap);
+			printdouble(putch, putdat, float_num, width, padc);
 			break;
 
 		// escaped '%' character

@@ -446,7 +446,8 @@ sys_debug_info(int option, char *buf, size_t size)
 		for (i = 0; p != NULL; i++)
 			p = p->pp_link;
 
-		ret = snprintf(buf, size, "Total Pages Num: %d\n"
+		ret = snprintf(buf, size,
+				"Total Pages Num: %d\n"
 				"Free Pages Num: %d\n"
 				"Used Pages Num: %d\n",
 				npages, i, npages - i);
