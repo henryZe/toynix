@@ -63,9 +63,13 @@ static void
 printdouble(void (*putch)(int, void*), void *putdat, double num,
 		int width, int padc)
 {
-
 	int Inte = (int)num;
-	int Deci = (int)(100000 * (num - Inte));
+	int Deci = (int)(1000000 * (num - Inte));
+
+	if (Deci % 10 >= 5)
+		Deci = Deci / 10 + 1;
+	else
+		Deci = Deci / 10;
 
 	printnum(putch, putdat, Inte, 10, width, padc);
 	putch('.', putdat);
