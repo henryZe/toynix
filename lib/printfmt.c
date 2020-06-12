@@ -73,7 +73,7 @@ printdouble(void (*putch)(int, void*), void *putdat, double num,
 
 	printnum(putch, putdat, Inte, 10, width, padc);
 	putch('.', putdat);
-	printnum(putch, putdat, Deci, 10, width, padc);
+	printnum(putch, putdat, Deci, 10, 5, '0');
 	return;
 }
 

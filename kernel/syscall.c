@@ -439,7 +439,7 @@ sys_debug_info(int option, char *buf, size_t size)
 
 	switch (option) {
 	case CPU_INFO:
-		ret = snprintf(buf, size, "CPU num: %d\n", ncpu);
+		ret = snprintf(buf, size, "CPU core: %d\n", ncpu);
 		break;
 
 	case MEM_INFO:
@@ -447,10 +447,11 @@ sys_debug_info(int option, char *buf, size_t size)
 			p = p->pp_link;
 
 		ret = snprintf(buf, size,
-				"Total Pages Num: %d\n"
-				"Free Pages Num: %d\n"
-				"Used Pages Num: %d\n",
-				npages, i, npages - i);
+					"Total pages: %d\n"
+					" Free pages: %d\n"
+					" Used pages: %d\n"
+					"      Usage: %f\%\n",
+					npages, i, npages - i, (float)(npages - i) * 100 / npages);
 		break;
 
 	default:

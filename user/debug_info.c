@@ -3,7 +3,19 @@
 void
 usage(void)
 {
-	cprintf("usage: debug_info cpu/mem/fs\n");
+	int i;
+
+	printf("usage: debug_info");
+	for (i = 0; i < ARRAY_SIZE(debug_option); i++)
+		printf(" %s |", debug_option[i]);
+	printf("\n");
+
+	exit();
+}
+
+void vma_usage(void)
+{
+	printf("usage: debug_info vma env_id\n");
 	exit();
 }
 
@@ -42,6 +54,7 @@ umain(int argc, char **argv)
 		read(fd, buf, sizeof(buf));
 
 		close(fd);
+		printf("%s", buf);
 		break;
 
 	case FS_INFO:
@@ -52,18 +65,22 @@ umain(int argc, char **argv)
 		if (ret < 0)
 			return;
 
-		snprintf(buf, sizeof(buf),
-				"Total Blocks Num: %d\n"
-				"Used Blocks Num: %d\n",
-				tmp[0], tmp[1]);
+		printf("Total blocks: %d\n"
+				" Used blocks: %d\n"
+				"       Usage: %f\%\n",
+				tmp[0], tmp[1], (float)tmp[1] * 100 / tmp[0]);
 
 		sys_page_unmap(0, tmp);
 		break;
 
 	case ENV_INFO:
+		printf("%8s %16s %8s %10s %8s %16s\n",
+				"Env", "Name", "Status", "Run times",
+				"Father", "Father name");
+
 		for (i = 0; i < NENV; i++) {
 			if (envs[i].env_status != ENV_FREE) {
-				printf("Env: %x Name: %16s Status: %8s Run Times: %8d Father: %x",
+				printf("%8x %16s %8s %10d %8x",
 					envs[i].env_id, envs[i].binaryname,
 					env_status[envs[i].env_status], envs[i].env_runs,
 					envs[i].env_parent_id);
@@ -75,16 +92,21 @@ umain(int argc, char **argv)
 		break;
 
 	case VMA_INFO:
+		if (!argv[2])
+			vma_usage();
+
 		envid = strtol(argv[2], NULL, 16);
 
 		if (envs[ENVX(envid)].env_status == ENV_FREE)
 			return;
 
 		printf("Env %x:\n", envid);
+
 		for (i = 0; i < envs[ENVX(envid)].vma_valid; i++) {
 			vma = (void *)&(envs[ENVX(envid)].vma[i]);
+
 			printf("VMA%d Begin: %08x Size: %8x Perm: %x\n",
-				i, vma->vm_start, vma->size, vma->vm_page_prot);
+					i, vma->vm_start, vma->size, vma->vm_page_prot);
 		}
 		break;
 
@@ -92,6 +114,5 @@ umain(int argc, char **argv)
 		return;
 	}
 
-	printf("%s", buf);
 	return;
 }

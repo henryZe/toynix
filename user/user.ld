@@ -8,7 +8,7 @@ ENTRY(_start)
 SECTIONS
 {
 	/* Load programs at this address: "." means the current address */
-	. = 0x800020;
+	. = 0x800000;
 
 	.text : {
 		*(.text .stub .text.* .gnu.linkonce.t.*)

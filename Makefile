@@ -25,7 +25,7 @@ PERL := perl
 # Only optimize to -O1 to discourage inlining, which complicates backtraces.
 CFLAGS := $(CFLAGS) $(DEFS) $(LABDEFS) -O1 -fno-builtin -I$(INCDIR) -MD
 CFLAGS += -fno-omit-frame-pointer
-CFLAGS += -std=gnu99
+CFLAGS += -std=gnu11
 CFLAGS += -static
 CFLAGS += -Wall -Wno-format -Wno-unused -Werror -gstabs -m32
 # -fno-tree-ch prevented gcc from sometimes reordering read_ebp() before

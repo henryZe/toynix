@@ -2,7 +2,7 @@
 
 ## 0 Introduction
 
-Toynix is a tiny kernel (which was programmed just for fun) in Unix-like interface. It is composed of simplified fs and network module in micro-kernel spirit. [**[Framework]**](readme/framework.md)
+Toynix is a tiny kernel (which was programmed just for fun) in Unix-like interface. It is composed of simplified fs and network module in micro-kernel spirit. [**[Framework]**](./readme/framework.md)
 
 Here are some critical features you might be concerned about:
 
@@ -61,24 +61,37 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 
 ### 8.1 Optimize
 
-* add VMA structure which describes a memory area:
-  * including start address and size
-  * flags to determine access rights and behaviors(such as page_fault handler)
-  * specifies which file is being mapped by the area, if any
-* use VMA pg_fault handler to replace global pg_fault handler
-* distinguish anonymous and mmap pages (whether need to copy original page)
-* modify map_segment from read to mmap images
-* replace static lib with share lib
-* fine-gained lock instead of global kernel lock:
-  * page allocator
-  * console driver
-  * scheduler
-  * IPC state
+* [ ] Implement recycling mechanism for page cache of fs block
+* [ ] Add VMA structure which describes a memory area:
+  * [x] including start address and size
+  * [ ] flags to determine access rights and behaviors (such as page_fault handler)
+  * [ ] specifies which file is being mapped by the area, if any
+* [ ] Use VMA pg_fault handler to replace global pg_fault handler
+* [ ] Distinguish anonymous and mmap pages (whether need to copy original page)
+* [ ] Modify map_segment from read to mmap images
+* [ ] Replace static lib with share lib
+* [ ] Fine-gained lock instead of global kernel lock:
+  * [ ] page allocator
+  * [ ] console driver
+  * [ ] scheduler
+  * [ ] IPC state
+* [ ] Replace Makefile compiling framework with Scons (& menuconfig feature)
+* [ ] Use Swarf-2 debug information instead of Stab format
+* [x] Support float print
+* [x] Optimize malloc with fusion/split block method, which based on sbrk
+* [x] Support directory operation:
+  * [x] Allow to scan directory by `ls` command
+  * [x] Allow to change workpath by `cd` command & `chdir` syscall
+  * [x] Implement `mv` command & `rename` syscall
+  * [x] Allow `mkdir` & `rmdir` directory operations
+* [x] Support shell background run with `&` descriptor
+* [x] Provide `debug_info` online method to show running status (such as mem, fs)
+* [x] Implement file remove operation, and supply `rm` command
 
 ### 8.2 Bug
 
 * lwip connect function by user/echotest.c
-* Kernel lock sometimes is illegally unlocked.
+* Kernel lock sometimes is illegally released
 
 ## 9 Ported Modules Claim
 
