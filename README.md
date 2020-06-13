@@ -62,6 +62,9 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 ### 8.1 Optimize
 
 * [ ] Implement recycling mechanism for page cache of fs block
+  * [x] add file_close for releasing page cache
+  * [ ] add list for recoding most recent access file
+  * [ ] have ability to decide when to release
 * [ ] Add VMA structure which describes a memory area:
   * [x] including start address and size
   * [ ] flags to determine access rights and behaviors (such as page_fault handler)
@@ -76,9 +79,8 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
   * [ ] scheduler
   * [ ] IPC state
 * [ ] Replace Makefile compiling framework with Scons (& menuconfig feature)
-* [ ] Use Swarf-2 debug information instead of Stab format
 * [x] Support float print
-* [x] Optimize malloc with fusion/split block method, which based on sbrk
+* [x] Optimize malloc with fusion/split block method, which based on `sbrk`
 * [x] Support directory operation:
   * [x] Allow to scan directory by `ls` command
   * [x] Allow to change workpath by `cd` command & `chdir` syscall

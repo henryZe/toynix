@@ -489,6 +489,30 @@ file_flush(struct File *f)
 		flush_block(diskaddr(f->f_indirect));
 }
 
+// Close file
+// Loop over all the blocks in file, and free page cache for recycling.
+void file_close(struct File *f)
+{
+	int i;
+	uint32_t *blockno;
+
+	for (i = 0; i < NDIRECT; i++)
+		sys_page_unmap(0, BLKNO2ADDR(f->f_direct[i]));
+
+	if (f->f_indirect) {
+
+		for (i = 0; i < (f->f_size / BLKSIZE - NDIRECT); i++) {
+
+			blockno = BLKNO2ADDR(f->f_indirect);
+			sys_page_unmap(0, BLKNO2ADDR(blockno[i]));
+		}
+
+		sys_page_unmap(0, BLKNO2ADDR(f->f_indirect));
+	}
+
+	sys_page_unmap(0, f);
+}
+
 // Remove a block from file f.  If it's not there, just silently succeed.
 // Returns 0 on success, < 0 on error.
 static int

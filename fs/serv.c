@@ -307,6 +307,8 @@ serve_stat(envid_t envid, union Fsipc *ipc)
 	return 0;
 }
 
+#define recycle 0
+
 // Flush all data and metadata of req->req_fileid to disk.
 int
 serve_flush(envid_t envid, struct Fsreq_flush *req)
@@ -322,6 +324,9 @@ serve_flush(envid_t envid, struct Fsreq_flush *req)
 		return ret;
 
 	file_flush(o->o_file);
+	if (recycle)
+		file_close(o->o_file);
+
 	return 0;
 }
 

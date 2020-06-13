@@ -102,7 +102,7 @@ error:
 	return ret;
 }
 
-#define debug 1
+#define debug 0
 
 static int
 map_segment(envid_t child, uintptr_t va, size_t memsz,
