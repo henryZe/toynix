@@ -102,7 +102,7 @@ error:
 	return ret;
 }
 
-#define debug 0
+#define debug 1
 
 static int
 map_segment(envid_t child, uintptr_t va, size_t memsz,
@@ -174,6 +174,39 @@ copy_shared_pages(envid_t child)
 	}
 
 	return 0;
+}
+
+static void print_section_name(int fd, struct Elf *elf)
+{
+	int i, ret;
+	struct Secthdr sh;
+	char string[128];
+
+	ret = seek(fd, elf->e_shoff + sizeof(struct Secthdr) * elf->e_shstrndx);
+	if (ret < 0)
+		return;
+
+	readn(fd, &sh, sizeof(struct Secthdr));
+
+	ret = seek(fd, sh.sh_offset);
+	if (ret < 0)
+		return;
+
+	readn(fd, string, sizeof(string));
+
+	for (i = 0; i < elf->e_shnum; i++) {
+
+		ret = seek(fd, elf->e_shoff + sizeof(struct Secthdr) * i);
+		if (ret < 0)
+			return;
+
+		readn(fd, &sh, sizeof(struct Secthdr));
+
+		if (!(sh.sh_flags & ELF_SHF_ALLOC))
+			continue;
+
+		printf("sh_name: %s\n", string + sh.sh_name);
+	}
 }
 
 // Spawn a child process from a program image loaded from the file system.
@@ -279,6 +312,9 @@ spawn(const char *prog, const char **argv)
 
 	// Set up program segments as defined in ELF header.
 	ph = (struct Proghdr *)(elf_buf + elf->e_phoff);
+
+	if (debug)
+		print_section_name(fd, elf);
 
 	for (i = 0; i < elf->e_phnum; i++, ph++) {
 		if (ph->p_type != ELF_PROG_LOAD)

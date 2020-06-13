@@ -101,11 +101,12 @@ umain(int argc, char **argv)
 			return;
 
 		printf("Env %x:\n", envid);
+		printf("VMA \t Begin \t Size \t Perm\n");
 
 		for (i = 0; i < envs[ENVX(envid)].vma_valid; i++) {
 			vma = (void *)&(envs[ENVX(envid)].vma[i]);
 
-			printf("VMA%d Begin: %08x Size: %8x Perm: %x\n",
+			printf("%d \t %08x \t %8x \t %x\n",
 					i, vma->vm_start, vma->size, vma->vm_page_prot);
 		}
 		break;
