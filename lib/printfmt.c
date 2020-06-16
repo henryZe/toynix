@@ -59,21 +59,37 @@ printnum(void (*putch)(int, void*), void *putdat,
 	putch("0123456789abcdef"[num % base], putdat);
 }
 
+static inline int pow10(int t)
+{
+	int p = 1;
+
+	while (t--)
+		p *= 10;
+	return p;
+}
+
 static void
 printdouble(void (*putch)(int, void*), void *putdat, double num,
-		int width, int padc)
+			int width, int precision, int padc)
 {
-	int Inte = (int)num;
-	int Deci = (int)(1000000 * (num - Inte));
+	int inte;
+	int deci;
 
-	if (Deci % 10 >= 5)
-		Deci = Deci / 10 + 1;
+	// default precision
+	if (precision < 0)
+		precision = 6;
+
+	inte = (int)num;
+	deci = (int)(pow10(precision + 1) * (num - inte));
+
+	if (deci % 10 >= 5)
+		deci = deci / 10 + 1;
 	else
-		Deci = Deci / 10;
+		deci = deci / 10;
 
-	printnum(putch, putdat, Inte, 10, width, padc);
+	printnum(putch, putdat, inte, 10, width, padc);
 	putch('.', putdat);
-	printnum(putch, putdat, Deci, 10, 5, '0');
+	printnum(putch, putdat, deci, 10, precision, '0');
 	return;
 }
 
@@ -263,7 +279,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 		// float
 		case 'f':
 			float_num = getdouble(&ap);
-			printdouble(putch, putdat, float_num, width, padc);
+			printdouble(putch, putdat, float_num, width, precision, padc);
 			break;
 
 		// escaped '%' character
