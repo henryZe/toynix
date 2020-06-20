@@ -171,4 +171,22 @@ int sys_rx_pkt(uint8_t *content, uint32_t length);
 // sleep
 void sleep(int sec);
 
+// signal
+typedef void (*sighandler_t)(int);
+typedef uint32_t sigset_t;
+
+enum sigmask_flag {
+    // The set of blocked signals is the union of the current set and the set argument.
+    SIG_BLOCK,
+    // The signals in set are removed from the current set of blocked signals.
+    SIG_UNBLOCK,
+    // The set of blocked signals is set to the argument set.
+    SIG_SETMASK,
+};
+
+sighandler_t signal(int signum, sighandler_t handler);
+int kill(envid_t env, int sig);
+int sigprocmask(enum sigmask_flag how, const sigset_t *set, sigset_t *oldset);
+int sigwait(const sigset_t *set, int *sig);
+
 #endif	// !INC_LIB_H

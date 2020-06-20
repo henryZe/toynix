@@ -61,6 +61,8 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 
 ### 8.1 Optimize
 
+* [ ] Implement signal operation set
+* [ ] Replace static lib with share lib
 * [ ] Implement recycling mechanism for page cache of fs block
   * [x] add file_close for releasing page cache
   * [ ] add list for recoding most recent access file
@@ -72,7 +74,6 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 * [ ] Use VMA pg_fault handler to replace global pg_fault handler
 * [ ] Distinguish anonymous and mmap pages (whether need to copy original page)
 * [ ] Modify map_segment from read to mmap images
-* [ ] Replace static lib with share lib
 * [ ] Fine-gained lock instead of global kernel lock:
   * [ ] page allocator
   * [ ] console driver

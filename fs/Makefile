@@ -21,6 +21,7 @@ USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/pingpong \
 		$(OBJDIR)/$(USRDIR)/testuserstack \
 		$(OBJDIR)/$(USRDIR)/breakpoint \
+		$(OBJDIR)/$(USRDIR)/signal_test \
 
 FSIMGTXTFILES := \
 		$(FSDIR)/newmotd \
