@@ -307,31 +307,7 @@ serve_stat(envid_t envid, union Fsipc *ipc)
 	return 0;
 }
 
-#define recycle 0
-
-// Flush all data and metadata of req->req_fileid to disk.
-int
-serve_flush(envid_t envid, struct Fsreq_flush *req)
-{
-	struct OpenFile *o;
-	int ret;
-
-	if (debug)
-		cprintf("%s %08x %08x\n", __func__, envid, req->req_fileid);
-
-	ret = openfile_lookup(envid, req->req_fileid, &o);
-	if (ret < 0)
-		return ret;
-
-	file_flush(o->o_file);
-	if (recycle)
-		file_close(o->o_file);
-
-	return 0;
-}
-
-static int
-fileisclosed(struct File *f)
+static int fileisclosed(struct File *f)
 {
 	int i;
 
@@ -346,8 +322,29 @@ fileisclosed(struct File *f)
 	return 1;
 }
 
-static int
-file_mutex_remove(struct File *f)
+// Flush all data and metadata of req->req_fileid to disk.
+int serve_flush(envid_t envid, struct Fsreq_flush *req)
+{
+	struct OpenFile *o;
+	int ret;
+
+	if (debug)
+		cprintf("%s %08x %08x\n", __func__, envid, req->req_fileid);
+
+	ret = openfile_lookup(envid, req->req_fileid, &o);
+	if (ret < 0)
+		return ret;
+
+	file_flush(o->o_file);
+
+	// all processes detach this file
+	if (fileisclosed(o->o_file))
+		file_close(o->o_file);
+
+	return 0;
+}
+
+static int file_mutex_remove(struct File *f)
 {
 	int ret;
 
