@@ -240,8 +240,6 @@ close:
 int
 rename(const char *oldpath, const char *newpath)
 {
-	int ret;
-
 	if ((strlen(oldpath) >= MAXPATHLEN) ||
 		(strlen(newpath) >= MAXPATHLEN))
 		return -E_BAD_PATH;

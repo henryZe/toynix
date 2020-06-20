@@ -22,8 +22,6 @@ struct jif {
 static void
 low_level_init(struct netif *netif)
 {
-	int r;
-
 	netif->hwaddr_len = 6;
 	netif->mtu = 1500;
 	netif->flags = NETIF_FLAG_BROADCAST;

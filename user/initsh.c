@@ -3,7 +3,7 @@
 void
 umain(int argc, char **argv)
 {
-	int i, r, x, want;
+	int r;
 
 	sys_env_name(0, "initsh");
 	cprintf("initsh: running sh\n");

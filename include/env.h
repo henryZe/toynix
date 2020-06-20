@@ -6,7 +6,9 @@
 #include <types.h>
 #include <trap.h>
 #include <memlayout.h>
+
 #include <vm.h>
+#include <fs.h>
 
 typedef int32_t envid_t;
 
@@ -71,9 +73,12 @@ struct Env {
 	envid_t env_ipc_from;		// envid of the sender
 	int env_ipc_perm;		// Perm of page mapping received
 
+	// Signal
+
+
 	// File System
-	char currentpath[1024];		// current fs path
-	char binaryname[64];
+	char currentpath[MAXPATHLEN];		// current fs path
+	char binaryname[MAXNAMELEN];
 };
 
 #endif // !INC_ENV_H

@@ -6,11 +6,6 @@
 void
 umain(int argc, char **argv)
 {
-	int x, r;
-	int nsecs = 1;
-	int secno = 0;
-	int diskno = 1;
-
 	if (read_eflags() & FL_IOPL_3)
 		cprintf("eflags wrong\n");
 

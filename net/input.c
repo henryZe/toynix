@@ -8,7 +8,6 @@ input(envid_t ns_envid)
 	sys_env_name(0, "ns_input");
 
 	int ret;
-	uint32_t length;
 
 	while (1) {
 		ret = sys_page_alloc(0, &nsipcbuf, PTE_W);

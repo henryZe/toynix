@@ -111,7 +111,7 @@ serve_open(envid_t envid, struct Fsreq_open *req,
 {
 	char path[MAXPATHLEN];
 	struct File *f;
-	int fileid, ret;
+	int ret;
 	struct OpenFile *o;
 
 	if (debug)
@@ -130,7 +130,6 @@ serve_open(envid_t envid, struct Fsreq_open *req,
 
 		return ret;
 	}
-	fileid = ret;
 
 	// Open the file
 	if (req->req_omode & (O_CREAT | O_MKDIR)) {

@@ -272,7 +272,6 @@ dup(int oldfdnum, int newfdnum)
 {
 	int ret;
 	char *ova, *nva;
-	pte_t pte;
 	struct Fd *oldfd, *newfd;
 
 	ret = fd_lookup(oldfdnum, &oldfd);

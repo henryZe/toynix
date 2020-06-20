@@ -42,9 +42,6 @@ umain(int argc, char **argv)
 {
 	int ret, serversock, clientsock;
 	struct sockaddr_in echoserver, echoclient;
-	char buffer[BUFFSIZE];
-	unsigned int echolen;
-	int received = 0;
 
 	// Create the TCP socket
 	serversock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);

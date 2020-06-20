@@ -130,7 +130,6 @@ void
 mem_init(void)
 {
 	uint32_t cr0;
-	size_t i, n;
 
 	// Find out how much memory the machine has (npages & npages_basemem).
 	i386_detect_memory();
@@ -205,15 +204,15 @@ mem_init(void)
 	// We might not have 2^32 - KERNBASE bytes of physical memory, but
 	// we just set up the mapping anyway.
 	// Permissions: kernel RW, user NONE
-#if 1
-	/* could be optimized by PTE_PS */
-	boot_map_region(kern_pgdir, KERNBASE,
-					(0 - KERNBASE), 0, PTE_W);
-#else
-	/* for reducing PTE overhead */
-	boot_map_region_by_hugepage(kern_pgdir, KERNBASE,
-					(0 - KERNBASE), 0, PTE_W);
-#endif
+	if (1) {
+		/* could be optimized by PTE_PS */
+		boot_map_region(kern_pgdir, KERNBASE,
+						(0 - KERNBASE), 0, PTE_W);
+	} else {
+		/* for reducing PTE overhead */
+		boot_map_region_by_hugepage(kern_pgdir, KERNBASE,
+						(0 - KERNBASE), 0, PTE_W);
+	}
 
 	// Initialize the SMP-related parts of the memory map
 	mem_init_mp();
@@ -765,7 +764,7 @@ check_page_free_list(bool only_low_memory)
 {
 	struct PageInfo *pp;
 	unsigned pdx_limit = only_low_memory ? 1 : NPDENTRIES;
-	int nfree_basemem = 0, nfree_extmem = 0, i = 0;
+	int nfree_basemem = 0, nfree_extmem = 0;
 	char *first_free_page;
 
 	if (!page_free_list)
@@ -996,7 +995,6 @@ check_page(void)
 	void *va;
 	uintptr_t mm1, mm2;
 	int i;
-	extern pde_t entry_pgdir[];
 
 	// should be able to allocate three pages
 	pp0 = pp1 = pp2 = 0;
@@ -1168,11 +1166,7 @@ check_page(void)
 static void
 check_page_installed_pgdir(void)
 {
-	struct PageInfo *pp, *pp0, *pp1, *pp2;
-	struct PageInfo *fl;
-	pte_t *ptep, *ptep1;
-	uintptr_t va;
-	int i;
+	struct PageInfo *pp0, *pp1, *pp2;
 
 	// check that we can read and write installed pages
 	pp1 = pp2 = 0;

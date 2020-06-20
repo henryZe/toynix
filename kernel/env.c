@@ -212,7 +212,7 @@ env_setup_vm(struct Env *e)
 static void
 region_alloc(struct Env *e, void *va, size_t len)
 {
-	int i, ret;
+	int ret;
 	struct PageInfo *p = NULL;
 	void *end = va + len;
 

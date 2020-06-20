@@ -102,7 +102,6 @@ start_timer(struct timer_thread *t, void (*func)(void), const char *name, int ms
 void
 serve_init(uint32_t ipaddr, uint32_t netmask, uint32_t gw)
 {
-	int ret;
 	lwip_core_lock();
 
 	uint32_t done = 0;

@@ -271,9 +271,7 @@ sys_page_map(envid_t srcenv_id, void *src,
 static int
 sys_page_unmap(envid_t envid, void *va)
 {
-	int ret;
 	struct Env *env;
-	struct PageInfo *page;
 
 	if (envid2env(envid, &env, 1) < 0)
 		return -E_BAD_ENV;
@@ -464,7 +462,6 @@ sys_debug_info(int option, char *buf, size_t size)
 static int
 sys_tx_pkt(const uint8_t *content, uint32_t length)
 {
-	int ret;
 	const uint8_t *addr;
 	uint32_t len;
 	uint8_t flag;
