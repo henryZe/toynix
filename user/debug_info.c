@@ -1,6 +1,6 @@
 #include <lib.h>
 
-void
+static void
 usage(void)
 {
 	int i;
@@ -13,7 +13,7 @@ usage(void)
 	exit();
 }
 
-void vma_usage(void)
+static void vma_usage(void)
 {
 	printf("usage: debug_info vma env_id\n");
 	exit();

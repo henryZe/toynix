@@ -1,6 +1,6 @@
 #include <lib.h>
 
-void
+static void
 usage(void)
 {
 	cprintf("rm FILE...\n");

@@ -147,7 +147,7 @@
 typedef uint32_t pte_t;
 typedef uint32_t pde_t;
 
-#if TOYNIX_USER
+#ifdef TOYNIX_USER
 /*
  * The page directory entry corresponding to the virtual address range
  * [UVPT, UVPT + PTSIZE) points to the page directory itself.  Thus, the page

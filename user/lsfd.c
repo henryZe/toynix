@@ -1,7 +1,7 @@
 #include <lib.h>
 #include <args.h>
 
-void
+static void
 usage(void)
 {
 	cprintf("usage: lsfd\n");

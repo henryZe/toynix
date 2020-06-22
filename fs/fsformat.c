@@ -44,7 +44,7 @@ char *diskmap, *diskpos;
 struct Super *super;
 uint32_t *bitmap;
 
-void
+static void
 panic(const char *fmt, ...)
 {
 	va_list ap;
@@ -56,20 +56,20 @@ panic(const char *fmt, ...)
 	abort();
 }
 
-void
+static void
 usage(void)
 {
 	fprintf(stderr, "Usage: fsformat fs.img NBLOCKS files\n");
 	exit(2);
 }
 
-uint32_t
+static uint32_t
 blockof(void *pos)
 {
 	return ((char *)pos - diskmap) / BLKSIZE;
 }
 
-void *
+static void *
 alloc(uint32_t bytes)
 {
 	void *start = diskpos;
@@ -82,7 +82,7 @@ alloc(uint32_t bytes)
 }
 
 /* initialize super & bitmap */
-void
+static void
 opendisk(const char *name)
 {
 	int ret, diskfd, nbitblocks;
@@ -128,7 +128,7 @@ opendisk(const char *name)
 }
 
 /* fill dir with file */
-void
+static void
 startdir(struct File *file, struct Dir *dout)
 {
 	dout->f = file;
@@ -137,7 +137,7 @@ startdir(struct File *file, struct Dir *dout)
 }
 
 /* add file named name into d */
-struct File *
+static struct File *
 diradd(struct Dir *d, uint32_t type, const char *name)
 {
 	struct File *out = &d->ents[d->n++];
@@ -150,7 +150,7 @@ diradd(struct Dir *d, uint32_t type, const char *name)
 	return out;
 }
 
-void
+static void
 readn(int fd, void *out, size_t n)
 {
 	size_t p = 0;
@@ -166,7 +166,7 @@ readn(int fd, void *out, size_t n)
 	}
 }
 
-void
+static void
 finishfile(struct File *file, uint32_t start_blk, uint32_t len)
 {
 	int i;
@@ -184,7 +184,7 @@ finishfile(struct File *file, uint32_t start_blk, uint32_t len)
 	}
 }
 
-void
+static void
 writefile(struct Dir *dir, const char *name)
 {
 	int ret, fd;
@@ -220,7 +220,7 @@ writefile(struct Dir *dir, const char *name)
 	close(fd);
 }
 
-void
+static void
 finishdir(struct Dir *d)
 {
 	int size = d->n * sizeof(struct File);
@@ -233,7 +233,7 @@ finishdir(struct Dir *d)
 }
 
 /* update bitmap */
-void
+static void
 finishdisk(void)
 {
 	int ret, i;

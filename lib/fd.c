@@ -235,7 +235,8 @@ read(int fdnum, void *buf, size_t n)
 ssize_t
 readn(int fdnum, void *buf, size_t n)
 {
-	int m, tot;
+	int m;
+	size_t tot;
 
 	for (tot = 0; tot < n; tot += m) {
 		m = read(fdnum, (char *)buf + tot, n - tot);

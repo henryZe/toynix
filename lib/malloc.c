@@ -1,4 +1,5 @@
 #include <lib.h>
+#include <malloc.h>
 
 enum {
 	MAXMALLOC = 1024 * 1024,    /* max size of one allocated chunk */

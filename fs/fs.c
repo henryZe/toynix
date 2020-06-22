@@ -8,7 +8,7 @@
 // --------------------------------------------------------------
 
 // Validate the file system super-block.
-void
+static void
 check_super(void)
 {
 	if (super->s_magic != FS_MAGIC)
@@ -39,7 +39,7 @@ block_is_free(uint32_t blockno)
 }
 
 // Mark a block free in the bitmap
-void
+static void
 free_block(uint32_t blockno)
 {
 	// Blockno zero is the null pointer of block numbers.
@@ -84,7 +84,7 @@ alloc_block(void)
 //
 // Check that all reserved blocks -- 0, 1, and the bitmap blocks themselves --
 // are all marked as in-use.
-void
+static void
 check_bitmap(void)
 {
 	uint32_t i;
@@ -143,8 +143,7 @@ fs_init(void)
 static int
 file_block_walk(struct File *f, uint32_t filebno, uint32_t **ppdiskbno, bool alloc)
 {
-	int ret;
-	uint32_t blockno;
+	int ret, blockno;
 	uint32_t *block_addr;
 
 	if (!ppdiskbno)

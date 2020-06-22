@@ -1,6 +1,6 @@
 #include <vm.h>
 #include <error.h>
-#include <env.h>
+#include <kernel/env.h>
 
 int
 env_add_vma(struct Env *e, unsigned long start, uint32_t size, uint32_t perm)

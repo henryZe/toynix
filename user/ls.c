@@ -3,7 +3,7 @@
 
 int flag[256];
 
-void
+static void
 ls1(const char *prefix, bool isdir, off_t size, const char *name)
 {
 	const char *sep;
@@ -26,7 +26,7 @@ ls1(const char *prefix, bool isdir, off_t size, const char *name)
 	printf("\n");
 }
 
-void
+static void
 lsdir(const char *path, const char *prefix)
 {
 	int fd, n;
@@ -54,7 +54,7 @@ lsdir(const char *path, const char *prefix)
 	close(fd);
 }
 
-void
+static void
 ls(const char *path, const char *prefix)
 {
 	int r;
@@ -71,7 +71,7 @@ ls(const char *path, const char *prefix)
 		ls1(NULL, st.st_isdir == FTYPE_DIR, st.st_size, path);
 }
 
-void
+static void
 usage(void)
 {
 	printf("usage: ls [-dFl] [file...]\n");

@@ -6,7 +6,7 @@
 
 int debug = 0;
 
-void
+static void
 usage(void)
 {
 	cprintf("usage: sh [-dix] [command-file]\n");
@@ -34,7 +34,7 @@ usage(void)
  * |w(word) ... |
  * p1              p2
  */
-int
+static int
 _gettoken(char *s, char **p1, char **p2)
 {
 	int t;
@@ -86,7 +86,7 @@ _gettoken(char *s, char **p1, char **p2)
 // and returns a token ID (0, '<', '>', '|', or 'w').
 // Subsequent calls to 'gettoken(0, token)' will return subsequent
 // tokens from the string.
-int
+static int
 gettoken(char *s, char **p1)
 {
 	static int c, nc;
@@ -107,7 +107,7 @@ gettoken(char *s, char **p1)
 // Do not return until the shell command is finished.
 // runcmd() is called in a forked child,
 // so it's OK to manipulate file descriptor state.
-void
+static void
 runcmd(char *s)
 {
 	char *argv[MAXARGS], *t, argv0buf[BUFSIZ];

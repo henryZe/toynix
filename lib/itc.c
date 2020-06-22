@@ -5,6 +5,7 @@
 #include <thread.h>
 #include <sys_arch.h>
 #include <lwip/sys.h>
+#include <spinlock.h>
 
 #define debug 0
 

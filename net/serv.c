@@ -99,7 +99,7 @@ start_timer(struct timer_thread *t, void (*func)(void), const char *name, int ms
 		panic("cannot create timer thread: %s", e2s(ret));
 }
 
-void
+static void
 serve_init(uint32_t ipaddr, uint32_t netmask, uint32_t gw)
 {
 	lwip_core_lock();
@@ -255,7 +255,7 @@ serve_thread(uint32_t a)
 	free(args);
 }
 
-void
+static void
 serve(void)
 {
 	int i, perm, req_no;

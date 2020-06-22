@@ -9,7 +9,7 @@ readline(const char *prompt)
 {
 	int i, c, echoing;
 
-#if TOYNIX_KERNEL
+#ifdef TOYNIX_KERNEL
 	if (prompt)
 		cprintf("%s", prompt);
 #else

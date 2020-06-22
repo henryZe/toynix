@@ -5,7 +5,7 @@
 int bol = 1;
 int line = 0;
 
-void
+static void
 num(int fd, const char *s)
 {
 	long n;

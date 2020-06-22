@@ -1,3 +1,5 @@
+#include <perror.h>
+
 #define LWIP_PROVIDE_ERRNO
 #include <lwip/arch.h>
 
@@ -42,7 +44,7 @@ const char *sys_errlist[] = {
 	[ENOSYS] = "ENOSYS",      /* Function not implemented */
 	[ENOTEMPTY] = "ENOTEMPTY",    /* Directory not empty */
 	[ELOOP] = "ELOOP",      /* Too many symbolic links encountered */
-	[EWOULDBLOCK] = "EWOULDBLOCK", /* Operation would block */
+	// [EWOULDBLOCK] = "EWOULDBLOCK", /* Operation would block */
 	[ENOMSG] = "ENOMSG",      /* No message of desired type */
 	[EIDRM] = "EIDRM",      /* Identifier removed */
 	[ECHRNG] = "ECHRNG",      /* Channel number out of range */
@@ -60,7 +62,7 @@ const char *sys_errlist[] = {
 	[EBADRQC] = "EBADRQC",      /* Invalid request code */
 	[EBADSLT] = "EBADSLT",      /* Invalid slot */
 
-	[EDEADLOCK] = "EDEADLOCK",
+	// [EDEADLOCK] = "EDEADLOCK",
 
 	[EBFONT] = "EBFONT",      /* Bad font file format */
 	[ENOSTR] = "ENOSTR",      /* Device not a stream */

@@ -43,7 +43,7 @@ struct OpenFile opentab[MAXOPEN] = {
 // Virtual address at which to receive page mappings containing client requests.
 union Fsipc *fsreq = (union Fsipc *)0x0ffff000;
 
-void
+static void
 serve_init(void)
 {
 	int i;
@@ -57,7 +57,7 @@ serve_init(void)
 }
 
 // Allocate an open file.
-int
+static int
 openfile_alloc(struct OpenFile **o)
 {
 	int i, ret;
@@ -88,7 +88,7 @@ openfile_alloc(struct OpenFile **o)
 }
 
 // Look up an open file for envid.
-int
+static int
 openfile_lookup(envid_t envid, uint32_t fileid, struct OpenFile **po)
 {
 	struct OpenFile *o;
@@ -105,7 +105,7 @@ openfile_lookup(envid_t envid, uint32_t fileid, struct OpenFile **po)
 // Open req->req_path in mode req->req_omode, storing the Fd page and
 // permissions to return to the calling environment in *pg_store and
 // *perm_store respectively.
-int
+static int
 serve_open(envid_t envid, struct Fsreq_open *req,
 				void **pg_store, int *perm_store)
 {
@@ -205,7 +205,7 @@ try_open:
 
 // Set the size of req->req_fileid to req->req_size bytes, truncating
 // or extending the file as necessary.
-int
+static int
 serve_set_size(envid_t envid, struct Fsreq_set_size *req)
 {
 	struct OpenFile *o;
@@ -233,7 +233,7 @@ serve_set_size(envid_t envid, struct Fsreq_set_size *req)
 // in ipc->read.req_fileid.  Return the bytes read from the file to
 // the caller in ipc->readRet, then update the seek position.  Returns
 // the number of bytes successfully read, or < 0 on error.
-int
+static int
 serve_read(envid_t envid, union Fsipc *ipc)
 {
 	struct Fsreq_read *req = &ipc->read;
@@ -261,7 +261,7 @@ serve_read(envid_t envid, union Fsipc *ipc)
 // the current seek position, and update the seek position
 // accordingly.  Extend the file if necessary.  Returns the number of
 // bytes written, or < 0 on error.
-int serve_write(envid_t envid, struct Fsreq_write *req)
+static int serve_write(envid_t envid, struct Fsreq_write *req)
 {
 	struct OpenFile *o;
 	int ret;
@@ -284,7 +284,7 @@ int serve_write(envid_t envid, struct Fsreq_write *req)
 
 // Stat ipc->stat.req_fileid.  Return the file's struct Stat to the
 // caller in ipc->statRet.
-int
+static int
 serve_stat(envid_t envid, union Fsipc *ipc)
 {
 	struct Fsreq_stat *req = &ipc->stat;
@@ -322,7 +322,7 @@ static int fileisclosed(struct File *f)
 }
 
 // Flush all data and metadata of req->req_fileid to disk.
-int serve_flush(envid_t envid, struct Fsreq_flush *req)
+static int serve_flush(envid_t envid, struct Fsreq_flush *req)
 {
 	struct OpenFile *o;
 	int ret;
@@ -375,7 +375,7 @@ static int file_mutex_remove(struct File *f)
 	return 0;
 }
 
-int
+static int
 serve_remove(envid_t envid, struct Fsreq_remove *req)
 {
 	char path[MAXPATHLEN];
@@ -400,14 +400,14 @@ serve_remove(envid_t envid, struct Fsreq_remove *req)
 	return file_mutex_remove(f);
 }
 
-int
+static int
 serve_sync(envid_t envid, union Fsipc *req)
 {
 	fs_sync();
 	return 0;
 }
 
-int
+static int
 serve_info(envid_t envid, union Fsipc *req)
 {
 	uint32_t cnt;
@@ -424,7 +424,7 @@ serve_info(envid_t envid, union Fsipc *req)
 	return 0;
 }
 
-int
+static int
 serve_rename(envid_t envid, union Fsipc *req)
 {
 	int ret;
@@ -460,7 +460,7 @@ fshandler handlers[] = {
 	[FSREQ_RENAME] = serve_rename,
 };
 
-void
+static void
 serve(void)
 {
 	uint32_t req;

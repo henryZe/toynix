@@ -15,8 +15,10 @@ OBJCOPY	:= objcopy
 OBJDUMP	:= objdump
 NM	:= nm
 
+CFLAGS := -Wall -Werror -Wmissing-prototypes -Wundef
+
 # Native commands
-NATIVE_CFLAGS := $(CFLAGS) $(DEFS) $(LABDEFS) -I. -MD -Wall
+NATIVE_CFLAGS := $(CFLAGS) $(DEFS) $(LABDEFS) -I. -MD
 TAR := gtar
 PERL := perl
 
@@ -27,7 +29,7 @@ CFLAGS := $(CFLAGS) $(DEFS) $(LABDEFS) -O1 -fno-builtin -I$(INCDIR) -MD
 CFLAGS += -fno-omit-frame-pointer
 CFLAGS += -std=gnu11
 CFLAGS += -static
-CFLAGS += -Wall -Wno-format -Werror -gstabs -m32
+CFLAGS += -gstabs -m32
 # -fno-tree-ch prevented gcc from sometimes reordering read_ebp() before
 # mon_backtrace()'s function prologue on gcc version: (Debian 4.7.2-5) 4.7.2
 CFLAGS += -fno-tree-ch

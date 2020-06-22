@@ -12,6 +12,7 @@
 #include <kernel/picirq.h>
 #include <kernel/console.h>
 #include <kernel/time.h>
+#include <kernel/trap.h>
 
 static int debug;
 
@@ -131,7 +132,7 @@ trap_init(void)
 	trap_init_percpu();
 }
 
-void
+static void
 print_regs(struct PushRegs *regs)
 {
 	cprintf("  edi  0x%08x\n", regs->reg_edi);
@@ -218,7 +219,7 @@ print_trapframe(struct Trapframe *tf)
 	}
 }
 
-void
+static void
 page_fault_handler(struct Trapframe *tf)
 {
 	uint32_t fault_va;
@@ -325,7 +326,7 @@ page_fault_handler(struct Trapframe *tf)
 static void
 trap_dispatch(struct Trapframe *tf)
 {
-	int32_t ret;
+	int ret;
 
 	// Handle processor exceptions.
 	switch (tf->tf_trapno) {

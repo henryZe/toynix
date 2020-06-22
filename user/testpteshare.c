@@ -6,7 +6,7 @@
 const char *msg = "hello, world\n";
 const char *msg2 = "goodbye, world\n";
 
-void
+static void
 child_of_spawn(void)
 {
 	strcpy(VA, msg2);

@@ -2,7 +2,7 @@
 
 char buf[8192];
 
-void
+static void
 cat(int f, char *s)
 {
 	long n;

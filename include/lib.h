@@ -31,6 +31,8 @@ extern const volatile struct PageInfo pages[];
 /* extern const volatile struct Env *thisenv; */
 #define thisenv (&envs[ENVX(sys_getenvid())])
 
+void libmain(int argc, char **argv);
+
 // exit.c
 void exit(void);
 
@@ -88,7 +90,7 @@ sys_exofork(void)
 
 // ipc.c
 void ipc_send(envid_t to_env, int value, void *pg, int perm);
-int32_t ipc_recv(envid_t *from_env_store, void *pg, int *perm_store);
+int ipc_recv(envid_t *from_env_store, void *pg, int *perm_store);
 envid_t ipc_find_env(enum EnvType type);
 
 // pageref.c

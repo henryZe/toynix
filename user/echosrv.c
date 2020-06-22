@@ -12,7 +12,7 @@ die(char *m)
 	exit();
 }
 
-void
+static void
 handle_client(int sock)
 {
 	char buffer[BUFFSIZE];

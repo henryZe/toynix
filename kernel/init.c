@@ -12,6 +12,7 @@
 #include <kernel/sched.h>
 #include <kernel/pci.h>
 #include <kernel/time.h>
+#include <kernel/init.h>
 
 static void boot_aps(void);
 

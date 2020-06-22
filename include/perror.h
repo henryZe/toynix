@@ -1,7 +1,7 @@
-#ifndef JOS_INC_PERROR_H
-#define JOS_INC_PERROR_H
+#ifndef _INC_PERROR_H_
+#define _INC_PERROR_H_
 
 void perror(const char *s);
-const char *e2s(int e);
+const char *e2s(int err);
 
-#endif /* !JOS_INC_PERROR_H */
+#endif /* !_INC_PERROR_H_ */

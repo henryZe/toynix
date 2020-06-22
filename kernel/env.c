@@ -383,7 +383,7 @@ load_icode(struct Env *e, uint8_t *binary)
 int
 env_alloc(struct Env **newenv_store, envid_t parent_id)
 {
-	int32_t generation;
+	int generation;
 	int r;
 	struct Env *e;
 

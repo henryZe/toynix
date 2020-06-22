@@ -15,6 +15,7 @@
 #include <kernel/env.h>
 #include <kernel/time.h>
 #include <kernel/e1000.h>
+#include <kernel/syscall.h>
 
 // Print a string to the system console.
 // The string is exactly 'len' characters long.
@@ -558,7 +559,7 @@ sys_env_name(envid_t envid, const char *name)
 }
 
 // Dispatches to the correct kernel function, passing the arguments.
-int32_t
+int
 syscall(uint32_t syscallno, uint32_t a1, uint32_t a2,
 		uint32_t a3, uint32_t a4, uint32_t a5)
 {

@@ -5,10 +5,11 @@
 #include <kernel/pmap.h>
 #include <kernel/cpu.h>
 #include <kernel/spinlock.h>
+#include <kernel/sched.h>
 
 #define LRT_STRAT 1
 
-void sched_halt(void);
+static void sched_halt(void) __attribute__((noreturn));
 
 // Choose a user environment to run and run it.
 void
@@ -65,7 +66,7 @@ sched_yield(void)
 
 // Halt this CPU when there is nothing to do. Wait until the
 // timer interrupt wakes it up. This function never returns.
-void
+static void
 sched_halt(void)
 {
 	int i;
@@ -107,4 +108,6 @@ sched_halt(void)
 		"hlt\n"			// halt this cpu and wait for interrupt
 		"jmp 1b\n"
 		: : "a" (thiscpu->cpu_ts.ts_esp0));
+
+	panic("sched_halt failed");
 }

@@ -60,7 +60,7 @@ mon_kerninfo(int argc, char **argv, struct Trapframe *tf)
 	cprintf("  data    %08x (sdata)          %08x (edata)\n", sdata, edata);
 	cprintf("  bss     %08x (sbss)           %08x (end)\n", sbss, end);
 	cprintf("Kernel executable memory footprint: %dKB\n",
-		ROUNDUP(end - stext, 1024) / 1024);
+			ROUNDUP(end - stext, 1024) / 1024);
 	return 0;
 }
 
@@ -237,7 +237,7 @@ mon_showmapping(int argc, char **argv, struct Trapframe *tf)
 	return 0;
 }
 
-int mode_print(pte_t pte)
+static int mode_print(pte_t pte)
 {
 	char bit_w;
 	char bit_u;

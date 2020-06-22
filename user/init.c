@@ -11,7 +11,7 @@ struct {
 /* not initialized */
 char bss[6000];
 
-int
+static int
 sum(const char *s, int n)
 {
 	int i, tot = 0;
