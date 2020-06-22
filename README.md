@@ -57,9 +57,22 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 
 [Details about commands.](./readme/command_line.md)
 
-## 8 Todo List
+## 8 Test Framework
 
-### 8.1 Optimize
+(✔️: test pass ❌: test fail ❗: no test yet)
+
+| Items | description | test file/function | Status |
+| ----- | ----------- | ------ | ------ |
+| bootloader |             |             | ✔️ |
+| memory management |             |             | ✔️ |
+| trap |             |             | ✔️ |
+| multiple task & core | | | ✔️ |
+| file system | | | ✔️ |
+| network | | | ❌ |
+
+## 9 Todo List
+
+### 9.1 Optimize
 
 * [ ] Implement signal operation set
 * [ ] Replace static lib with share lib
@@ -91,11 +104,11 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 * [x] Provide `debug_info` online method to show running status (such as mem, fs)
 * [x] Implement file remove operation, and supply `rm` command
 
-### 8.2 Bug
+### 9.2 Bug
 
-* lwip connect function by user/echotest.c
+* Failed to build connection with server (lwip connect failed in user/echotest.c, server: user/echosrv.c)
 * Kernel lock sometimes is illegally released
 
-## 9 Ported Modules Claim
+## 10 Ported Modules Claim
 
 * lwip network stack module
