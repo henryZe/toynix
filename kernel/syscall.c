@@ -435,10 +435,25 @@ sys_debug_info(int option, char *buf, size_t size)
 {
 	int i, ret = 0;
 	struct PageInfo *p = page_free_list;
+	char temp[64];
+	const char *cpu_status[] = {
+		"unused",
+		"started",
+		"halted",
+	};
 
 	switch (option) {
 	case CPU_INFO:
-		ret = snprintf(buf, size, "CPU core: %d\n", ncpu);
+		snprintf(buf, size, "%3s %8s %8s %s\n", "CPU", "status", "env", "name");
+
+		for (i = 0; i < ncpu; i++) {
+			snprintf(temp, sizeof(temp), "%3d %8s %8x %s\n",
+					cpus[i].cpu_id, cpu_status[cpus[i].cpu_status],
+					cpus[i].cpu_env ? cpus[i].cpu_env->env_id : 0,
+					cpus[i].cpu_env ? cpus[i].cpu_env->binaryname : "NULL");
+			strcat(buf, temp);
+		}
+
 		break;
 
 	case MEM_INFO:

@@ -23,7 +23,7 @@ void
 umain(int argc, char **argv)
 {
 	int i, fd, ret, envid;
-	char buf[128] = {0};
+	char buf[256] = {0};
 	uint32_t *tmp = UTEMP;
 	struct vm_area_struct *vma;
 	const char *env_status[] = {
@@ -74,15 +74,16 @@ umain(int argc, char **argv)
 		break;
 
 	case ENV_INFO:
-		printf("%8s %16s %8s %10s %8s %16s\n",
-				"Env", "Name", "Status", "Run times",
+		printf("%8s %16s %8s %s %10s %8s %16s\n",
+				"Env", "Name", "Status", "CPU", "Run times",
 				"Father", "Father name");
 
 		for (i = 0; i < NENV; i++) {
 			if (envs[i].env_status != ENV_FREE) {
-				printf("%8x %16s %8s %10d %8x",
+				printf("%8x %16s %8s %2d %10d %8x",
 					envs[i].env_id, envs[i].binaryname,
-					env_status[envs[i].env_status], envs[i].env_runs,
+					env_status[envs[i].env_status],
+					envs[i].env_cpunum, envs[i].env_runs,
 					envs[i].env_parent_id);
 				if (envs[i].env_parent_id)
 					printf(" %16s", envs[ENVX(envs[i].env_parent_id)].binaryname);
