@@ -58,6 +58,6 @@ $(OBJDIR)/$(NETDIR)/lwip/%.o: $(NETDIR)/lwip/%.S $(OBJDIR)/.vars.USER_CFLAGS
 	$(CC) -nostdinc $(USER_CFLAGS) -c -o $@ $<
 
 $(OBJDIR)/$(LIBDIR)/liblwip.a: $(LWIP_OBJFILES)
-	@echo + ar $@
+	@echo + ar[USER] $@
 	mkdir -p $(@D)
 	$(AR) r $@ $(LWIP_OBJFILES)

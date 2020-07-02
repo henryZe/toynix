@@ -1,5 +1,3 @@
-include $(NETDIR)/lwip/Makefile
-
 # Linker flags for user programs
 USR_LDFLAGS := $(LDFLAGS) -T $(USRDIR)/user.ld -nostdlib
 
