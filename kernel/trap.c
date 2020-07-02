@@ -98,24 +98,24 @@ void
 trap_init(void)
 {
 	// trap
-	SETGATE(idt[T_DIVIDE], 1, GD_KT, traphandler_0, 0);
-	SETGATE(idt[T_DEBUG], 1, GD_KT, traphandler_1, 0);
+	SETGATE(idt[T_DIVIDE], 0, GD_KT, traphandler_0, 0);
+	SETGATE(idt[T_DEBUG], 0, GD_KT, traphandler_1, 0);
 	SETGATE(idt[T_NMI], 0, GD_KT, traphandler_2, 0);
-	SETGATE(idt[T_BRKPT], 1, GD_KT, traphandler_3, 3);
-	SETGATE(idt[T_OFLOW], 1, GD_KT, traphandler_4, 0);
-	SETGATE(idt[T_BOUND], 1, GD_KT, traphandler_5, 0);
-	SETGATE(idt[T_ILLOP], 1, GD_KT, traphandler_6, 0);
-	SETGATE(idt[T_DEVICE], 1, GD_KT, traphandler_7, 0);
-	SETGATE(idt[T_DBLFLT], 1, GD_KT, traphandler_8, 0);
-	SETGATE(idt[T_TSS], 1, GD_KT, traphandler_10, 0);
-	SETGATE(idt[T_SEGNP], 1, GD_KT, traphandler_11, 0);
-	SETGATE(idt[T_STACK], 1, GD_KT, traphandler_12, 0);
-	SETGATE(idt[T_GPFLT], 1, GD_KT, traphandler_13, 0);
-	SETGATE(idt[T_PGFLT], 1, GD_KT, traphandler_14, 0);
-	SETGATE(idt[T_FPERR], 1, GD_KT, traphandler_16, 0);
-	SETGATE(idt[T_ALIGN], 1, GD_KT, traphandler_17, 0);
-	SETGATE(idt[T_MCHK], 1, GD_KT, traphandler_18, 0);
-	SETGATE(idt[T_SIMDERR], 1, GD_KT, traphandler_19, 0);
+	SETGATE(idt[T_BRKPT], 0, GD_KT, traphandler_3, 3);
+	SETGATE(idt[T_OFLOW], 0, GD_KT, traphandler_4, 0);
+	SETGATE(idt[T_BOUND], 0, GD_KT, traphandler_5, 0);
+	SETGATE(idt[T_ILLOP], 0, GD_KT, traphandler_6, 0);
+	SETGATE(idt[T_DEVICE], 0, GD_KT, traphandler_7, 0);
+	SETGATE(idt[T_DBLFLT], 0, GD_KT, traphandler_8, 0);
+	SETGATE(idt[T_TSS], 0, GD_KT, traphandler_10, 0);
+	SETGATE(idt[T_SEGNP], 0, GD_KT, traphandler_11, 0);
+	SETGATE(idt[T_STACK], 0, GD_KT, traphandler_12, 0);
+	SETGATE(idt[T_GPFLT], 0, GD_KT, traphandler_13, 0);
+	SETGATE(idt[T_PGFLT], 0, GD_KT, traphandler_14, 0);
+	SETGATE(idt[T_FPERR], 0, GD_KT, traphandler_16, 0);
+	SETGATE(idt[T_ALIGN], 0, GD_KT, traphandler_17, 0);
+	SETGATE(idt[T_MCHK], 0, GD_KT, traphandler_18, 0);
+	SETGATE(idt[T_SIMDERR], 0, GD_KT, traphandler_19, 0);
 
 	// soft interrupt
 	SETGATE(idt[T_SYSCALL], 0, GD_KT, traphandler_48, 3);
@@ -410,10 +410,6 @@ trap(struct Trapframe *tf)
 	if (panicstr)
 		asm volatile("hlt");
 
-	// Re-acqurie the big kernel lock if we were halted in sched_yield()
-	if (xchg(&thiscpu->cpu_status, CPU_STARTED) == CPU_HALTED)
-		lock_kernel();
-
 	// Check that interrupts are disabled. If this assertion
 	// fails, DO NOT be tempted to fix it by inserting a "cli" in
 	// the interrupt path.
@@ -445,6 +441,11 @@ trap(struct Trapframe *tf)
 
 		// The trapframe on the stack should be ignored from here on.
 		tf = &curenv->env_tf;
+
+	} else {
+		// Re-acqurie the big kernel lock if we were halted in sched_yield()
+		if (xchg(&thiscpu->cpu_status, CPU_STARTED) == CPU_HALTED)
+			lock_kernel();
 	}
 
 	// Record that tf is the last real trapframe so

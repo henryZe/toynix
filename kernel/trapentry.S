@@ -25,7 +25,6 @@
 	.type name, @function;		/* symbol type is function */		\
 	.align 2;			/* align function definition */		\
 	name:				/* function starts here */		\
-		cli;			/* close interrupt when enter kernel */ \
 		pushl $(num);		/* push trap num */			\
 		jmp alltraps
 
@@ -38,7 +37,6 @@
 	.type name, @function;		\
 	.align 2;			\
 	name:				\
-		cli;			\
 		pushl $0;		\
 		pushl $(num);		\
 		jmp alltraps
