@@ -52,13 +52,13 @@ mon_kerninfo(int argc, char **argv, struct Trapframe *tf)
 	extern char sdata[], edata[], sbss[], end[];
 
 	cprintf("Special kernel symbols:\n");
-	cprintf("  entry   %08x (_start)         %08x (entry)\n", _start, entry);
-	cprintf("  text    %08x (stext)          %08x (etext)\n", stext, etext);
-	cprintf("  rodata  %08x (srodata)        %08x (erodata)\n", srodata, erodata);
-	cprintf("  stab    %08x (STAB_BEGIN)     %08x (STAB_END)\n", __STAB_BEGIN__, __STAB_END__);
-	cprintf("  stabstr %08x (STABSTR_BEGIN)  %08x (STABSTR_END)\n", __STABSTR_BEGIN__, __STABSTR_END__);
-	cprintf("  data    %08x (sdata)          %08x (edata)\n", sdata, edata);
-	cprintf("  bss     %08x (sbss)           %08x (end)\n", sbss, end);
+	cprintf("  entry   %p (_start)         %p (entry)\n", _start, entry);
+	cprintf("  text    %p (stext)          %p (etext)\n", stext, etext);
+	cprintf("  rodata  %p (srodata)        %p (erodata)\n", srodata, erodata);
+	cprintf("  stab    %p (STAB_BEGIN)     %p (STAB_END)\n", __STAB_BEGIN__, __STAB_END__);
+	cprintf("  stabstr %p (STABSTR_BEGIN)  %p (STABSTR_END)\n", __STABSTR_BEGIN__, __STABSTR_END__);
+	cprintf("  data    %p (sdata)          %p (edata)\n", sdata, edata);
+	cprintf("  bss     %p (sbss)           %p (end)\n", sbss, end);
 	cprintf("Kernel executable memory footprint: %dKB\n",
 			ROUNDUP(end - stext, 1024) / 1024);
 	return 0;
@@ -112,7 +112,7 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 		if (ret < 0)
 			cprintf("debuginfo not found location of eip\n");
 
-		cprintf("%s: %d, %.*s + 0x%x, %d arg(s)",
+		cprintf("%s: %d, %.*s + 0x%lx, %d arg(s)",
 			info.eip_file, info.eip_line,
 			info.eip_fn_namelen, info.eip_fn_name,
 			eip - info.eip_fn_addr,
@@ -121,7 +121,7 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 		if (info.eip_fn_narg) {
 			cprintf(": ");
 			for (i = 0; i < info.eip_fn_narg; i++) {
-				cprintf("%.*s[%08x] ",
+				cprintf("%.*s[%08lx] ",
 					info.eip_fn_arglen[i], info.eip_fn_arg[i],
 					*(*(unsigned long **)ebp + 2 + i));
 			}
@@ -289,7 +289,7 @@ mon_setaddrmode(int argc, char **argv, struct Trapframe *tf)
 		return 0;
 	}
 
-	cprintf("%08x: ", addr);
+	cprintf("%p: ", addr);
 	mode_print(*pte);
 
 	uint32_t perm = 0;
@@ -303,7 +303,7 @@ mon_setaddrmode(int argc, char **argv, struct Trapframe *tf)
 	else					/* set */
 		*pte = *pte | perm;
 
-	cprintf("%08x: ", addr);
+	cprintf("%p: ", addr);
 	mode_print(*pte);
 
 	return 0;
@@ -326,7 +326,7 @@ mon_dump(int argc, char **argv, struct Trapframe *tf)
 	uint32_t i, j;
 
 	for (i = 0; i < ROUNDUP(size, sizeof(uint32_t))/sizeof(uint32_t);) {
-		cprintf("%08x: ", addr + i);
+		cprintf("%p: ", addr + i);
 			for (j = i; (i < (j + 4)) && (i < ROUNDUP(size, sizeof(uint32_t))/sizeof(uint32_t)); i++)
 				cprintf("%08x ", addr[i]);
 		cprintf("\n");

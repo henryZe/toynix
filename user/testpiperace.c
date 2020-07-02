@@ -62,5 +62,5 @@ umain(int argc, char **argv)
 	if (pageref(va) != (3 + 1))
 		cprintf("\nchild detected race\n");
 	else
-		cprintf("\nrace didn't happen\n", max);
+		cprintf("\nrace didn't happen\n");
 }

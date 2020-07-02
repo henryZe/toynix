@@ -21,5 +21,5 @@ umain(int argc, char **argv)
 
 	ret = rename(src, dst);
 	if (ret < 0)
-		printf("rename %s %s failed: %e", src, dst, ret);
+		warn("rename %s %s failed: %e", src, dst, ret);
 }

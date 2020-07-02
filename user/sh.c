@@ -146,7 +146,7 @@ again:
 			// then close the original 'fd'.
 			fd = open(t, O_RDONLY);
 			if (fd < 0) {
-				cprintf("open %s for read: %e", t, fd);
+				warn("open %s for read: %e", t, fd);
 				exit();
 			}
 
@@ -159,13 +159,13 @@ again:
 		case '>':	// Output redirection
 			// Grab the filename from the argument list
 			if (gettoken(NULL, &t) != 'w') {
-				cprintf("syntax error: > not followed by word\n");
+				warn("syntax error: > not followed by word\n");
 				exit();
 			}
 
 			fd = open(t, O_WRONLY | O_CREAT);
 			if (fd < 0) {
-				cprintf("open %s for write: %e", t, fd);
+				warn("open %s for write: %e", t, fd);
 				exit();
 			}
 
@@ -178,7 +178,7 @@ again:
 		case '|':	//pipe
 			ret = pipe(p);
 			if (ret < 0) {
-				cprintf("pipe: %e", ret);
+				warn("pipe: %e", ret);
 				exit();
 			}
 
@@ -187,7 +187,7 @@ again:
 
 			ret = fork();
 			if (ret < 0) {
-				cprintf("fork: %e", ret);
+				warn("fork: %e", ret);
 				exit();
 			}
 
@@ -212,7 +212,7 @@ again:
 				close(p[0]);
 				goto runit;
 			}
-			panic("| not implemented");
+
 			break;
 
 		case '&':
@@ -272,7 +272,7 @@ runit:
 	// Spawn the command!
 	ret = spawn(argv[0], (const char **)argv);
 	if (ret < 0)
-		cprintf("spawn %s: %e\n", argv[0], ret);
+		warn("spawn %s: %e\n", argv[0], ret);
 
 	// close all file descriptors
 	close_all();

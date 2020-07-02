@@ -18,6 +18,6 @@ umain(int argc, char **argv)
 	for (i = 1; i < argc; i++) {
 		ret = mkdir(argv[i]);
 		if (ret < 0)
-			printf("can't create directory %s: %e\n", argv[i], ret);
+			warn("can't create directory %s: %e\n", argv[i], ret);
 	}
 }

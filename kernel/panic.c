@@ -51,4 +51,3 @@ _warn(const char *file, int line, const char *fmt,...)
 	cprintf("\n");
 	va_end(ap);
 }
-

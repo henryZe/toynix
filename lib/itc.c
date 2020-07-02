@@ -300,7 +300,7 @@ timeout_cleanup(thread_id_t tid)
 	}
 
 	if (debug)
-		cprintf("timeout_cleanup: bogus tid %ld\n", tid);
+		cprintf("timeout_cleanup: bogus tid %d\n", tid);
 
 done:
 	lwip_core_unlock();

@@ -236,7 +236,7 @@ serve_thread(uint32_t a)
 		break;
 
 	default:
-		cprintf("Invalid request code %d from %08x\n", args->whom, args->req);
+		cprintf("Invalid request code %d from %p\n", args->whom, args->req);
 		r = -E_INVAL;
 		break;
 	}

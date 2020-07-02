@@ -33,7 +33,7 @@ lsdir(const char *path, const char *prefix)
 	struct File f;
 
 	if ((fd = open(path, O_RDONLY)) < 0) {
-		printf("open %s: %e", path, fd);
+		warn("open %s: %e", path, fd);
 		exit();
 	}
 
@@ -47,7 +47,7 @@ lsdir(const char *path, const char *prefix)
 		exit();
 	}
 	if (n < 0) {
-		printf("error reading directory %s: %e", path, n);
+		warn("error reading directory %s: %e", path, n);
 		exit();
 	}
 
@@ -61,7 +61,7 @@ ls(const char *path, const char *prefix)
 	struct Stat st;
 
 	if ((r = stat(path, &st)) < 0) {
-		printf("stat %s: %e", path, r);
+		warn("stat %s: %e", path, r);
 		exit();
 	}
 

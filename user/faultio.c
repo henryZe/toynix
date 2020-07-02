@@ -15,5 +15,5 @@ umain(int argc, char **argv)
 	 */
 	outb(0x1F6, 0xE0 | (1<<4));
 
-	cprintf("%s: made it here --- bug\n");
+	cprintf("made it here --- bug\n");
 }

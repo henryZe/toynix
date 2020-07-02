@@ -60,7 +60,7 @@ void umain(int argc, char **argv)
 		}
 		received += bytes;
 		buffer[bytes] = '\0';        // Assure null terminated string
-		cprintf(buffer);
+		cprintf("%s", buffer);
 	}
 	cprintf("\n");
 

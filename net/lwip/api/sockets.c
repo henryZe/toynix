@@ -1819,7 +1819,7 @@ lwip_setsockopt_internal(void *arg)
       break;
     case TCP_KEEPALIVE:
       sock->conn->pcb.tcp->keep_idle = (u32_t)(*(int*)optval);
-      LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_setsockopt(%d, IPPROTO_TCP, TCP_KEEPALIVE) -> %lu\n",
+      LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_setsockopt(%d, IPPROTO_TCP, TCP_KEEPALIVE) -> %u\n",
                   s, sock->conn->pcb.tcp->keep_idle));
       break;
 

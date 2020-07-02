@@ -24,3 +24,19 @@ _panic(const char *file, int line, const char *fmt, ...)
 	while (1)
 		breakpoint();
 }
+
+/* like panic, but don't */
+void
+_warn(const char *file, int line, const char *fmt,...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+
+	cprintf("[%08x] user warning in %s at %s:%d: ",
+		sys_getenvid(), thisenv->binaryname, file, line);
+
+	vcprintf(fmt, ap);
+	cprintf("\n");
+	va_end(ap);
+}

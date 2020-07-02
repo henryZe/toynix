@@ -126,7 +126,7 @@ serve_open(envid_t envid, struct Fsreq_open *req,
 	ret = openfile_alloc(&o);
 	if (ret < 0) {
 		if (debug)
-			cprintf("openfile_alloc failed: %e", ret);
+			warn("openfile_alloc failed: %e", ret);
 
 		return ret;
 	}
@@ -138,7 +138,7 @@ serve_open(envid_t envid, struct Fsreq_open *req,
 			if (!(req->req_omode & O_EXCL) && (ret == -E_FILE_EXISTS))
 				goto try_open;
 			if (debug)
-				cprintf("file_create failed: %e", ret);
+				warn("file_create failed: %e", ret);
 
 			return ret;
 		}
@@ -147,7 +147,7 @@ try_open:
 		ret = file_open(path, &f);
 		if (ret < 0) {
 			if (debug)
-				cprintf("file_open failed: %e", ret);
+				warn("file_open failed: %e", ret);
 
 			return ret;
 		}
@@ -158,7 +158,7 @@ try_open:
 		ret = file_set_size(f, 0);
 		if (ret < 0) {
 			if (debug)
-				cprintf("file_set_size failed: %e", ret);
+				warn("file_set_size failed: %e", ret);
 
 			return ret;
 		}
@@ -167,7 +167,7 @@ try_open:
 	ret = file_open(path, &f);
 	if (ret < 0) {
 		if (debug)
-			cprintf("file_open failed: %e", ret);
+			warn("file_open failed: %e", ret);
 
 		return ret;
 	}
@@ -356,7 +356,7 @@ static int file_mutex_remove(struct File *f)
 
 	if (!fileisclosed(f)) {
 		if (debug)
-			cprintf("remove %s failed: %e\n", f->f_name, -E_BUSY);
+			warn("remove %s failed: %e\n", f->f_name, -E_BUSY);
 
 		return -E_BUSY;
 	}
@@ -367,7 +367,7 @@ static int file_mutex_remove(struct File *f)
 	ret = file_remove(f);
 	if (ret < 0) {
 		if (debug)
-			cprintf("file_remove failed: %e", ret);
+			warn("file_remove failed: %e", ret);
 
 		return ret;
 	}
@@ -392,7 +392,7 @@ serve_remove(envid_t envid, struct Fsreq_remove *req)
 	ret = file_open(path, &f);
 	if (ret < 0) {
 		if (debug)
-			cprintf("file_open failed: %e", ret);
+			warn("file_open failed: %e", ret);
 
 		return ret;
 	}
@@ -473,7 +473,7 @@ serve(void)
 		req = ipc_recv(&whom, fsreq, &perm);
 		if (debug)
 			cprintf("fs req %d from %08x [page %08x: %s]\n",
-				req, whom, uvpt[PGNUM(fsreq)], fsreq);
+				req, whom, uvpt[PGNUM(fsreq)], (char *)fsreq);
 
 		// All requests must contain an argument page
 		if (!(perm & PTE_P)) {

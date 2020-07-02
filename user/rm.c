@@ -18,6 +18,6 @@ umain(int argc, char **argv)
 	for (i = 1; i < argc; i++) {
 		f = remove(argv[i]);
 		if (f < 0)
-			printf("can't remove %s: %e\n", argv[i], f);
+			warn("can't remove %s: %e\n", argv[i], f);
 	}
 }

@@ -21,7 +21,7 @@ umain(int argc, char **argv)
 		cprintf("init: starting sh\n");
 		r = spawnl("/sh", "sh", NULL);
 		if (r < 0) {
-			cprintf("init: spawn sh: %e\n", r);
+			warn("init: spawn sh: %e\n", r);
 			continue;
 		}
 		wait(r);

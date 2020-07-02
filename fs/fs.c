@@ -554,7 +554,7 @@ file_truncate_blocks(struct File *f, off_t newsize)
 	for (bno = new_nblocks; bno < old_nblocks; bno++) {
 		ret = file_free_block(f, bno);
 		if (ret < 0)
-			cprintf("warning: file_free_block: %e", ret);
+			warn("file_free_block: %e", ret);
 	}
 
 	if (new_nblocks <= NDIRECT && f->f_indirect) {

@@ -73,7 +73,7 @@ umain(int argc, char **argv)
 
 		ret = spawnl("/sh", "sh", NULL);
 		if (ret < 0) {
-			printf("init: spawn sh: %e\n", ret);
+			warn("init: spawn sh: %e\n", ret);
 			continue;
 		}
 

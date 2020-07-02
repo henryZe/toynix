@@ -449,7 +449,7 @@ sys_debug_info(int option, char *buf, size_t size)
 					"Total pages: %d\n"
 					" Free pages: %d\n"
 					" Used pages: %d\n"
-					"      Usage: %f\%\n",
+					"      Usage: %f%%\n",
 					npages, i, npages - i, (float)(npages - i) * 100 / npages);
 		break;
 

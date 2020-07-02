@@ -67,7 +67,7 @@ umain(int argc, char **argv)
 
 		printf("Total blocks: %d\n"
 				" Used blocks: %d\n"
-				"       Usage: %f\%\n",
+				"       Usage: %f%%\n",
 				tmp[0], tmp[1], (float)tmp[1] * 100 / tmp[0]);
 
 		sys_page_unmap(0, tmp);
@@ -106,7 +106,7 @@ umain(int argc, char **argv)
 		for (i = 0; i < envs[ENVX(envid)].vma_valid; i++) {
 			vma = (void *)&(envs[ENVX(envid)].vma[i]);
 
-			printf("%d \t %08x \t %8x \t %x\n",
+			printf("%d \t %08lx \t %8x \t %x\n",
 					i, vma->vm_start, vma->size, vma->vm_page_prot);
 		}
 		break;

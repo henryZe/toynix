@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <error.h>
+#include <assert.h>
 
 #define BUFLEN 1024
 static char buf[BUFLEN];
@@ -23,7 +24,7 @@ readline(const char *prompt)
 		c = getchar();
 		if (c < 0) {
 			if (c != -E_EOF)
-				cprintf("read error: %e\n", c);
+				warn("read error: %e\n", c);
 			return NULL;
 
 		} else if ((c == '\b' || c == '\x7f') && i > 0) {

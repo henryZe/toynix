@@ -13,6 +13,6 @@ umain(int argc, char **argv)
 	cprintf("%04f\n",  123.004567);
 
 	for (size_t i = 0; i < thisenv->vma_valid; i++)
-		cprintf("vma[%d] start %08x size %08x perm %08x\n",
+		cprintf("vma[%d] start %08lx size %08x perm %08x\n",
 			i, thisenv->vma[i].vm_start, thisenv->vma[i].size, thisenv->vma[i].vm_page_prot);
 }
