@@ -29,4 +29,4 @@ enum {
 	MAXERROR,		// the maximum allowed
 };
 
-#endif	// !INC_ERROR_H */
+#endif	// !INC_ERROR_H

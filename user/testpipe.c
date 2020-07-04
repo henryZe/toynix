@@ -19,7 +19,7 @@ umain(int argc, char **argv)
 		cprintf("[%08x] pipereadeof close %d\n", thisenv->env_id, p[1]);
 		close(p[1]);
 		cprintf("[%08x] pipereadeof readn %d\n", thisenv->env_id, p[0]);
-		i = readn(p[0], buf, sizeof buf-1);
+		i = readn(p[0], buf, sizeof(buf)-1);
 		if (i < 0)
 			panic("read: %e", i);
 		buf[i] = 0;

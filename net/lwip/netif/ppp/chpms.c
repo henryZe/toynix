@@ -260,8 +260,8 @@ Get7Bits( u_char *input, int startBit)
 {
   register unsigned int  word;
 
-  word  = (unsigned)input[startBit / 8] << 8;
-  word |= (unsigned)input[startBit / 8 + 1];
+  word  = (unsigned int)input[startBit / 8] << 8;
+  word |= (unsigned int)input[startBit / 8 + 1];
 
   word >>= 15 - (startBit % 8 + 7);
 

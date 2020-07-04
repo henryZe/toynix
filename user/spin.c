@@ -9,7 +9,7 @@ umain(int argc, char **argv)
 	env = fork();
 	if (!env) {
 		cprintf("I am the child.  Spinning...\n");
-		while(1);
+		while (1);
 	}
 
 	cprintf("I am the parent.  Running the child...\n");

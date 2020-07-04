@@ -39,7 +39,7 @@
 #define PGOFF(la)	(((uintptr_t) (la)) & 0xFFF)
 
 // construct linear address from indexes and offset
-#define PGADDR(d, t, o)	((void*) ((d) << PDXSHIFT | (t) << PTXSHIFT | (o)))
+#define PGADDR(d, t, o)	((void *) ((d) << PDXSHIFT | (t) << PTXSHIFT | (o)))
 
 // Page directory and page table constants.
 #define NPDENTRIES	1024		// page directory entries per page directory
@@ -143,7 +143,7 @@
 #define SEG_NULL						\
 	.word 0, 0;						\
 	.byte 0, 0, 0, 0
-#define SEG(type,base,lim)					\
+#define SEG(type, base, lim)					\
 	.word (((lim) >> 12) & 0xffff), ((base) & 0xffff);	\
 	.byte (((base) >> 16) & 0xff), (0x90 | (type)),		\
 		(0xC0 | (((lim) >> 28) & 0xf)), (((base) >> 24) & 0xff)
@@ -177,12 +177,12 @@ struct Segdesc {
 // Normal segment
 #define SEG(type, base, lim, dpl) 					\
 { ((lim) >> 12) & 0xffff, (base) & 0xffff, ((base) >> 16) & 0xff,	\
-    type, 1, dpl, 1, (unsigned) (lim) >> 28, 0, 0, 1, 1,		\
-    (unsigned) (base) >> 24 }
+    type, 1, dpl, 1, (unsigned int) (lim) >> 28, 0, 0, 1, 1,		\
+    (unsigned int) (base) >> 24 }
 #define SEG16(type, base, lim, dpl) (struct Segdesc)			\
 { (lim) & 0xffff, (base) & 0xffff, ((base) >> 16) & 0xff,		\
-    type, 1, dpl, 1, (unsigned) (lim) >> 16, 0, 0, 1, 0,		\
-    (unsigned) (base) >> 24 }
+    type, 1, dpl, 1, (unsigned int) (lim) >> 16, 0, 0, 1, 0,		\
+    (unsigned int) (base) >> 24 }
 
 #endif /* !__ASSEMBLER__ */
 
@@ -316,7 +316,7 @@ struct Gatedesc {
 struct Pseudodesc {
 	uint16_t pd_lim;		// Limit
 	uint32_t pd_base;		// Base address
-} __attribute__ ((packed));
+} __attribute__((__packed__));
 
 #endif /* !__ASSEMBLER__ */
 

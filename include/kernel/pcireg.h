@@ -391,7 +391,7 @@ typedef uint8_t pci_revision_t;
 	    (-(size))
 
 #define PCI_MAPREG_NUM(offset)						\
-	    (((unsigned)(offset)-PCI_MAPREG_START)/4)
+	    (((unsigned int)(offset)-PCI_MAPREG_START)/4)
 
 
 /*
@@ -572,7 +572,7 @@ typedef uint8_t pci_intr_line_t;
 #define	PCI_INTERRUPT_LINE(icr) \
 	    (((icr) >> PCI_INTERRUPT_LINE_SHIFT) & PCI_INTERRUPT_LINE_MASK)
 
-#define PCI_INTERRUPT_CODE(lat,gnt,pin,line)		\
+#define PCI_INTERRUPT_CODE(lat, gnt, pin, line)		\
 	  ((((lat)&PCI_INTERRUPT_LATENCY_MASK)<<PCI_INTERRUPT_LATENCY_SHIFT)| \
 	   (((gnt)&PCI_INTERRUPT_GRANT_MASK)  <<PCI_INTERRUPT_GRANT_SHIFT)  | \
 	   (((pin)&PCI_INTERRUPT_PIN_MASK)    <<PCI_INTERRUPT_PIN_SHIFT)    | \

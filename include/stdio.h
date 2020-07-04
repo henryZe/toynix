@@ -27,7 +27,7 @@ int vcprintf(const char *fmt, va_list);
 // lib/fprintf.c
 int printf(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 int fprintf(int fd, const char *fmt, ...) __attribute__((format(printf, 2, 3)));
-int vfprintf(int fd, const char *fmt, va_list);
+int vfprintf(int fd, const char *fmt, va_list ap);
 
 // lib/readline.c
 char *readline(const char *prompt);

@@ -49,8 +49,7 @@
  */
 #if 0
 
-struct Frob
-{
+struct Frob {
 	int frobozz;
 	LIST_ENTRY(Frob) frob_link;	/* this contains the list element pointers */
 };
@@ -62,7 +61,7 @@ struct Frob_list flist;			/* declare a Frob list */
 LIST_INIT(&flist);			/* clear flist (globals are cleared anyway) */
 flist = LIST_HEAD_INITIALIZER(&flist);	/* alternate way to clear flist */
 
-if(LIST_EMPTY(&flist))			/* check whether list is empty */
+if (LIST_EMPTY(&flist))			/* check whether list is empty */
 	printf("list is empty\n");
 
 struct Frob *f = LIST_FIRST(&flist);	/* f is first element in list */

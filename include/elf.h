@@ -60,9 +60,9 @@ struct Secthdr {
 #define ELF_SHT_STRTAB		3
 
 // Values for Secthdr::sh_flags
-#define ELF_SHF_WRITE 			1
-#define ELF_SHF_ALLOC 			2
-#define ELF_SHF_EXECINSTR 		4
+#define ELF_SHF_WRITE			1
+#define ELF_SHF_ALLOC			2
+#define ELF_SHF_EXECINSTR		4
 
 // Values for Secthdr::sh_name
 #define ELF_SHN_UNDEF		0

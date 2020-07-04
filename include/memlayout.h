@@ -94,8 +94,8 @@
 
 // Kernel stack.
 #define KSTACKTOP	KERNBASE
-#define KSTKSIZE	(8*PGSIZE)   		// size of a kernel stack
-#define KSTKGAP		(8*PGSIZE)   		// size of a kernel stack guard
+#define KSTKSIZE	(8*PGSIZE)		// size of a kernel stack
+#define KSTKGAP		(8*PGSIZE)		// size of a kernel stack guard
 
 // Memory-mapped IO.
 #define MMIOLIM		(KSTACKTOP - PTSIZE)
@@ -132,7 +132,7 @@
 #define UTEXT		(2*PTSIZE)
 
 // Used for temporary page mappings.  Typed 'void*' for convenience
-#define UTEMP		((void*) PTSIZE)
+#define UTEMP		((void *) PTSIZE)
 // Used for temporary page mappings for the user page-fault handler
 // (should not conflict with other temporary page mappings)
 #define PFTEMP		(UTEMP + PTSIZE - PGSIZE)

@@ -13,7 +13,7 @@ umain(int argc, char **argv)
 		if (buf == 0)
 			exit();
 		if (memcmp(buf, "free ", 5) == 0) {
-			v = (void*) strtol(buf + 5, 0, 0);
+			v = (void *) strtol(buf + 5, 0, 0);
 			free(v);
 		} else if (memcmp(buf, "malloc ", 7) == 0) {
 			n = strtol(buf + 7, 0, 0);

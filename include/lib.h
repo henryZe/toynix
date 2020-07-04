@@ -58,12 +58,12 @@ void *sbrk(intptr_t increment);
 void sys_cputs(const char *string, size_t len);
 int	sys_cgetc(void);
 envid_t	sys_getenvid(void);
-int	sys_env_destroy(envid_t);
+int	sys_env_destroy(envid_t envid);
 void sys_yield(void);
 int	sys_env_set_status(envid_t envid, int status);
 int	sys_page_alloc(envid_t envid, void *pg, int perm);
 int	sys_page_map(envid_t src_env, void *src_pg,
-		        envid_t dst_env, void *dst_pg, int perm);
+				envid_t dst_env, void *dst_pg, int perm);
 int	sys_page_unmap(envid_t env, void *pg);
 int sys_env_set_pgfault_upcall(envid_t envid, void *upcall);
 int sys_ipc_try_send(envid_t to_env, int value, void *pg, int perm);
@@ -79,13 +79,13 @@ int sys_env_name(envid_t envid, const char *name);
 static inline envid_t __attribute__((always_inline))
 sys_exofork(void)
 {
-    envid_t ret;
+	envid_t ret;
 
-    asm volatile("int %2"
-                : "=a" (ret)
-                : "a" (SYS_exofork), "i" (T_SYSCALL));
+	asm volatile("int %2"
+				: "=a" (ret)
+				: "a" (SYS_exofork), "i" (T_SYSCALL));
 
-    return ret;
+	return ret;
 }
 
 // ipc.c
@@ -178,12 +178,12 @@ typedef void (*sighandler_t)(int);
 typedef uint32_t sigset_t;
 
 enum sigmask_flag {
-    // The set of blocked signals is the union of the current set and the set argument.
-    SIG_BLOCK,
-    // The signals in set are removed from the current set of blocked signals.
-    SIG_UNBLOCK,
-    // The set of blocked signals is set to the argument set.
-    SIG_SETMASK,
+	// The set of blocked signals is the union of the current set and the set argument.
+	SIG_BLOCK,
+	// The signals in set are removed from the current set of blocked signals.
+	SIG_UNBLOCK,
+	// The set of blocked signals is set to the argument set.
+	SIG_SETMASK,
 };
 
 sighandler_t signal(int signum, sighandler_t handler);

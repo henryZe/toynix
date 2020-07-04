@@ -107,7 +107,6 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 ### 9.2 Bug
 
 * Failed to build connection with server (lwip connect failed in user/echotest.c, server: user/echosrv.c)
-* Kernel lock sometimes is illegally released
 
 ## 10 Ported Modules Claim
 
