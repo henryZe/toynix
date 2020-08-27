@@ -44,11 +44,12 @@ static const char * const error_string[MAXERROR] = {
  */
 static void
 printnum(void (*putch)(int, void*), void *putdat,
-	 unsigned long long num, unsigned base, int width, int padc)
+		unsigned long long num, unsigned base,
+		int width, int padc, int upper)
 {
 	// first recursively print all preceding (more significant) digits
 	if (num >= base) {
-		printnum(putch, putdat, num / base, base, width - 1, padc);
+		printnum(putch, putdat, num / base, base, width - 1, padc, upper);
 	} else {
 		// print any needed pad characters before first digit
 		while (--width > 0)
@@ -56,7 +57,10 @@ printnum(void (*putch)(int, void*), void *putdat,
 	}
 
 	// then print this (the least significant) digit
-	putch("0123456789abcdef"[num % base], putdat);
+	if (!upper)
+		putch("0123456789abcdef"[num % base], putdat);
+	else
+		putch("0123456789ABCDEF"[num % base], putdat);
 }
 
 static inline int pow10(int t)
@@ -87,9 +91,9 @@ printdouble(void (*putch)(int, void*), void *putdat, double num,
 	else
 		deci = deci / 10;
 
-	printnum(putch, putdat, inte, 10, width, padc);
+	printnum(putch, putdat, inte, 10, width, padc, 0);
 	putch('.', putdat);
-	printnum(putch, putdat, deci, 10, precision, '0');
+	printnum(putch, putdat, deci, 10, precision, '0', 0);
 	return;
 }
 
@@ -135,7 +139,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 	register int ch, err;
 	unsigned long long num;
 	double float_num;
-	int base, lflag, width, precision, altflag;
+	int base, lflag, width, precision, altflag, upper;
 	char padc;
 
 	while (1) {
@@ -151,6 +155,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 		precision = -1;
 		lflag = 0;
 		altflag = 0;
+		upper = 0;
 	reswitch:
 		switch (ch = *(unsigned char *) fmt++) {
 
@@ -269,11 +274,13 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 			goto number;
 
 		// (unsigned) hexadecimal
+		case 'X':
+			upper = 1;
 		case 'x':
 			num = getuint(&ap, lflag);
 			base = 16;
 		number:
-			printnum(putch, putdat, num, base, width, padc);
+			printnum(putch, putdat, num, base, width, padc, upper);
 			break;
 
 		// float

@@ -11,6 +11,8 @@ umain(int argc, char **argv)
 	cprintf("%.05f\n", 123.004567);
 	cprintf("%.01f\n", 123.004567);
 	cprintf("%04f\n",  123.004567);
+	cprintf("%X\n",  0xabcdef);
+	cprintf("%x\n",  0xabcdef);
 
 	for (size_t i = 0; i < thisenv->vma_valid; i++)
 		cprintf("vma[%d] start %08lx size %08x perm %08x\n",

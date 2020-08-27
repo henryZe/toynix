@@ -77,16 +77,16 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 * [ ] Implement signal operation set
 * [ ] Replace static lib with share lib
 * [ ] Implement recycling mechanism for page cache of fs block
-  * [x] add file_close for releasing page cache
+  * [x] add `file_close` for releasing page cache
   * [ ] add list for recoding most recent access file
   * [ ] have ability to decide when to release
 * [ ] Add VMA structure which describes a memory area:
   * [x] including start address and size
-  * [ ] flags to determine access rights and behaviors (such as page_fault handler)
+  * [ ] flags to determine access rights and behaviors (such as `page_fault` handler)
   * [ ] specifies which file is being mapped by the area, if any
-* [ ] Use VMA pg_fault handler to replace global pg_fault handler
+* [ ] Use VMA `pg_fault` handler to replace global `pg_fault` handler
 * [ ] Distinguish anonymous and mmap pages (whether need to copy original page)
-* [ ] Modify map_segment from read to mmap images
+* [ ] Modify `map_segment` from read to mmap images
 * [ ] Fine-gained lock instead of global kernel lock:
   * [ ] page allocator
   * [ ] console driver
