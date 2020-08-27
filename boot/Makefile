@@ -3,11 +3,11 @@ BOOT_OBJS := $(OBJDIR)/$(BOOTDIR)/boot.o $(OBJDIR)/$(BOOTDIR)/bootmain.o
 $(OBJDIR)/$(BOOTDIR)/%.o: $(BOOTDIR)/%.S
 	@echo + as[BOOT] $<
 	@mkdir -p $(@D)
-	$(CC) -nostdinc $(KERN_CFLAGS) -c -o $@ $<
+	$(CC) -nostdinc $(BOOT_CFLAGS) -c -o $@ $<
 
 $(OBJDIR)/$(BOOTDIR)/%.o: $(BOOTDIR)/%.c
 	@echo + cc[BOOT] -Os $<
-	$(CC) -nostdinc $(KERN_CFLAGS) -Os -c -o $@ $<
+	$(CC) -nostdinc $(BOOT_CFLAGS) -Os -c -o $@ $<
 
 $(OBJDIR)/$(BOOTDIR)/boot: $(BOOT_OBJS)
 	@echo + ld[BOOT] $(BOOTDIR)/boot

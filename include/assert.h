@@ -10,6 +10,7 @@
 
 void _warn(const char *file, int line, const char *fmt, ...);
 void _panic(const char *file, int line, const char *fmt, ...) __attribute__((noreturn));
+void __stack_chk_fail(void);
 
 #define assert(x)		\
 	do { if (!(x)) panic("assertion failed: %s", #x); } while (0)

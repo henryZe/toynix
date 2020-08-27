@@ -34,6 +34,7 @@ LIB_SRCFILES :=	\
 	$(LIBDIR)/buddy.c \
 	$(LIBDIR)/sbrk.c \
 	$(LIBDIR)/signal.c \
+	$(LIBDIR)/stack_protector.c \
 
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.c, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_SRCFILES))
 LIB_OBJFILES := $(patsubst $(LIBDIR)/%.S, $(OBJDIR)/$(LIBDIR)/%.o, $(LIB_OBJFILES))

@@ -15,7 +15,8 @@ OBJCOPY	:= objcopy
 OBJDUMP	:= objdump
 NM	:= nm
 
-CFLAGS := -Wall -Werror -Wmissing-prototypes -Wundef
+CFLAGS := -Wall -Werror -Wundef
+CFLAGS := -Wmissing-prototypes
 
 # Native commands
 NATIVE_CFLAGS := $(CFLAGS) $(DEFS) $(LABDEFS) -I. -MD
@@ -41,6 +42,7 @@ CFLAGS += -I$(NETDIR)/lwip/include \
 
 # Add -fno-stack-protector if the option exists.
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
+# CFLAGS += -fstack-protector-all
 
 # Common linker flags
 LDFLAGS := -m elf_i386
@@ -50,6 +52,7 @@ GCC_LIB := $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
 # Make sure that 'all' is the first target
 all:
 
+BOOT_CFLAGS := $(CFLAGS)
 KERN_CFLAGS := $(CFLAGS) -DTOYNIX_KERNEL -gstabs
 USER_CFLAGS := $(CFLAGS) -DTOYNIX_USER -gstabs
 
