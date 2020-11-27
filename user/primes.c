@@ -1,6 +1,6 @@
 #include <lib.h>
 
-unsigned
+static unsigned
 primeproc(void)
 {
 	int i, id, p;

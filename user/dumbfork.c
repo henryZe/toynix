@@ -20,7 +20,7 @@ umain(int argc, char **argv)
 	}
 }
 
-void
+static void
 duppage(envid_t dst_env, void *addr)
 {
 	int r;

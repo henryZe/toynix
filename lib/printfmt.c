@@ -19,41 +19,46 @@
  */
 
 static const char * const error_string[MAXERROR] = {
-	[E_UNSPECIFIED]	= "unspecified error",
-	[E_BAD_ENV]	= "bad environment",
-	[E_INVAL]	= "invalid parameter",
-	[E_NO_MEM]	= "out of memory",
-	[E_NO_FREE_ENV]	= "out of environments",
-	[E_FAULT]	= "segmentation fault",
-	[E_IPC_NOT_RECV]= "env is not recving",
-	[E_EOF]         = "unexpected end of file",
-	[E_NO_DISK]	= "no free space on disk",
-	[E_MAX_OPEN]	= "too many files are open",
-	[E_NOT_FOUND]	= "file or block not found",
-	[E_BAD_PATH]	= "invalid path",
-	[E_FILE_EXISTS] = "file already exists",
-	[E_NOT_EXEC]	= "file is not a valid executable",
-	[E_NOT_SUPP]	= "operation not supported",
-	[E_BUSY]	= "device busy",
-	[E_BAD_REQ]	= "bad HTTP request",
+	[E_UNSPECIFIED]  = "unspecified error",
+	[E_BAD_ENV]      = "bad environment",
+	[E_INVAL]        = "invalid parameter",
+	[E_NO_MEM]       = "out of memory",
+	[E_NO_FREE_ENV]  = "out of environments",
+	[E_FAULT]        = "segmentation fault",
+	[E_IPC_NOT_RECV] = "env is not recving",
+	[E_EOF]          = "unexpected end of file",
+	[E_NO_DISK]      = "no free space on disk",
+	[E_MAX_OPEN]     = "too many files are open",
+	[E_NOT_FOUND]    = "file or block not found",
+	[E_BAD_PATH]     = "invalid path",
+	[E_FILE_EXISTS]  = "file already exists",
+	[E_NOT_EXEC]     = "file is not a valid executable",
+	[E_NOT_SUPP]     = "operation not supported",
+	[E_BUSY]         = "device busy",
+	[E_BAD_REQ]      = "bad HTTP request",
 };
 
 /*
  * Print a number (base <= 16) in reverse order,
  * using specified putch function and associated pointer putdat.
+ * Return width of print number.
  */
-static void
+static int
 printnum(void (*putch)(int, void*), void *putdat,
 		unsigned long long num, unsigned base,
 		int width, int padc, int upper)
 {
+	int w = 0;
+
 	// first recursively print all preceding (more significant) digits
 	if (num >= base) {
-		printnum(putch, putdat, num / base, base, width - 1, padc, upper);
+		w = printnum(putch, putdat, num / base, base, width - 1, padc, upper);
 	} else {
 		// print any needed pad characters before first digit
-		while (--width > 0)
+		while (--width > 0 && padc != '-') {
 			putch(padc, putdat);
+			w++;
+		}
 	}
 
 	// then print this (the least significant) digit
@@ -61,6 +66,8 @@ printnum(void (*putch)(int, void*), void *putdat,
 		putch("0123456789abcdef"[num % base], putdat);
 	else
 		putch("0123456789ABCDEF"[num % base], putdat);
+
+	return w + 1;
 }
 
 static inline int pow10(int t)
@@ -76,15 +83,15 @@ static void
 printdouble(void (*putch)(int, void*), void *putdat, double num,
 			int width, int precision, int padc)
 {
-	int inte;
-	int deci;
+	long long inte;
+	long long deci;
 
 	// default precision
 	if (precision < 0)
 		precision = 6;
 
-	inte = (int)num;
-	deci = (int)(pow10(precision + 1) * (num - inte));
+	inte = (long long)num;
+	deci = (long long)(pow10(precision + 1) * (num - inte));
 
 	if (deci % 10 >= 5)
 		deci = deci / 10 + 1;
@@ -129,9 +136,6 @@ getdouble(va_list *ap)
 	return va_arg(*ap, double);
 }
 
-// Main function to format and print a string.
-void printfmt(void (*putch)(int, void*), void *putdat, const char *fmt, ...);
-
 void
 vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 {
@@ -139,7 +143,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 	register int ch, err;
 	unsigned long long num;
 	double float_num;
-	int base, lflag, width, precision, altflag, upper;
+	int base, lflag, width, precision, altflag, num_width, upper;
 	char padc;
 
 	while (1) {
@@ -280,12 +284,18 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 			num = getuint(&ap, lflag);
 			base = 16;
 		number:
-			printnum(putch, putdat, num, base, width, padc, upper);
+			num_width = printnum(putch, putdat, num, base, width, padc, upper);
+			for (; width - num_width > 0; width--)
+				putch(' ', putdat);
 			break;
 
 		// float
 		case 'f':
 			float_num = getdouble(&ap);
+			if (float_num < 0) {
+				putch('-', putdat);
+				float_num = -float_num;
+			}
 			printdouble(putch, putdat, float_num, width, precision, padc);
 			break;
 
@@ -304,6 +314,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 	}
 }
 
+// Main function to format and print a string.
 void
 printfmt(void (*putch)(int, void*), void *putdat, const char *fmt, ...)
 {

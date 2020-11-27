@@ -1,7 +1,7 @@
 #include <lib.h>
 #include <x86.h>
 
-void
+static void
 wrong(int rfd, int kfd, int off)
 {
 	char buf[100];

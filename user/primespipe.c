@@ -10,7 +10,7 @@
 
 #include <lib.h>
 
-unsigned int
+static unsigned int
 primeproc(int fd)
 {
 	int i, id, p, pfd[2], wfd, ret;

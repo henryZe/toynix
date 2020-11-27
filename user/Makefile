@@ -48,9 +48,10 @@ USER_TESTFILES := \
 		$(USRDIR)/echosrv.c \
 		$(USRDIR)/httpd.c \
 		$(USRDIR)/fairness.c \
+		# $(USRDIR)/testprint.c \
 
 USER_OBJFILES := $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_SRCFILES))
-#USER_OBJFILES += $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_TESTFILES))
+# USER_OBJFILES += $(patsubst $(USRDIR)/%.c, $(OBJDIR)/$(USRDIR)/%.o, $(USER_TESTFILES))
 
 $(OBJDIR)/$(USRDIR)/%.o: $(USRDIR)/%.c
 	@echo + cc[USER] $<

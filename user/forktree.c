@@ -4,7 +4,7 @@
 
 void forktree(const char *cur);
 
-void
+static void
 forkchild(const char *cur, char branch)
 {
 	char nxt[DEPTH + 1];

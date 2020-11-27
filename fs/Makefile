@@ -21,6 +21,7 @@ USERAPPS := \
 		$(OBJDIR)/$(USRDIR)/pingpong \
 		$(OBJDIR)/$(USRDIR)/testuserstack \
 		$(OBJDIR)/$(USRDIR)/breakpoint \
+		$(OBJDIR)/$(USRDIR)/testprint \
 		$(OBJDIR)/$(USRDIR)/signal_test \
 
 FSIMGTXTFILES := \
@@ -47,7 +48,7 @@ BUSYBOX := \
 		$(OBJDIR)/$(USRDIR)/mkdir \
 		$(OBJDIR)/$(USRDIR)/mv \
 
-FSIMGFILES := $(BUSYBOX) $(USERAPPS) #$(FSIMGTXTFILES)
+FSIMGFILES := $(BUSYBOX) #$(USERAPPS) #$(FSIMGTXTFILES)
 
 # Compile FS object files
 $(OBJDIR)/$(FSDIR)/%.o: $(FSDIR)/%.c $(OBJDIR)/.vars.USER_CFLAGS
