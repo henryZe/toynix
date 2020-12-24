@@ -14,4 +14,4 @@ $(OBJDIR)/$(BOOTDIR)/boot: $(BOOT_OBJS)
 	$(LD) $(LDFLAGS) -N -e start -Ttext 0x7C00 -o $@.out $^
 	$(OBJDUMP) -S $@.out >$@.asm
 	$(OBJCOPY) -S -O binary -j .text $@.out $@
-	perl $(BOOTDIR)/sign.pl $(OBJDIR)/$(BOOTDIR)/boot
+	python $(BOOTDIR)/sign.py $(OBJDIR)/$(BOOTDIR)/boot

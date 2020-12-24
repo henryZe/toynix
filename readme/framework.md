@@ -81,14 +81,12 @@ ld -e start -Ttext 0x7C00
 ~~~
 
 file: boot/boot.S function: start
-
-1. switch to 32-bit protected mode
-2. jump into bootmain
+  1. switch to 32-bit protected mode
+  2. jump into bootmain
 
 file: boot/bootmain.c function: bootmain
-
-1. load elf file, include elf header & program headers
-2. jump into kernel entry
+  1. load elf file, include elf header & program headers
+  2. jump into kernel entry
 
 ### 1.3 Kernel
 
