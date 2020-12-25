@@ -1,3 +1,11 @@
+#
+# boot/Makefile
+#
+# Copyright (C) 2018 Henry.Zeng <henryz_e@163.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the MIT License.
+
 BOOT_OBJS := $(OBJDIR)/$(BOOTDIR)/boot.o $(OBJDIR)/$(BOOTDIR)/bootmain.o
 
 $(OBJDIR)/$(BOOTDIR)/%.o: $(BOOTDIR)/%.S

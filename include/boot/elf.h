@@ -1,3 +1,11 @@
+/*
+ *  include/boot/elf.h
+ *
+ *  Copyright (C) 2018 Henry.Zeng <henryz_e@163.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the MIT License.
+ */
 // Format of an ELF executable file
 
 #define ELF_MAGIC 0x464C457FU  // "\x7FELF" in little endian

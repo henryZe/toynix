@@ -33,14 +33,15 @@ init(void)
 	/* multiprocessor initialization functions */
 	/* config lapicaddr */
 	mp_init();
-	/* map lapic */
+	/* map local APIC */
 	lapic_init();
 
-	/* multitasking initialization functions */
+	/* initialize interrupt controller */
 	pic_init();
 
-	/* hardware initializations */
+	/* tick initialize */
 	time_init();
+	/* pci bus initialize */
 	pci_init();
 
 	// Acquire the big kernel lock before waking up APs

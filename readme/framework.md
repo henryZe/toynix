@@ -5,63 +5,63 @@
 ## Catalogue
 
 - [1 Boot](#1-Boot)
-  - [1.1 x86 Boot ROM](#11-x86-Boot-ROM)
-  - [1.2 Bootloader](#12-Bootloader)
-  - [1.3 Kernel](#13-Kernel)
+    - [1.1 x86 Boot ROM](#11-x86-Boot-ROM)
+    - [1.2 Bootloader](#12-Bootloader)
+    - [1.3 Kernel](#13-Kernel)
 - [2 Monitor](#2-Monitor)
-  - [2.1 Trace of Stack](#21-Trace-of-Stack)
+    - [2.1 Trace of Stack](#21-Trace-of-Stack)
 - [3 Memory Management](#3-Memory-Management)
-  - [3.1 Initialize](#31-Initialize)
-  - [3.2 Page Management](#32-Page-Management)
-  - [3.3 User Memory](#33-User-Memory)
-  - [3.4 IO Ports](#34-IO-Ports)
-  - [3.5 Malloc](#35-Malloc)
-  - [3.6 VMA](#36-Vma)
+    - [3.1 Initialize](#31-Initialize)
+    - [3.2 Page Management](#32-Page-Management)
+    - [3.3 User Memory](#33-User-Memory)
+    - [3.4 IO Ports](#34-IO-Ports)
+    - [3.5 Malloc](#35-Malloc)
+    - [3.6 VMA](#36-Vma)
 - [4 Environment](#4-Environment)
-  - [4.1 Initialize](#41-Initialize)
-  - [4.2 Create New Environment](#42-Create-New-Environment)
-  - [4.3 Schedule](#43-Schedule)
-  - [4.4 User-mode Startup](#44-User-mode-Startup)
-  - [4.5 Fork](#45-Fork)
-  - [4.6 Spawn](#46-Spawn)
+    - [4.1 Initialize](#41-Initialize)
+    - [4.2 Create New Environment](#42-Create-New-Environment)
+    - [4.3 Schedule](#43-Schedule)
+    - [4.4 User-mode Startup](#44-User-mode-Startup)
+    - [4.5 Fork](#45-Fork)
+    - [4.6 Spawn](#46-Spawn)
 - [5 Trap](#5-Trap)
-  - [5.1 Initialize](#51-Initialize)
-  - [5.2 Flow](#52-Flow)
-  - [5.3 Page Fault](#53-Page-Fault)
-  - [5.4 System Call](#54-System-Call)
+    - [5.1 Initialize](#51-Initialize)
+    - [5.2 Flow](#52-Flow)
+    - [5.3 Page Fault](#53-Page-Fault)
+    - [5.4 System Call](#54-System-Call)
 - [6 Time Tick](#6-Time-Tick)
 - [7 Multiple Processor](#7-Multiple-Processor)
-  - [7.1 Initialize LAPIC](#71-Initialize-LAPIC)
-  - [7.2 Startup APs](#72-Startup-APs)
-  - [7.3 AP Boot-up](#73-AP-Boot-up)
+    - [7.1 Initialize LAPIC](#71-Initialize-LAPIC)
+    - [7.2 Startup APs](#72-Startup-APs)
+    - [7.3 AP Boot-up](#73-AP-Boot-up)
 - [8 Thread](#8-Thread)
-  - [8.1 Thread Period](#81-Thread-Period)
-  - [8.2 Thread Yield](#82-Thread-Yield)
-  - [8.3 Thread Wait & Wakeup](#83-Thread-Wait--Wakeup)
+    - [8.1 Thread Period](#81-Thread-Period)
+    - [8.2 Thread Yield](#82-Thread-Yield)
+    - [8.3 Thread Wait & Wakeup](#83-Thread-Wait--Wakeup)
 - [9 Concurrency](#9-Concurrency)
-  - [9.1 Spin-lock](#91-Spin-lock)
-  - [9.2 Inter-Process Communication](#92-Inter-Process-Communication)
-  - [9.3 Inter-Thread Communication](#93-Inter-Thread-Communication)
-    - [9.3.1 Semaphore](#931-Semaphore)
-    - [9.3.2 Mail Box](#932-Mail-Box)
+    - [9.1 Spin-lock](#91-Spin-lock)
+    - [9.2 Inter-Process Communication](#92-Inter-Process-Communication)
+    - [9.3 Inter-Thread Communication](#93-Inter-Thread-Communication)
+        - [9.3.1 Semaphore](#931-Semaphore)
+        - [9.3.2 Mail Box](#932-Mail-Box)
 - [10 File System](#10-File-System)
-  - [10.1 Initialize](#101-Initialize)
-  - [10.2 Block Cache](#102-Block-Cache)
-  - [10.3 Block & Bitmap](#103-Block--Bitmap)
-  - [10.4 File & Block](#104-File--Block)
-  - [10.5 Regular File Interface](#105-Regular-File-Interface)
-  - [10.6 Pipe](#106-Pipe)
-  - [10.7 Console](#107-Console)
+    - [10.1 Initialize](#101-Initialize)
+    - [10.2 Block Cache](#102-Block-Cache)
+    - [10.3 Block & Bitmap](#103-Block--Bitmap)
+    - [10.4 File & Block](#104-File--Block)
+    - [10.5 Regular File Interface](#105-Regular-File-Interface)
+    - [10.6 Pipe](#106-Pipe)
+    - [10.7 Console](#107-Console)
 - [11 Shell](#11-Shell)
-  - [11.1 Initialize](#111-Initialize)
-  - [11.2 Run Command Line](#112-Run-Command-Line)
+    - [11.1 Initialize](#111-Initialize)
+    - [11.2 Run Command Line](#112-Run-Command-Line)
 - [12 Network](#12-Network)
-  - [12.1 PCI Bus Initialize](#121-PCI-Bus-Initialize)
-  - [12.2 E1000 Interface](#122-E1000-Interface)
-  - [12.3 User Interface](#123-User-Interface)
-  - [12.4 Network Output/Input Env](#124-Network-OutputInput-Env)
-  - [12.5 Core Net-Server Env](#125-Core-Net-Server-Env)
-  - [12.6 HTTPD server](#126-HTTPD-server)
+    - [12.1 PCI Bus Initialize](#121-PCI-Bus-Initialize)
+    - [12.2 E1000 Interface](#122-E1000-Interface)
+    - [12.3 User Interface](#123-User-Interface)
+    - [12.4 Network Output/Input Env](#124-Network-OutputInput-Env)
+    - [12.5 Core Net-Server Env](#125-Core-Net-Server-Env)
+    - [12.6 HTTPD server](#126-HTTPD-server)
 
 ## 1 Boot
 
@@ -81,12 +81,12 @@ ld -e start -Ttext 0x7C00
 ~~~
 
 file: boot/boot.S function: start
-  1. switch to 32-bit protected mode
-  2. jump into bootmain
+    1. switch to 32-bit protected mode
+    2. jump into bootmain
 
 file: boot/bootmain.c function: bootmain
-  1. load elf file, include elf header & program headers
-  2. jump into kernel entry
+    1. load elf file, include elf header & program headers
+    2. jump into kernel entry
 
 ### 1.3 Kernel
 
@@ -98,10 +98,12 @@ file: kernel/kernel.ld
 ~~~ ld
 ENTRY(_start)
 
+SECTIONS {
     . = 0xF0100000;
     .text : AT(0x100000) {
         ...
     }
+}
 ~~~
 
 file: kernel/entry.S function: _start
@@ -113,7 +115,7 @@ file: kernel/entry.S function: _start
 file: kernel/init.c function: init
 
 1. initialize bss segment
-2. initialize console devices including CGA, keyboard and serial port (cons_init)
+2. initialize console devices, including CGA, keyboard and serial port
 3. initialize memory ([mem_init](#3-Memory-Management))
 4. initialize task ([env_init](#4-Environment))
 5. initialize trap ([trap_init](#5-Trap))
@@ -339,7 +341,9 @@ file: user/user.ld
 ~~~ ld
 ENTRY(_start)
 
+SECTIONS {
     . = 0x800020;
+}
 ~~~
 
 file: lib/entry.S
@@ -512,21 +516,21 @@ function: _pgfault_upcall
 2. simulate 'iret' and return to trap point
 
 ~~~
-already in exception stack case:
-+-----------------------+
-| Exception Stack n     |
-+-----------------------+ <--- esp
-| trap-time eip         |
-+-----------------------+
-| Exception Stack (n+1) |
-+-----------------------+
+    already in exception stack case:
+    +-----------------------+
+    | Exception Stack n     |
+    +-----------------------+ <--- esp
+    | trap-time eip         |
+    +-----------------------+
+    | Exception Stack (n+1) |
+    +-----------------------+
 
-first time trap into exception stack case:
-+-------------------+            +-------------------+
-| Regular Stack     |            | Exception Stack 1 |
-+-------------------+ <--- esp   +-------------------+
-| trap-time eip     |
-+-------------------+
+    first time trap into exception stack case:
+    +-------------------+            +-------------------+
+    | Regular Stack     |            | Exception Stack 1 |
+    +-------------------+ <--- esp   +-------------------+
+    | trap-time eip     |
+    +-------------------+
 ~~~
 
 file: lib/fork.c
@@ -924,34 +928,35 @@ function: file_block_walk
 ### 10.5 Regular File Interface
 
 ~~~
-      Regular env           FS env
-   +---------------+   +---------------+
-   |      read     |   |   file_read   |
-   |   (lib/fd.c)  |   |   (fs/fs.c)   |
-...|.......|.......|...|.......^.......|.........................
-   |       v       |   |       |       |      RPC mechanism
-   |  devfile_read |   |  serve_read   | (Remote Procedure Call)
-   |  (lib/file.c) |   |  (fs/serv.c)  |
-   |       |       |   |       ^       |
-   |       v       |   |       |       |
-   |     fsipc     |   |     serve     | User Space
-   |  (lib/file.c) |   |  (fs/serv.c)  |
-   |       |       |   |       ^       |
-   |       v       |   |       |       |
-   |   ipc_send    |   |   ipc_recv    |
-   |       |       |   |       ^       |
-   +-------|-------+   +-------|-------+
-           |    Kernel Space   |
-           +-------------------+
+        Regular env           FS env
+    +---------------+   +---------------+
+    |      read     |   |   file_read   |
+    |   (lib/fd.c)  |   |   (fs/fs.c)   |
+....|.......|.......|...|.......^.......|.........................
+    |       v       |   |       |       |      RPC mechanism
+    |  devfile_read |   |  serve_read   | (Remote Procedure Call)
+    |  (lib/file.c) |   |  (fs/serv.c)  |
+    |       |       |   |       ^       |
+    |       v       |   |       |       |
+    |     fsipc     |   |     serve     | User Space
+    |  (lib/file.c) |   |  (fs/serv.c)  |
+    |       |       |   |       ^       |
+    |       v       |   |       |       |
+    |   ipc_send    |   |   ipc_recv    |
+    |       |       |   |       ^       |
+    +-------|-------+   +-------|-------+
+            |    Kernel Space   |
+            +-------------------+
+~~~
 
-
-               +--------------------+
-               |  struct OpenFile   |
-               | (max 1024 at once) |
-               +--------------------+
-                          |
-                          |
-        +-----------------+-----------------+
+~~~
+            +----------------------+
+            |   struct OpenFile    |
+            |  (max 1024 at once)  |
+            +----------------------+
+                        |
+                        |
+        +---------------+-------------------+
         |                                   |
         |                                   |
         V                                   V

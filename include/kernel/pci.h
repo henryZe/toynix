@@ -4,7 +4,12 @@
 #include <types.h>
 
 // PCI subsystem interface
-enum { pci_res_bus, pci_res_mem, pci_res_io, pci_res_max };
+enum {
+    pci_res_bus,
+    pci_res_mem,
+    pci_res_io,
+    pci_res_max
+};
 
 struct pci_bus;
 

@@ -20,8 +20,6 @@ CFLAGS := -Wmissing-prototypes
 
 # Native commands
 NATIVE_CFLAGS := $(CFLAGS) $(DEFS) $(LABDEFS) -I. -MD
-TAR := gtar
-PERL := perl
 
 # Compiler flags
 # -fno-builtin is required to avoid refs to undefined functions in the kernel.
