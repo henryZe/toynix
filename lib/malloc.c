@@ -69,6 +69,9 @@ extend_heap(struct m_block *last, size_t s)
 	b->free = 0;
 	if (last)
 		last->next = b;
+	else
+		/* first time, initialize base */
+		base = b;
 
 	return b;
 }
@@ -76,32 +79,25 @@ extend_heap(struct m_block *last, size_t s)
 void *
 malloc(size_t n)
 {
-	struct m_block *b, *last;
+	struct m_block *last = NULL;
+	struct m_block *b;
 	size_t s = align4(n);
 
 	if (n >= MAXMALLOC)
 		return NULL;
 
-	if (base) {
-		/* First find a block */
-		b = find_block(&last, s);
-		if (b) {
-			/* can we split */
-			if ((b->size - s) >= (BLOCK_SIZE + 4))
-				split_block(b, s);
-			b->free = 0;
-		} else {
-			/* No fitting block, extend the heap */
-			b = extend_heap(last, s);
-			if (!b)
-				return NULL;
-		}
+	/* First find a block */
+	b = find_block(&last, s);
+	if (b) {
+		/* can we split */
+		if ((b->size - s) >= (BLOCK_SIZE + 4))
+			split_block(b, s);
+		b->free = 0;
 	} else {
-		/* first time */
-		b = extend_heap(NULL, s);
+		/* No fitting block or first time, extend the heap */
+		b = extend_heap(last, s);
 		if (!b)
 			return NULL;
-		base = b;		
 	}
 
 	return b->data;	

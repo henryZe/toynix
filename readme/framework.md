@@ -230,14 +230,29 @@ file: lib/malloc.c
 function: malloc
 > adopt first-fit / COW
 
+    1. find suitable block for allocate
+    2. if found: split into smaller block
+    3. if can't: extend the heap
+
 function: free
 > free specific area
+
+    1. verify whether the address is validate
+    2. get the memory block
+    3. whether allow to fusion previous & next one
+    4. if there is no one any more following, shrink heap size
 
 function: calloc
 > allocate area and the memory is set to zero
 
 function: realloc
-> changes the size of the memory block pointed to by ptr to size bytes
+> changes the size of the memory block pointed by ptr as size bytes
+
+    1. if ptr is null, allocate size
+    2. if original size greater than size, split the block
+    3. if original size less than size:
+        a. try to fusion next block
+        b. or allocate new block & copy & free original one
 
 ### 3.6 VMA
 
@@ -260,7 +275,8 @@ function: env_init
 > Initialize all of the Env structures in the envs array and add them to the env_free_list
 
 function: env_init_percpu
-> Configure the segmentation hardware with separate segments for privilege level 0 (kernel) and privilege level 3 (user)
+> Configure the global segmentation hardware with separate segments for privilege level 0 (kernel) and privilege level 3 (user).
+> Clear the local segmentation hardware.
 
 ### 4.2 Create New Environment
 
