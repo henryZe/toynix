@@ -114,8 +114,8 @@ file: kernel/entry.S function: _start
 
 file: kernel/init.c function: init
 
-1. initialize bss segment
-2. initialize console devices, including CGA, keyboard and serial port
+1. initialize bss segment (optional)
+2. initialize console devices, including CGA, keyboard and serial port (cons_init)
 3. initialize memory ([mem_init](#3-Memory-Management))
 4. initialize task ([env_init](#4-Environment))
 5. initialize trap ([trap_init](#5-Trap))
@@ -169,8 +169,8 @@ function: mon_backtrace
 
 file: kernel/pmap.c function: mem_init
 
-1. detect available physical memory size
-2. allocate kern_pgdir by simplified allocator(boot_alloc)
+1. detect available physical memory size (i386_detect_memory)
+2. allocate kern_pgdir by simplified allocator (boot_alloc)
 3. setup user page tables (UVPT, read only)
 4. allocate page array
 5. allocate env array
@@ -196,14 +196,18 @@ function: page_lookup
 > Return the page mapped at specific virtual address
 
 function: page_insert
-> Map the physical page at specific virtual address
+> Map the physical page at specific virtual address, allow to handle below cases:
+
+    1. map new page
+    2. remap same page for permission modification
+    3. remap va, and remove previous page
 
 function: page_remove
 > Unmap the physical page at specific virtual address
 
-1. look up physical page by va
-2. decrease page ref count
-3. invalidate TLB entry
+    1. look up physical page by va
+    2. decrease page ref count
+    3. invalidate TLB entry
 
 ### 3.3 User Memory
 
@@ -241,8 +245,10 @@ file: kernel/vm.c
 > create virtual memory area
 
 function: add_vma
+> append a virtual memory area in env
 
 function: copy_vma
+> copy a virtual memory area from parent env
 
 ## 4 Environment
 

@@ -61,10 +61,14 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 
 (✔️: test pass ❌: test fail ❗: no test yet)
 
-| Items | description | test file/function | Status |
+| Items | Description | Test file/function | Status |
 | ----- | ----------- | ------ | ------ |
-| bootloader |             |             | ✔️ |
-| memory management |             |             | ✔️ |
+| bootloader | success to boot kernel | kernel/init.c, init | ✔️ |
+| monitor | assist to debug when panic | include/assert.h, panic | ✔️ |
+| memory management | Check that the pages on the page_free_list are reasonable. | kernel/pmap.c, check_page_free_list | ✔️ |
+|  | Check the physical page allocator. | kernel/pmap.c, check_page_alloc | ✔️ |
+|  | Check `page_insert, page_remove`. | kernel/pmap.c, check_page, check_page_installed_pgdir | ✔️ |
+|  | Checks that the kernel part of virtual address space. | kernel/pmap.c, check_kern_pgdir | ✔️ |
 | trap |             |             | ✔️ |
 | multiple task & core | | | ✔️ |
 | file system | | | ✔️ |
@@ -78,7 +82,7 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 * [ ] Replace static lib with share lib
 * [ ] Implement recycling mechanism for page cache of fs block
   * [x] add `file_close` for releasing page cache
-  * [ ] add list for recoding most recent access file
+  * [ ] add list for recording most recent access file
   * [ ] have ability to decide when to release
 * [ ] Add VMA structure which describes a memory area:
   * [x] including start address and size
