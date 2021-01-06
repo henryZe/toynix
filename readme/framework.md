@@ -283,17 +283,21 @@ function: env_init_percpu
 function: env_setup_vm
 > Initialize the kernel virtual memory layout for environment e
 
+    1. allocate one page as env_pgdir
+    2. copy kern_pgdir as env_pgdir
+    3. map UVPT in env_pgdir
+
 function: region_alloc
 > Allocate len bytes of physical memory for environment env and map it at va
 
 function: load_icode
 > Parse an ELF binary image and load its contents into the user address space
 
-1. switch env_pgdir
-2. load ELF image
-3. set tf_eip
-4. initial stack by mapping one page
-5. switch back to kern_pgdir
+    1. switch env_pgdir
+    2. load ELF image
+    3. set tf_eip
+    4. initial stack by mapping one page
+    5. switch back to kern_pgdir
 
 function: env_alloc
 > Allocates and initializes a new environment
