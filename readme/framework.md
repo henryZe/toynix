@@ -311,7 +311,7 @@ function: env_create
 function: env_run
 > Start a given environment running in user mode
 
-1. set current env as spending
+1. set current env as suspending
 2. set target env as running
 3. switch env_pgdir
 4. unlock kernel before returning to user
@@ -323,7 +323,7 @@ function: env_pop_tf
 function: env_destroy
 > Free specific environment
 
-1. set env status as ENV_DYING
+1. set env status as ENV_DYING when running on other core
 2. in next schedule, call env_free
 3. schedule
 

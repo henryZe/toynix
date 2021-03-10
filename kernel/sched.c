@@ -40,8 +40,7 @@ sched_yield(void)
 	for (j = 0; j < NENV; j++, i = (i + 1) % NENV) {
 		if (envs[i].env_status == ENV_RUNNABLE) {
 			if (min_env)
-				min_env = envs[i].env_runs < min_env->env_runs ?
-						(envs + i) : min_env;
+				min_env = envs[i].env_runs < min_env->env_runs ? (envs + i) : min_env;
 			else
 				min_env = envs + i;
 		}
