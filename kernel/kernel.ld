@@ -8,10 +8,12 @@ ENTRY(_start)
 SECTIONS
 {
 	/* Link the kernel at this address: "." means the current address */
+	/* VMA */
 	. = 0xF0100000;
 
 	/* AT(...) gives the load address of this section, which tells
 	   the boot loader where to load the kernel in physical memory */
+	/* LMA */
 	.text : AT(0x100000) {
 		PROVIDE(stext = .);
 		*(.text .stub .text.* .gnu.linkonce.t.*)
