@@ -183,6 +183,7 @@ static void print_section_name(int fd, struct Elf *elf)
 	struct Secthdr sh;
 	char string[128];
 
+	// section header string table
 	ret = seek(fd, elf->e_shoff + sizeof(struct Secthdr) * elf->e_shstrndx);
 	if (ret < 0)
 		return;
@@ -193,6 +194,7 @@ static void print_section_name(int fd, struct Elf *elf)
 	if (ret < 0)
 		return;
 
+	// section header string base address
 	readn(fd, string, sizeof(string));
 
 	for (i = 0; i < elf->e_shnum; i++) {
@@ -206,7 +208,8 @@ static void print_section_name(int fd, struct Elf *elf)
 		if (!(sh.sh_flags & ELF_SHF_ALLOC))
 			continue;
 
-		printf("sh_name: %s\n", string + sh.sh_name);
+		printf("section name: %s addr: 0x%08x size: 0x%08x\n",
+				string + sh.sh_name, sh.sh_addr, sh.sh_size);
 	}
 }
 
