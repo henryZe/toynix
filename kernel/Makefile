@@ -33,6 +33,7 @@ KERN_SRCFILES := \
 		$(LIBDIR)/printfmt.c \
 		$(LIBDIR)/readline.c \
 		$(LIBDIR)/stack_protector.c \
+		$(LIBDIR)/math.c \
 
 # Binary program images to embed within the kernel.
 KERN_OBJFILES := $(patsubst $(KERNDIR)/%.c, $(OBJDIR)/$(KERNDIR)/%.o, $(KERN_SRCFILES))

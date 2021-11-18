@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <error.h>
+#include <math.h>
 
 /*
  * Space or zero padding and a field width are supported for the numeric
@@ -70,15 +71,6 @@ printnum(void (*putch)(int, void*), void *putdat,
 	return w + 1;
 }
 
-static inline int pow10(int t)
-{
-	int p = 1;
-
-	while (t--)
-		p *= 10;
-	return p;
-}
-
 static void
 printdouble(void (*putch)(int, void*), void *putdat, double num,
 			int width, int precision, int padc)
@@ -91,7 +83,7 @@ printdouble(void (*putch)(int, void*), void *putdat, double num,
 		precision = 6;
 
 	inte = (long long)num;
-	deci = (long long)(pow10(precision + 1) * (num - inte));
+	deci = (long long)(pow(10, precision + 1) * (num - inte));
 
 	if (deci % 10 >= 5)
 		deci = deci / 10 + 1;

@@ -18,5 +18,6 @@ static inline unsigned long next_pow_of_2(unsigned long x)
 }
 
 unsigned long log_of_2(unsigned long number);
+unsigned long pow(unsigned char base, unsigned char index);
 
 #endif

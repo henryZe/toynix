@@ -15,3 +15,12 @@ unsigned long log_of_2(unsigned long number)
 
 	return MultiplyDeBruijnBitPosition2[((number * 0x077CB531UL) >> 27) & 0x1F];
 }
+
+unsigned long pow(unsigned char base, unsigned char index)
+{
+    unsigned long power = 1;
+    for (unsigned char i = 0; i < index; i++) {
+        power = base * power;
+    }
+    return power;
+}

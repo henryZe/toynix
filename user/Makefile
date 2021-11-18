@@ -64,4 +64,4 @@ $(OBJDIR)/$(USRDIR)/%: $(OBJDIR)/$(USRDIR)/%.o $(OBJDIR)/$(LIBDIR)/entry.o $(OBJ
 	$(OBJDUMP) -S $@.debug > $@.asm
 	$(NM) -n $@.debug > $@.sym
 	$(OBJCOPY) $@.debug $@
-	#$(OBJCOPY) -R .stab -R .stabstr --add-gnu-debuglink=$(basename $@.debug) $@.debug $@
+	# $(OBJCOPY) -R .stab -R .stabstr --add-gnu-debuglink=$(basename $@.debug) $@.debug $@
