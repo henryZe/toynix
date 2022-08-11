@@ -12,7 +12,7 @@ def main(argv):
 
     size = os.path.getsize(argv[0])
     if size > 510:
-        print("boot block too large: {} bytes (max 510)".format(size), file = sys.stderr)
+        print("boot block too large: {} bytes (max 510)".format(size))
         return -1
 
     print("boot block is {} bytes (max 510)".format(size))
