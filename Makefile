@@ -16,7 +16,7 @@ OBJDUMP	:= objdump
 NM	:= nm
 
 CFLAGS := -Wall -Werror -Wundef
-CFLAGS := -Wmissing-prototypes
+CFLAGS += -Wmissing-prototypes
 
 # Native commands
 NATIVE_CFLAGS := $(CFLAGS) $(DEFS) $(LABDEFS) -I. -MD
