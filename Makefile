@@ -45,7 +45,8 @@ CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 &
 # Common linker flags
 LDFLAGS := -m elf_i386
 
-GCC_LIB := $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
+GCC_LIB =
+# GCC_LIB := $(shell $(CC) $(CFLAGS) -print-libgcc-file-name)
 
 # Make sure that 'all' is the first target
 all:

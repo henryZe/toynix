@@ -8,6 +8,7 @@
 #include <stdarg.h>
 #include <error.h>
 #include <math.h>
+#include <div64.h>
 
 /*
  * Space or zero padding and a field width are supported for the numeric
@@ -76,19 +77,25 @@ printdouble(void (*putch)(int, void*), void *putdat, double num,
 			int width, int precision, int padc)
 {
 	long long inte;
-	long long deci;
+	long long sdeci;
+	unsigned long long deci;
 
 	// default precision
 	if (precision < 0)
 		precision = 6;
 
 	inte = (long long)num;
-	deci = (long long)(pow(10, precision + 1) * (num - inte));
+	sdeci = (long long)(pow(10, precision + 1) * (num - inte));
+	if (sdeci < 0)
+		sdeci = -sdeci;
 
-	if (deci % 10 >= 5)
-		deci = deci / 10 + 1;
-	else
-		deci = deci / 10;
+	deci = (unsigned long long)sdeci;
+	if (deci % 10 >= 5) {
+		deci /= 10;
+		deci++;
+	} else {
+		deci /= 10;
+	}
 
 	printnum(putch, putdat, inte, 10, width, padc, 0);
 	putch('.', putdat);

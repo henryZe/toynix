@@ -3,7 +3,7 @@
 void
 umain(int argc, char **argv)
 {
-    cprintf("%.07f\n", 123.99999);
+	cprintf("%.07f\n", 123.99999);
 	cprintf("%.07f\n", 123.004567);
 	cprintf("%.05f\n", 123.004567);
 	cprintf("%.01f\n", 123.004567);

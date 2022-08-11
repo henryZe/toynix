@@ -31,6 +31,7 @@ LIB_SRCFILES :=	\
 	$(LIBDIR)/itc.c \
 	$(LIBDIR)/sleep.c \
 	$(LIBDIR)/math.c \
+	$(LIBDIR)/div64.c \
 	$(LIBDIR)/buddy.c \
 	$(LIBDIR)/sbrk.c \
 	$(LIBDIR)/signal.c \

@@ -2,6 +2,8 @@
 
 ## 0 Introduction
 
+**Just type "make qemu-nox" to start it now!**
+
 Toynix is a tiny kernel (which was programmed just for fun) in Unix-like interface. It is composed of simplified fs and network module in micro-kernel spirit. [**[Framework]**](./readme/framework.md)
 
 Here are some critical features you might be concerned about:
@@ -42,7 +44,6 @@ The only one thing done by bootloader is reading the kernel image from disk. Thi
 
 * apt-get install qemu
 * apt-get install gcc
-* apt-get install gcc-multilib
 
 ### 7.2 Built Option
 
