@@ -15,8 +15,8 @@ OBJCOPY	:= objcopy
 OBJDUMP	:= objdump
 NM	:= nm
 
-CFLAGS := -Wall -Werror -Wundef
-CFLAGS += -Wmissing-prototypes
+CFLAGS := -Wall -Werror
+CFLAGS += -Wno-address-of-packed-member
 
 # Native commands
 NATIVE_CFLAGS := $(CFLAGS) $(DEFS) $(LABDEFS) -I. -MD
@@ -107,7 +107,9 @@ QEMUOPTS += -smp $(CPUS)
 QEMUOPTS += -drive file=$(OBJDIR)/$(FSDIR)/fs.img,index=1,media=disk,format=raw
 IMAGES += $(OBJDIR)/$(FSDIR)/fs.img
 QEMUOPTS += -net user -net nic,model=e1000 \
-			# -redir tcp:$(PORT7)::7 -redir tcp:$(PORT80)::80 -redir udp:$(PORT7)::7 \
+			-nic user,hostfwd=tcp::$(PORT7)-:7 \
+			-nic user,hostfwd=tcp::$(PORT80)-:80 \
+			-nic user,hostfwd=udp::$(PORT7)-:7 \
 			# -net dump,file=qemu.pcap \
 
 QEMUOPTS += $(QEMUEXTRA)
