@@ -15,8 +15,8 @@ OBJCOPY	:= objcopy
 OBJDUMP	:= objdump
 NM	:= nm
 
-CFLAGS := -Wall -Werror
-CFLAGS += -Wno-address-of-packed-member
+CFLAGS := -Wall
+CFLAGS += -Werror -Wno-address-of-packed-member
 
 # Native commands
 NATIVE_CFLAGS := $(CFLAGS) $(DEFS) $(LABDEFS) -I. -MD

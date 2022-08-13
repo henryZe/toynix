@@ -153,6 +153,8 @@ file_block_walk(struct File *f, uint32_t filebno, uint32_t **ppdiskbno, bool all
 		return -E_INVAL;
 
 	if (filebno < NDIRECT) {
+		// check f_direct 4-byte aligned
+		static_assert(((uintptr_t)(((struct File *)NULL)->f_direct) & 0x3) == 0);
 		*ppdiskbno = &f->f_direct[filebno];
 		return 0;
 	}

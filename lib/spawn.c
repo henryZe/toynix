@@ -310,6 +310,8 @@ spawn(const char *prog, const char **argv)
 	child_tf = envs[ENVX(child)].env_tf;
 	child_tf.tf_eip = elf->e_entry;
 
+	// check tf_esp 4-byte aligned
+	static_assert(((uintptr_t)&(((struct Trapframe *)NULL)->tf_esp) & 0x3) == 0);
 	ret = init_stack(child, argv, &child_tf.tf_esp);
 	if (ret < 0)
 		return ret;
