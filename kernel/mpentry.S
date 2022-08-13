@@ -28,7 +28,7 @@
 #define RELOC(x) ((x) - KERNBASE)
 #define MPBOOTPHYS(s) ((s) - mpentry_start + MPENTRY_PADDR)
 
-.code16           
+.code16
 .globl mpentry_start
 mpentry_start:
 	cli

@@ -2,7 +2,7 @@
 
 static uint8_t *mbegin = (uint8_t *)0x08000000;
 static uint8_t *mend   = (uint8_t *)0x10000000;
-static uint8_t *heap_break = NULL;
+static uint8_t *heap_break;
 
 void *
 sbrk(intptr_t increment)

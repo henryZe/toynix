@@ -5,7 +5,7 @@ usage(void)
 {
 	int i;
 
-	printf("usage: debug_info");
+	printf("%s: debug_info", __func__);
 	for (i = 0; i < ARRAY_SIZE(debug_option); i++)
 		printf(" %s |", debug_option[i]);
 	printf("\n");
@@ -19,6 +19,14 @@ static void vma_usage(void)
 	exit();
 }
 
+static const char * const env_status[] = {
+	"free",
+	"dying",
+	"waiting",
+	"running",
+	"pending",
+};
+
 void
 umain(int argc, char **argv)
 {
@@ -26,13 +34,6 @@ umain(int argc, char **argv)
 	char buf[256] = {0};
 	uint32_t *tmp = UTEMP;
 	struct vm_area_struct *vma;
-	const char *env_status[] = {
-		"free",
-		"dying",
-		"waiting",
-		"running",
-		"pending",
-	};
 
 	if (argc == 1)
 		usage();
@@ -86,7 +87,8 @@ umain(int argc, char **argv)
 					envs[i].env_cpunum, envs[i].env_runs,
 					envs[i].env_parent_id);
 				if (envs[i].env_parent_id)
-					printf(" %16s", envs[ENVX(envs[i].env_parent_id)].binaryname);
+					printf(" %16s",
+						envs[ENVX(envs[i].env_parent_id)].binaryname);
 				printf("\n");
 			}
 		}
@@ -115,6 +117,4 @@ umain(int argc, char **argv)
 	default:
 		return;
 	}
-
-	return;
 }

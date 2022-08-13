@@ -13,8 +13,6 @@
 
 #define SECTSIZE  512
 
-void bootmain(void);
-
 static void
 waitdisk(void)
 {

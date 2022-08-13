@@ -31,9 +31,8 @@ strnlen(const char *s, size_t size)
 char *
 strcpy(char *dst, const char *src)
 {
-	char *ret;
+	char *ret = dst;
 
-	ret = dst;
 	while ((*dst++ = *src++) != '\0')
 		/* do nothing */;
 	return ret;
@@ -42,13 +41,13 @@ strcpy(char *dst, const char *src)
 char *
 strcat(char *dst, const char *src)
 {
-	int len = strlen(dst);
-	strcpy(dst + len, src);
+	strcpy(dst + strlen(dst), src);
 	return dst;
 }
 
 char *
-strncpy(char *dst, const char *src, size_t size) {
+strncpy(char *dst, const char *src, size_t size)
+{
 	size_t i;
 	char *ret;
 
@@ -228,6 +227,7 @@ void *
 memfind(const void *s, int c, size_t n)
 {
 	const void *ends = (const char *) s + n;
+
 	for (; s < ends; s++)
 		if (*(const unsigned char *) s == (unsigned char) c)
 			break;
@@ -278,6 +278,5 @@ strtol(const char *s, char **endptr, int base)
 
 	if (endptr)
 		*endptr = (char *) s;
-	return (neg ? -val : val);
+	return neg ? -val : val;
 }
-

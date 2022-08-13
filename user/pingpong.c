@@ -11,7 +11,7 @@ umain(int argc, char **argv)
 
 	who = fork();
 	if (who) {
-		// get the ball rolling 
+		// get the ball rolling
 		cprintf("send 0 from %x to %x\n", sys_getenvid(), who);
 		ipc_send(who, 0, NULL, 0);
 	}

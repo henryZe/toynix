@@ -3,7 +3,7 @@
 #include <lib.h>
 
 int bol = 1;
-int line = 0;
+int line;
 
 static void
 num(int fd, const char *s)

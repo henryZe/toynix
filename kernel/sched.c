@@ -108,5 +108,5 @@ sched_halt(void)
 		"jmp 1b\n"
 		: : "a" (thiscpu->cpu_ts.ts_esp0));
 
-	panic("sched_halt failed");
+	panic("%s failed", __func__);
 }

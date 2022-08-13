@@ -13,7 +13,7 @@
 
 #define ENVGENSHIFT	12		// >= LOGNENV
 
-struct Env *envs = NULL;		// All environments
+struct Env *envs;			// All environments
 static struct Env *env_free_list;	// Free environment list, linked by Env->env_link.
 
 // Global descriptor table.
@@ -31,8 +31,7 @@ static struct Env *env_free_list;	// Free environment list, linked by Env->env_l
 // definition of gdt specifies the Descriptor Privilege Level (DPL)
 // of that descriptor: 0 for kernel and 3 for user.
 //
-struct Segdesc gdt[NCPU + 5] =
-{
+struct Segdesc gdt[NCPU + 5] = {
 	// 0x0 - unused (always faults -- for trapping NULL far pointers)
 	SEG_NULL,
 

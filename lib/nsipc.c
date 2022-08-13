@@ -11,7 +11,7 @@ union Nsipc nsipcbuf __attribute__((aligned(PGSIZE)));
 // type: request code, passed as the simple integer IPC value.
 // Returns 0 if successful, < 0 on failure.
 static int
-nsipc(unsigned type)
+nsipc(unsigned int type)
 {
 	static envid_t nsenv;
 
@@ -21,7 +21,8 @@ nsipc(unsigned type)
 	static_assert(sizeof(nsipcbuf) == PGSIZE);
 
 	if (debug)
-		cprintf("[%08x] nsipc %d\n", thisenv->env_id, type);
+		cprintf("[%08x] %s %d\n",
+			thisenv->env_id, __func__, type);
 
 	ipc_send(nsenv, type, &nsipcbuf, PTE_W);
 	return ipc_recv(NULL, NULL, NULL);	/* recv ret_val only */
@@ -67,6 +68,7 @@ nsipc_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
 	ret = nsipc(NSREQ_ACCEPT);
 	if (ret >= 0) {
 		struct Nsret_accept *ret = &nsipcbuf.acceptRet;
+
 		memmove(addr, &ret->ret_addr, ret->ret_addrlen);
 		*addrlen = ret->ret_addrlen;
 	}

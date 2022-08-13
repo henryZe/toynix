@@ -18,9 +18,9 @@ umain(int argc, char **argv)
 		n = read(fd, buf, sizeof(buf) - 1);
 		if (n <= 0)
 			break;
-		sys_cputs(buf, n);	
+		sys_cputs(buf, n);
 	}
-	
+
 	cprintf("icode: close /motd\n");
 	close(fd);
 

@@ -15,16 +15,16 @@ enum {
 };
 
 struct thread_context {
-	thread_id_t		tc_tid;
-	void		*tc_stack_bottom;
-	char 		tc_name[name_size];
-	void		(*tc_entry)(uint32_t);
-	uint32_t		tc_arg;
-	struct toynix_jmp_buf	tc_jb;
-	volatile uint32_t	*tc_wait_addr;
-	volatile char	tc_wakeup;
-	void		(*tc_onhalt[THREAD_NUM_ONHALT])(thread_id_t);
-	int			tc_nonhalt;
+	thread_id_t tc_tid;
+	void *tc_stack_bottom;
+	char tc_name[name_size];
+	void (*tc_entry)(uint32_t tc_arg);
+	uint32_t tc_arg;
+	struct toynix_jmp_buf tc_jb;
+	volatile uint32_t *tc_wait_addr;
+	volatile char tc_wakeup;
+	void (*tc_onhalt[THREAD_NUM_ONHALT])(thread_id_t);
+	int tc_nonhalt;
 	struct thread_context *tc_queue_link;
 };
 
@@ -33,7 +33,7 @@ struct thread_queue {
 	struct thread_context *tq_last;
 };
 
-static inline void 
+static inline void
 threadq_init(struct thread_queue *tq)
 {
 	tq->tq_first = NULL;
@@ -59,10 +59,11 @@ threadq_push(struct thread_queue *tq, struct thread_context *tc)
 static inline struct thread_context *
 threadq_pop(struct thread_queue *tq)
 {
-	if (!tq->tq_first)
+	struct thread_context *tc = tq->tq_first;
+
+	if (!tc)
 		return NULL;
 
-	struct thread_context *tc = tq->tq_first;
 	tq->tq_first = tc->tc_queue_link;
 	tc->tc_queue_link = NULL;
 	return tc;

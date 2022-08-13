@@ -18,9 +18,11 @@ unsigned long log_of_2(unsigned long number)
 
 unsigned long pow(unsigned char base, unsigned char index)
 {
-    unsigned long power = 1;
-    for (unsigned char i = 0; i < index; i++) {
-        power = base * power;
-    }
-    return power;
+	unsigned long power = 1;
+	unsigned char i;
+
+	for (i = 0; i < index; i++)
+		power *= base;
+
+	return power;
 }

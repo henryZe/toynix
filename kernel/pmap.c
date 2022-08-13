@@ -51,7 +51,7 @@ i386_detect_memory(void)
 	else
 		totalmem = basemem;
 
-	totalmem = (totalmem > OS_MAX_MEMORY)? OS_MAX_MEMORY : totalmem;
+	totalmem = (totalmem > OS_MAX_MEMORY) ? OS_MAX_MEMORY : totalmem;
 	npages = totalmem / (PGSIZE / 1024);
 	npages_basemem = basemem / (PGSIZE / 1024);
 
@@ -327,7 +327,7 @@ page_init(void)
 			 */
 			pages[i].pp_ref = 1;
 
-		} else if ((i >= npages_basemem) && \
+		} else if ((i >= npages_basemem) &&
 			(i < npages_basemem + iohole_pgnum + allocated_pgnum)) {
 			/* used for io_hole & boot_alloc */
 			pages[i].pp_ref = 1;
@@ -398,7 +398,7 @@ page_free(struct PageInfo *pp)
 // freeing it if there are no more refs.
 //
 void
-page_decref(struct PageInfo* pp)
+page_decref(struct PageInfo *pp)
 {
 	if (--pp->pp_ref == 0)
 		page_free(pp);
@@ -478,12 +478,11 @@ boot_map_region_by_hugepage(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t 
 	size_t i = 0;
 
 	enable_cr4_pse();
-
 	for (i = 0; i < (size >> PDXSHIFT); i++) {
-        pgdir[PDX(va)] = pa | PTE_P | PTE_PS | perm;
-        va += PTSIZE;
-        pa += PTSIZE;
-    }
+		pgdir[PDX(va)] = pa | PTE_P | PTE_PS | perm;
+		va += PTSIZE;
+		pa += PTSIZE;
+	}
 }
 
 //
@@ -733,8 +732,8 @@ void
 user_mem_assert(struct Env *env, const void *va, size_t len, int perm)
 {
 	if (user_mem_check(env, va, len, perm | PTE_U | PTE_P) < 0) {
-		cprintf("[%08x] user_mem_check assertion failure for "
-			"va %08x\n", env->env_id, user_mem_check_addr);
+		cprintf("[%08x] user_mem_check assertion failure for va %08x\n",
+			env->env_id, user_mem_check_addr);
 		env_destroy(env);	// may not return
 	}
 }
@@ -763,7 +762,7 @@ static void
 check_page_free_list(bool only_low_memory)
 {
 	struct PageInfo *pp;
-	unsigned pdx_limit = only_low_memory ? 1 : NPDENTRIES;
+	unsigned int pdx_limit = only_low_memory ? 1 : NPDENTRIES;
 	int nfree_basemem = 0, nfree_extmem = 0;
 	char *first_free_page;
 
@@ -818,7 +817,7 @@ check_page_free_list(bool only_low_memory)
 	assert(nfree_extmem > 0);
 
 	cprintf("nfree_basemem %dKB, nfree_extmem %dKB\n", nfree_basemem << 2, nfree_extmem << 2);
-	cprintf("check_page_free_list(%d) succeeded!\n", only_low_memory);
+	cprintf("%s(%d) succeeded!\n", __func__, only_low_memory);
 }
 
 //
@@ -896,7 +895,7 @@ check_page_alloc(void)
 		--nfree;
 	assert(nfree == 0);
 
-	cprintf("check_page_alloc() succeeded!\n");
+	cprintf("%s() succeeded!\n", __func__);
 }
 
 //
@@ -960,7 +959,7 @@ check_kern_pgdir(void)
 			break;
 		}
 	}
-	cprintf("check_kern_pgdir() succeeded!\n");
+	cprintf("%s() succeeded!\n", __func__);
 }
 
 // This function returns the physical address of the page containing 'va',
@@ -1123,7 +1122,7 @@ check_page(void)
 	page_free(pp0);
 	pgdir_walk(kern_pgdir, 0x0, 1);
 	ptep = (pte_t *) page2kva(pp0);
-	for(i=0; i<NPTENTRIES; i++)
+	for (i = 0; i < NPTENTRIES; i++)
 		assert((ptep[i] & PTE_P) == 0);
 	kern_pgdir[0] = 0;
 	pp0->pp_ref = 0;
@@ -1159,7 +1158,7 @@ check_page(void)
 	*pgdir_walk(kern_pgdir, (void *) mm1 + PGSIZE, 0) = 0;
 	*pgdir_walk(kern_pgdir, (void *) mm2, 0) = 0;
 
-	cprintf("check_page() succeeded!\n");
+	cprintf("%s() succeeded!\n", __func__);
 }
 
 // check page_insert, page_remove, &c, with an installed kern_pgdir
@@ -1197,5 +1196,5 @@ check_page_installed_pgdir(void)
 	// free the pages we took
 	page_free(pp0);
 
-	cprintf("check_page_installed_pgdir() succeeded!\n");
+	cprintf("%s() succeeded!\n", __func__);
 }

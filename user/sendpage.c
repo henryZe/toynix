@@ -33,6 +33,4 @@ umain(int argc, char **argv)
 	cprintf("%x got message: %s\n", who, TEMP_ADDR);
 	if (strncmp(TEMP_ADDR, str2, strlen(str2)) == 0)
 		cprintf("parent received correct message\n");
-
-	return;
 }

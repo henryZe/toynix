@@ -146,7 +146,8 @@
 #define SEG(type, base, lim)					\
 	.word (((lim) >> 12) & 0xffff), ((base) & 0xffff);	\
 	.byte (((base) >> 16) & 0xff), (0x90 | (type)),		\
-		(0xC0 | (((lim) >> 28) & 0xf)), (((base) >> 24) & 0xff)
+		(0xC0 | (((lim) >> 28) & 0xf)),			\
+		(((base) >> 24) & 0xff)
 
 #else	// not __ASSEMBLER__
 
@@ -175,14 +176,39 @@ struct Segdesc {
 // Segment that is loadable but faults when used
 #define SEG_FAULT	{ 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0 }
 // Normal segment
-#define SEG(type, base, lim, dpl) 					\
-{ ((lim) >> 12) & 0xffff, (base) & 0xffff, ((base) >> 16) & 0xff,	\
-    type, 1, dpl, 1, (unsigned int) (lim) >> 28, 0, 0, 1, 1,		\
-    (unsigned int) (base) >> 24 }
-#define SEG16(type, base, lim, dpl) (struct Segdesc)			\
-{ (lim) & 0xffff, (base) & 0xffff, ((base) >> 16) & 0xff,		\
-    type, 1, dpl, 1, (unsigned int) (lim) >> 16, 0, 0, 1, 0,		\
-    (unsigned int) (base) >> 24 }
+#define SEG(type, base, lim, dpl)			\
+	{						\
+		((lim) >> 12) & 0xffff,			\
+		(base) & 0xffff,			\
+		((base) >> 16) & 0xff,			\
+		type,					\
+		1,					\
+		dpl,					\
+		1,					\
+		(unsigned int) (lim) >> 28,		\
+		0,					\
+		0,					\
+		1,					\
+		1,					\
+		(unsigned int) (base) >> 24,		\
+	}
+
+#define SEG16(type, base, lim, dpl)			\
+	(struct Segdesc) {				\
+		(lim) & 0xffff,				\
+		(base) & 0xffff,			\
+		((base) >> 16) & 0xff,			\
+		type,					\
+		1,					\
+		dpl,					\
+		1,					\
+		(unsigned int) (lim) >> 16,		\
+		0,					\
+		0,					\
+		1,					\
+		0,					\
+		(unsigned int) (base) >> 24,		\
+	}
 
 #endif /* !__ASSEMBLER__ */
 
@@ -299,7 +325,7 @@ struct Gatedesc {
 }
 
 // Set up a call gate descriptor.
-#define SETCALLGATE(gate, sel, off, dpl)           	        \
+#define SETCALLGATE(gate, sel, off, dpl)			\
 {								\
 	(gate).gd_off_15_0 = (uint32_t) (off) & 0xffff;		\
 	(gate).gd_sel = (sel);					\

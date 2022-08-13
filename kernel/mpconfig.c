@@ -222,7 +222,7 @@ mp_init(void)
 		// [MP 3.2.6.1] If the hardware implements PIC mode,
 		// switch to getting interrupts from the LAPIC.
 		cprintf("SMP: Setting IMCR to switch from PIC mode to symmetric I/O mode\n");
-		outb(0x22, 0x70);   		// Select IMCR
-		outb(0x23, inb(0x23) | 1);  // Mask external interrupts.
+		outb(0x22, 0x70);		// Select IMCR
+		outb(0x23, inb(0x23) | 1);	// Mask external interrupts.
 	}
 }

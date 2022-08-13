@@ -53,7 +53,8 @@ pipe(int pfd[2])
 	fd1->fd_omode = O_WRONLY;
 
 	if (debug)
-		cprintf("[%08x] pipe create %08x\n", thisenv->env_id, uvpt[PGNUM(va)]);
+		cprintf("[%08x] %s create %08x\n",
+			thisenv->env_id, __func__, uvpt[PGNUM(va)]);
 
 	pfd[0] = fd2num(fd0);
 	pfd[1] = fd2num(fd1);

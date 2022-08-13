@@ -1,7 +1,5 @@
 #include <lib.h>
 
-void _pgfault_upcall();
-
 void
 umain(int argc, char **argv)
 {

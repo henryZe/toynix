@@ -5,7 +5,7 @@ enum {
 	MAXMALLOC = 1024 * 1024,    /* max size of one allocated chunk */
 };
 
-static void *base = NULL;
+static void *base;
 
 struct m_block {
 	size_t size;
@@ -40,6 +40,7 @@ split_block(struct m_block *b, size_t s)
 		return;
 
 	struct m_block *new = (struct m_block *)(b->data + s);
+
 	new->size = b->size - s - BLOCK_SIZE;
 	new->next = b->next;
 	new->prev = b;
@@ -100,7 +101,7 @@ malloc(size_t n)
 			return NULL;
 	}
 
-	return b->data;	
+	return b->data;
 }
 
 /* Get the block from addr */
@@ -108,6 +109,7 @@ static struct m_block*
 get_block(void *p)
 {
 	uint8_t *temp = p;
+
 	temp -= BLOCK_SIZE;
 	p = temp;
 	return p;
@@ -182,7 +184,7 @@ calloc(size_t nmemb, size_t size)
 
 /* Copy data from block to block */
 static void
-copy_block(struct m_block *src , struct m_block *dst)
+copy_block(struct m_block *src, struct m_block *dst)
 {
 	int *sdata, *ddata;
 	size_t i;

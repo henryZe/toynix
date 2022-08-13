@@ -31,7 +31,7 @@ struct responce_header {
 };
 
 struct responce_header headers[] = {
-	{ 200, 	"HTTP/" HTTP_VERSION " 200 OK\r\n"
+	{ 200, "HTTP/" HTTP_VERSION " 200 OK\r\n"
 		"Server: jhttpd/" VERSION "\r\n"},
 	{ 0, NULL},
 };
@@ -109,13 +109,14 @@ send_error(struct http_request *req, int code)
 	if (e->code == 0)
 		return -1;
 
-	r = snprintf(buf, sizeof(buf), "HTTP/" HTTP_VERSION" %d %s\r\n"
-			       "Server: jhttpd/" VERSION "\r\n"
-			       "Connection: close"
-			       "Content-type: text/html\r\n"
-			       "\r\n"
-			       "<html><body><p>%d - %s</p></body></html>\r\n",
-			       e->code, e->msg, e->code, e->msg);
+	r = snprintf(buf, sizeof(buf),
+			"HTTP/" HTTP_VERSION " %d %s\r\n"
+			"Server: jhttpd/" VERSION "\r\n"
+			"Connection: close"
+			"Content-type: text/html\r\n"
+			"\r\n"
+			"<html><body><p>%d - %s</p></body></html>\r\n",
+			e->code, e->msg, e->code, e->msg);
 
 	if (write(req->sock, buf, r) != r)
 		return -1;
@@ -127,6 +128,7 @@ static int
 send_header(struct http_request *req, int code)
 {
 	struct responce_header *h = headers;
+
 	while (h->code != 0 && h->header != 0) {
 		if (h->code == code)
 			break;
@@ -137,6 +139,7 @@ send_header(struct http_request *req, int code)
 		return -1;
 
 	int len = strlen(h->header);
+
 	if (write(req->sock, h->header, len) != len)
 		die("Failed to send bytes to client");
 
@@ -204,7 +207,7 @@ send_data(struct http_request *req, int fd)
 {
 	char buf[BUFFSIZE];
 	int received, r;
-	
+
 	while (1) {
 		received = read(fd, buf, sizeof(buf));
 		if (received <= 0)

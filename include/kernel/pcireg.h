@@ -60,7 +60,7 @@ typedef uint16_t pci_product_id_t;
 #define	PCI_PRODUCT(id) \
 	    (((id) >> PCI_PRODUCT_SHIFT) & PCI_PRODUCT_MASK)
 
-#define PCI_ID_CODE(vid,pid)					\
+#define PCI_ID_CODE(vid, pid)					\
 	((((vid) & PCI_VENDOR_MASK) << PCI_VENDOR_SHIFT) |	\
 	 (((pid) & PCI_PRODUCT_MASK) << PCI_PRODUCT_SHIFT))	\
 
@@ -73,7 +73,7 @@ typedef uint16_t pci_product_id_t;
 #define	PCI_STATUS_SHIFT			16
 #define	PCI_STATUS_MASK				0xffff
 
-#define PCI_COMMAND_STATUS_CODE(cmd,stat)			\
+#define PCI_COMMAND_STATUS_CODE(cmd, stat)			\
 	((((cmd) & PCI_COMMAND_MASK) >> PCI_COMMAND_SHIFT) |	\
 	 (((stat) & PCI_STATUS_MASK) >> PCI_STATUS_SHIFT))	\
 
@@ -326,12 +326,12 @@ typedef uint8_t pci_revision_t;
 #define	PCI_CACHELINE(bhlcr) \
 	    (((bhlcr) >> PCI_CACHELINE_SHIFT) & PCI_CACHELINE_MASK)
 
-#define PCI_BHLC_CODE(bist,type,multi,latency,cacheline)		\
-	    ((((bist) & PCI_BIST_MASK) << PCI_BIST_SHIFT) |		\
-	     (((type) & PCI_HDRTYPE_MASK) << PCI_HDRTYPE_SHIFT) |	\
-	     (((multi)?0x80:0) << PCI_HDRTYPE_SHIFT) |			\
-	     (((latency) & PCI_LATTIMER_MASK) << PCI_LATTIMER_SHIFT) |	\
-	     (((cacheline) & PCI_CACHELINE_MASK) << PCI_CACHELINE_SHIFT))
+#define PCI_BHLC_CODE(bist, type, multi, latency, cacheline)			\
+		((((bist) & PCI_BIST_MASK) << PCI_BIST_SHIFT) |			\
+		(((type) & PCI_HDRTYPE_MASK) << PCI_HDRTYPE_SHIFT) |		\
+		(((multi)?0x80:0) << PCI_HDRTYPE_SHIFT) |			\
+		(((latency) & PCI_LATTIMER_MASK) << PCI_LATTIMER_SHIFT) |	\
+		(((cacheline) & PCI_CACHELINE_MASK) << PCI_CACHELINE_SHIFT))
 
 /*
  * PCI header type
@@ -432,7 +432,7 @@ typedef uint8_t pci_revision_t;
 #define	PCI_CAP_HOTPLUG		0x0c
 #define	PCI_CAP_AGP8		0x0e
 #define	PCI_CAP_SECURE		0x0f
-#define	PCI_CAP_PCIEXPRESS     	0x10
+#define	PCI_CAP_PCIEXPRESS	0x10
 #define	PCI_CAP_MSIX		0x11
 
 /*
@@ -572,11 +572,11 @@ typedef uint8_t pci_intr_line_t;
 #define	PCI_INTERRUPT_LINE(icr) \
 	    (((icr) >> PCI_INTERRUPT_LINE_SHIFT) & PCI_INTERRUPT_LINE_MASK)
 
-#define PCI_INTERRUPT_CODE(lat, gnt, pin, line)		\
-	  ((((lat)&PCI_INTERRUPT_LATENCY_MASK)<<PCI_INTERRUPT_LATENCY_SHIFT)| \
-	   (((gnt)&PCI_INTERRUPT_GRANT_MASK)  <<PCI_INTERRUPT_GRANT_SHIFT)  | \
-	   (((pin)&PCI_INTERRUPT_PIN_MASK)    <<PCI_INTERRUPT_PIN_SHIFT)    | \
-	   (((line)&PCI_INTERRUPT_LINE_MASK)  <<PCI_INTERRUPT_LINE_SHIFT))
+#define PCI_INTERRUPT_CODE(lat, gnt, pin, line)					\
+	((((lat)&PCI_INTERRUPT_LATENCY_MASK) << PCI_INTERRUPT_LATENCY_SHIFT) |	\
+	(((gnt)&PCI_INTERRUPT_GRANT_MASK)    << PCI_INTERRUPT_GRANT_SHIFT)   |	\
+	(((pin)&PCI_INTERRUPT_PIN_MASK)      << PCI_INTERRUPT_PIN_SHIFT)     |	\
+	(((line)&PCI_INTERRUPT_LINE_MASK)    << PCI_INTERRUPT_LINE_SHIFT))
 
 #define	PCI_INTERRUPT_PIN_NONE			0x00
 #define	PCI_INTERRUPT_PIN_A			0x01

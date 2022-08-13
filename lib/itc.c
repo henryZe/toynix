@@ -61,8 +61,9 @@ sys_sem_t
 sys_sem_new(uint8_t count)
 {
 	struct sys_sem_entry *sema = LIST_FIRST(&sem_free);
+
 	if (!sema) {
-		cprintf("lwip: sys_sem_new: out of semaphores\n");
+		cprintf("lwip: %s: out of semaphores\n", __func__);
 		return SYS_SEM_NULL;
 	}
 
@@ -122,11 +123,12 @@ sys_arch_sem_wait(sys_sem_t sem, uint32_t tm_msec)
 			lwip_core_lock();
 
 			if (gen != sems[sem].gen) {
-				cprintf("sys_arch_sem_wait: sem freed under waiter!\n");
+				cprintf("%s: sem freed under waiter!\n", __func__);
 				return SYS_ARCH_TIMEOUT;
 			}
 
 			uint32_t b = sys_time_msec();
+
 			waited += (b - a);
 		}
 	}
@@ -140,16 +142,18 @@ sys_mbox_new(int size)
 	assert(size < MBOXSLOTS);
 
 	struct sys_mbox_entry *mbe = LIST_FIRST(&mbox_free);
+
 	if (!mbe) {
-		cprintf("lwip: sys_mbox_new: out of mailboxes\n");
+		cprintf("lwip: %s: out of mailboxes\n", __func__);
 		return SYS_MBOX_NULL;
 	}
-	
+
 	LIST_REMOVE(mbe, link);
 	assert(mbe->freed);
 	mbe->freed = 0;
-	
+
 	int i = mbe - &mboxes[0];
+
 	mbe->head = -1;
 	mbe->nextq = 0;
 	mbe->queued_msg = sys_sem_new(0);
@@ -159,7 +163,7 @@ sys_mbox_new(int size)
 		mbe->free_msg == SYS_SEM_NULL) {
 
 		sys_mbox_free(i);
-		cprintf("lwip: sys_mbox_new: can't get semaphore\n");
+		cprintf("lwip: %s: can't get semaphore\n", __func__);
 		return SYS_MBOX_NULL;
 	}
 
@@ -187,6 +191,7 @@ sys_mbox_trypost(sys_mbox_t mbox, void *msg)
 		return ERR_MEM;
 
 	int slot = mboxes[mbox].nextq;
+
 	mboxes[mbox].nextq = (slot + 1) % MBOXSLOTS;
 	mboxes[mbox].msg[slot] = msg;
 
@@ -210,12 +215,14 @@ sys_arch_mbox_fetch(sys_sem_t mbox, void **msg, uint32_t tm_msec)
 	assert(!mboxes[mbox].freed);
 
 	uint32_t waited = sys_arch_sem_wait(mboxes[mbox].queued_msg, tm_msec);
+
 	if (waited == SYS_ARCH_TIMEOUT)
 		return waited;
 
 	int slot = mboxes[mbox].head;
+
 	if (slot == -1)
-		panic("lwip: sys_arch_mbox_fetch: no message");
+		panic("lwip: %s: no message", __func__);
 
 	if (msg)
 		*msg = mboxes[mbox].msg[slot];
@@ -232,7 +239,7 @@ sys_arch_mbox_fetch(sys_sem_t mbox, void **msg, uint32_t tm_msec)
 uint32_t
 sys_arch_mbox_tryfetch(sys_mbox_t mbox, void **msg)
 {
-	return sys_arch_mbox_fetch(mbox, msg, SYS_ARCH_NOWAIT); 
+	return sys_arch_mbox_fetch(mbox, msg, SYS_ARCH_NOWAIT);
 }
 
 struct lwip_thread {
@@ -253,12 +260,13 @@ lwip_thread_entry(uint32_t arg)
 }
 
 sys_thread_t
-sys_thread_new(char *name, void (* thread)(void *arg), void *arg,
+sys_thread_new(char *name, void (*thread)(void *arg), void *arg,
 				int stacksize, int prio)
 {
 	struct lwip_thread *lt = malloc(sizeof(*lt));
+
 	if (!lt)
-		panic("sys_thread_new: cannot allocate thread struct");
+		panic("%s: cannot allocate thread struct", __func__);
 
 	if (stacksize > PGSIZE)
 		panic("large stack %d", stacksize);
@@ -270,15 +278,15 @@ sys_thread_new(char *name, void (* thread)(void *arg), void *arg,
 	int r = thread_create(&tid, name, lwip_thread_entry, (uint32_t)lt);
 
 	if (r < 0)
-		panic("lwip: sys_thread_new: cannot create: %s\n", e2s(r));
+		panic("lwip: %s: cannot create: %e\n", __func__, r);
 
 	return tid;
 }
 
 struct sys_thread {
-    thread_id_t tid;
-    struct sys_timeouts tmo;
-    LIST_ENTRY(sys_thread) link;
+	thread_id_t tid;
+	struct sys_timeouts tmo;
+	LIST_ENTRY(sys_thread) link;
 };
 
 enum { thread_hash_size = 257 };
@@ -300,7 +308,7 @@ timeout_cleanup(thread_id_t tid)
 	}
 
 	if (debug)
-		cprintf("timeout_cleanup: bogus tid %d\n", tid);
+		cprintf("%s: bogus tid %d\n", __func__, tid);
 
 done:
 	lwip_core_unlock();
@@ -319,9 +327,10 @@ sys_arch_timeouts(void)
 
 	t = malloc(sizeof(*t));
 	if (t == NULL)
-		panic("sys_arch_timeouts: cannot malloc");
+		panic("%s: cannot malloc", __func__);
 
 	int r = thread_onhalt(timeout_cleanup);
+
 	if (r < 0)
 		panic("thread_onhalt failed: %s", e2s(r));
 
@@ -336,13 +345,11 @@ out:
 void
 lwip_core_lock(void)
 {
-	return;
 }
 
 void
 lwip_core_unlock(void)
 {
-	return;
 }
 
 int
@@ -354,11 +361,9 @@ sys_spin_lock_init(const char *name)
 void
 sys_spin_lock(int lk)
 {
-	return;
 }
 
 void
 sys_spin_unlock(int lk)
 {
-	return;
 }

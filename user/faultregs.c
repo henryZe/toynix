@@ -30,8 +30,8 @@ struct regs {
 static struct regs before, during, after;
 
 static void
-check_regs(struct regs* a, const char *an, struct regs* b,
-				const char *bn, const char *testname)
+check_regs(struct regs *a, const char *an, struct regs *b,
+		const char *bn, const char *testname)
 {
 	int mismatch = 0;
 

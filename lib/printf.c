@@ -31,7 +31,7 @@ vcprintf(const char *fmt, va_list ap)
 
 	b.idx = 0;
 	b.cnt = 0;
-	vprintfmt((void*)putch, &b, fmt, ap);
+	vprintfmt((void *)putch, &b, fmt, ap);
 	/* print the residue */
 	sys_cputs(b.buf, b.idx);
 

@@ -430,17 +430,18 @@ sys_time_msec(void)
 	return time_msec();
 }
 
+static const char * const cpu_status[] = {
+	"unused",
+	"started",
+	"halted",
+};
+
 static int
 sys_debug_info(int option, char *buf, size_t size)
 {
 	int i, ret = 0;
 	struct PageInfo *p = page_free_list;
 	char temp[64];
-	const char *cpu_status[] = {
-		"unused",
-		"started",
-		"halted",
-	};
 
 	switch (option) {
 	case CPU_INFO:

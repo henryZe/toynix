@@ -101,6 +101,7 @@ static inline uint
 readeflags(void)
 {
 	uint eflags;
+
 	asm volatile("pushfl; popl %0" : "=r" (eflags));
 	return eflags;
 }
@@ -140,6 +141,7 @@ static inline uint
 rcr2(void)
 {
 	uint val;
+
 	asm volatile("movl %%cr2,%0" : "=r" (val));
 	return val;
 }

@@ -74,7 +74,7 @@ umain(int argc, char **argv)
 		close(p[1]);
 		primeproc(p[0]);
 	}
-	
+
 	close(p[0]);
 
 	// feed all the integers through

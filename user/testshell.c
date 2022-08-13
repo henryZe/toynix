@@ -13,11 +13,11 @@ wrong(int rfd, int kfd, int off)
 	cprintf("shell produced incorrect output.\n");
 
 	cprintf("expected:\n===\n");
-	while ((n = read(kfd, buf, sizeof buf-1)) > 0)
+	while ((n = read(kfd, buf, sizeof(buf) - 1)) > 0)
 		sys_cputs(buf, n);
 
 	cprintf("===\ngot:\n===\n");
-	while ((n = read(rfd, buf, sizeof buf-1)) > 0)
+	while ((n = read(rfd, buf, sizeof(buf) - 1)) > 0)
 		sys_cputs(buf, n);
 
 	cprintf("===\n");

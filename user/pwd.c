@@ -3,7 +3,7 @@
 static void
 usage(void)
 {
-	cprintf("usage: pwd\n");
+	cprintf("%s: pwd\n", __func__);
 	exit();
 }
 

@@ -68,32 +68,6 @@ trap_init_percpu(void)
 	lidt(&idt_pd);
 }
 
-void traphandler_0(void);
-void traphandler_1(void);
-void traphandler_2(void);
-void traphandler_3(void);
-void traphandler_4(void);
-void traphandler_5(void);
-void traphandler_6(void);
-void traphandler_7(void);
-void traphandler_8(void);
-void traphandler_10(void);
-void traphandler_11(void);
-void traphandler_12(void);
-void traphandler_13(void);
-void traphandler_14(void);
-void traphandler_16(void);
-void traphandler_17(void);
-void traphandler_18(void);
-void traphandler_19(void);
-void traphandler_48(void);
-void irqhandler_0(void);
-void irqhandler_1(void);
-void irqhandler_4(void);
-void irqhandler_7(void);
-void irqhandler_14(void);
-void irqhandler_19(void);
-
 void
 trap_init(void)
 {
@@ -405,8 +379,6 @@ trap(struct Trapframe *tf)
 	asm volatile("cld" ::: "cc");
 
 	// Halt the CPU if some other CPU has called panic()
-	extern char *panicstr;
-
 	if (panicstr)
 		asm volatile("hlt");
 

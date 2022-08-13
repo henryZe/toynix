@@ -9,11 +9,11 @@
 
 // Mutual exclusion lock.
 struct spinlock {
-	unsigned locked;			// Is the lock held?
+	unsigned int locked;		// Is the lock held?
 
 #ifdef DEBUG_SPINLOCK
 	// For debugging:
-	char *name;					// Name of lock.
+	char *name;			// Name of lock.
 	struct CpuInfo *cpu;		// The CPU holding the lock.
 	uintptr_t pcs[DEBUG_PCS];	// The call stack (an array of program counters) that locked the lock.
 #endif

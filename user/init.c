@@ -33,16 +33,14 @@ umain(int argc, char **argv)
 	want = 0xf989e;
 	x = sum((char *)&data, sizeof(data));
 	if (x != want)
-		cprintf("init: data is not initialized: "
-				"got sum %08x wanted %08x\n",
-				x, want);
+		cprintf("init: data is not initialized: got sum %08x wanted %08x\n",
+			x, want);
 	else
 		cprintf("init: data seems okay\n");
 
 	x = sum(bss, sizeof(bss));
 	if (x)
-		cprintf("bss is not initialized: "
-				"wanted sum 0 got %08x\n", x);
+		cprintf("bss is not initialized: wanted sum 0 got %08x\n", x);
 	else
 		cprintf("init: bss seems okay\n");
 

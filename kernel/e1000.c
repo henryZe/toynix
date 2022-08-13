@@ -91,7 +91,8 @@ pci_e1000_attach(struct pci_func *pcif)
 	*(uint32_t *)rdbah = 0;
 
 	for (i = 0; i < NRXDESCS; i++)
-		rx_desc_table[i].addr = page2pa(page_alloc(0)) + sizeof(int);	/* struct jif_pkt -> jp_len */
+		/* struct jif_pkt -> jp_len */
+		rx_desc_table[i].addr = page2pa(page_alloc(0)) + sizeof(int);
 
 	uintptr_t rdlen = E1000_REG_ADDR(e1000, E1000_RDLEN);
 	*(uint32_t *)rdlen = sizeof(rx_desc_table);

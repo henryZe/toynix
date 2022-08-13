@@ -121,8 +121,7 @@ fd_close(struct Fd *fd, bool must_exist)
 // File functions
 // --------------------------------------------------------------
 
-static struct Dev *devtab[] =
-{
+static struct Dev *devtab[] = {
 	&devfile,
 	&devpipe,
 	&devcons,
@@ -166,8 +165,7 @@ close(int fdnum)
 void
 close_all(void)
 {
-	int i;
-	for (i = 0; i < MAXFD; i++)
+	for (int i = 0; i < MAXFD; i++)
 		close(i);
 }
 
@@ -187,13 +185,14 @@ write(int fdnum, const void *buf, size_t n)
 		return ret;
 
 	if ((fd->fd_omode & O_ACCMODE) == O_RDONLY) {
-		cprintf("[%08x] write %d -- bad mode\n", thisenv->env_id, fdnum);
+		cprintf("[%08x] %s %d -- bad mode\n",
+			thisenv->env_id, __func__, fdnum);
 		return -E_INVAL;
 	}
 
 	if (debug)
-		cprintf("write %d %p %d via dev %s\n",
-			fdnum, buf, n, dev->dev_name);
+		cprintf("%s %d %p %d via dev %s\n",
+			__func__, fdnum, buf, n, dev->dev_name);
 
 	if (!dev->dev_write)
 		return -E_NOT_SUPP;
@@ -221,8 +220,8 @@ read(int fdnum, void *buf, size_t n)
 		return ret;
 
 	if ((fd->fd_omode & O_ACCMODE) == O_WRONLY) {
-		cprintf("[%08x] read %d -- bad mode\n",
-				thisenv->env_id, fdnum);
+		cprintf("[%08x] %s %d -- bad mode\n",
+			thisenv->env_id, __func__, fdnum);
 		return -E_INVAL;
 	}
 

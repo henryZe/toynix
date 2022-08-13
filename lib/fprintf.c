@@ -18,6 +18,7 @@ writebuf(struct printbuf *b)
 {
 	if (b->error > 0) {
 		ssize_t result = write(b->fd, b->buf, b->idx);
+
 		if (result > 0)
 			b->result += result;
 
@@ -53,7 +54,7 @@ vfprintf(int fd, const char *fmt, va_list ap)
 	if (b.idx > 0)
 		writebuf(&b);
 
-	return (b.result ? b.result : b.error);
+	return b.result ? b.result : b.error;
 }
 
 int

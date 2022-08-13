@@ -4,12 +4,12 @@
 #define BUFSIZ 1024		/* Find the buffer overrun bug! */
 #define MAXARGS 16
 
-int debug = 0;
+int debug;
 
 static void
 usage(void)
 {
-	cprintf("usage: sh [-dix] [command-file]\n");
+	cprintf("%s: sh [-dix] [command-file]\n", __func__);
 	exit();
 }
 

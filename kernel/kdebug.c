@@ -92,14 +92,11 @@ stab_binsearch(const struct Stab *stabs, int *region_left, int *region_right,
 		*region_right = *region_left - 1;
 	else {
 		// find rightmost region containing 'addr'
-		for (l = *region_right;
-		     l > *region_left && stabs[l].n_type != type;
-		     l--)
+		for (l = *region_right; l > *region_left && stabs[l].n_type != type; l--)
 			/* do nothing */;
 		*region_left = l;
 	}
 }
-
 
 // debuginfo_eip(addr, info)
 //
@@ -230,7 +227,8 @@ debuginfo_eip(uintptr_t addr, struct Eipdebuginfo *info)
 			i++, lline++) {
 			info->eip_fn_narg++;
 			info->eip_fn_arg[i] = stabstr + stabs[lline].n_strx;
-			info->eip_fn_arglen[i] = strfind(info->eip_fn_arg[i], ':') - info->eip_fn_arg[i];
+			info->eip_fn_arglen[i] =
+				strfind(info->eip_fn_arg[i], ':') - info->eip_fn_arg[i];
 		}
 	}
 

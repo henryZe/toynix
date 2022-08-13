@@ -216,7 +216,7 @@ static void print_section_name(int fd, struct Elf *elf)
 // Spawn a child process from a program image loaded from the file system.
 // prog: the pathname of the program to run.
 // argv: pointer to null-terminated array of pointers to strings,
-// 	 which will be passed to the child as its command-line arguments.
+//	 which will be passed to the child as its command-line arguments.
 // Returns child envid on success, < 0 on failure.
 int
 spawn(const char *prog, const char **argv)
@@ -389,6 +389,7 @@ spawnl(const char *prog, const char *arg0, ...)
 	// Now that we have the size of the args, do a second pass
 	// and store the values in a VLA(very large array), which has the format of argv
 	const char *argv[argc + 2];
+
 	argv[0] = arg0;
 	argv[argc + 1] = NULL;
 

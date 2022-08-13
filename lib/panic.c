@@ -27,7 +27,7 @@ _panic(const char *file, int line, const char *fmt, ...)
 
 /* like panic, but don't */
 void
-_warn(const char *file, int line, const char *fmt,...)
+_warn(const char *file, int line, const char *fmt, ...)
 {
 	va_list ap;
 

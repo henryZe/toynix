@@ -7,7 +7,7 @@
 
 // Flag to do "lspci" at bootup
 static int pci_show_devs = 1;
-static int pci_show_addrs = 0;
+static int pci_show_addrs;
 
 // PCI "configuration mechanism one"
 static uint32_t pci_conf1_addr_ioport = 0x0cf8;
@@ -19,7 +19,7 @@ static int pci_bridge_attach(struct pci_func *pcif);
 // PCI driver table
 struct pci_driver {
 	uint32_t key1, key2;
-	int (*attachfn) (struct pci_func *pcif);
+	int (*attachfn)(struct pci_func *pcif);
 };
 
 // pci_attach_class matches the class and subclass of a PCI device
@@ -66,7 +66,7 @@ pci_conf_write(struct pci_func *f, uint32_t off, uint32_t v)
 	outl(pci_conf1_data_ioport, v);
 }
 
-static const char *pci_class[] = {
+static const char * const pci_class[] = {
 	[0x0] = "Unknown",
 	[0x1] = "Storage controller",
 	[0x2] = "Network controller",
@@ -80,6 +80,7 @@ static void
 pci_print_func(struct pci_func *f)
 {
 	const char *class = pci_class[0];
+
 	if (PCI_CLASS(f->dev_class) < ARRAY_SIZE(pci_class))
 		class = pci_class[PCI_CLASS(f->dev_class)];
 
@@ -99,11 +100,11 @@ pci_attach_match(uint32_t key1, uint32_t key2,
 	for (i = 0; list[i].attachfn; i++) {
 		if (list[i].key1 == key1 && list[i].key2 == key2) {
 			int r = list[i].attachfn(pcif);
+
 			if (r > 0)
 				return r;
 			if (r < 0)
-				warn("pci_attach_match: attaching "
-					"%x.%x (%p): %e\n",
+				warn("pci_attach_match: attaching %x.%x (%p): %e\n",
 					key1, key2, list[i].attachfn, r);
 		}
 	}
@@ -133,12 +134,14 @@ pci_scan_bus(struct pci_bus *bus)
 
 	for (df.dev = 0; df.dev < 32; df.dev++) {
 		uint32_t bhlc = pci_conf_read(&df, PCI_BHLC_REG);
+
 		if (PCI_HDRTYPE_TYPE(bhlc) > 1)		// Unsupported or no device
 			continue;
 
 		totaldev++;
 
 		struct pci_func f = df;
+
 		for (f.func = 0; f.func < (PCI_HDRTYPE_MULTIFN(bhlc) ? 8 : 1); f.func++) {
 			struct pci_func af = f;
 
@@ -147,8 +150,8 @@ pci_scan_bus(struct pci_bus *bus)
 				continue;
 
 			uint32_t intr = pci_conf_read(&af, PCI_INTERRUPT_REG);
-			af.irq_line = PCI_INTERRUPT_LINE(intr);
 
+			af.irq_line = PCI_INTERRUPT_LINE(intr);
 			af.dev_class = pci_conf_read(&af, PCI_CLASS_REG);
 			if (pci_show_devs)
 				pci_print_func(&af);
@@ -172,6 +175,7 @@ pci_bridge_attach(struct pci_func *pcif)
 	}
 
 	struct pci_bus nbus;
+
 	memset(&nbus, 0, sizeof(nbus));
 	nbus.parent_bridge = pcif;
 	nbus.busno = (busreg >> PCI_BRIDGE_BUS_SECONDARY_SHIFT) & 0xff;
@@ -190,8 +194,8 @@ int
 pci_init(void)
 {
 	static struct pci_bus root_bus;
-	memset(&root_bus, 0, sizeof(root_bus));
 
+	memset(&root_bus, 0, sizeof(root_bus));
 	return pci_scan_bus(&root_bus);
 }
 
@@ -200,9 +204,9 @@ void
 pci_func_enable(struct pci_func *f)
 {
 	pci_conf_write(f, PCI_COMMAND_STATUS_REG,
-					PCI_COMMAND_IO_ENABLE |
-					PCI_COMMAND_MEM_ENABLE |
-					PCI_COMMAND_MASTER_ENABLE);
+			PCI_COMMAND_IO_ENABLE |
+			PCI_COMMAND_MEM_ENABLE |
+			PCI_COMMAND_MASTER_ENABLE);
 
 	uint32_t bar_width;
 	uint32_t bar;
@@ -220,6 +224,7 @@ pci_func_enable(struct pci_func *f)
 
 		int regnum = PCI_MAPREG_NUM(bar);
 		uint32_t base, size;
+
 		if (PCI_MAPREG_TYPE(rv) == PCI_MAPREG_TYPE_MEM) {
 			if (PCI_MAPREG_MEM_TYPE(rv) == PCI_MAPREG_MEM_TYPE_64BIT)
 				bar_width = 8;
@@ -242,9 +247,7 @@ pci_func_enable(struct pci_func *f)
 		f->reg_size[regnum] = size;
 
 		if (size && !base)
-			cprintf("PCI device %02x:%02x.%d (%04x:%04x) "
-				"may be misconfigured: "
-				"region %d: base 0x%x, size %d\n",
+			cprintf("PCI device %02x:%02x.%d (%04x:%04x) may be misconfigured: region %d: base 0x%x, size %d\n",
 				f->bus->busno, f->dev, f->func,
 				PCI_VENDOR(f->dev_id), PCI_PRODUCT(f->dev_id),
 				regnum, base, size);

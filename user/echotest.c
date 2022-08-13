@@ -52,12 +52,13 @@ void umain(int argc, char **argv)
 		die("Mismatch in number of sent bytes");
 
 	// Receive the word back from the server
-	cprintf("Received: \n");
+	cprintf("Received:\n");
 	while (received < echolen) {
 		int bytes = 0;
-		if ((bytes = read(sock, buffer, BUFFSIZE-1)) < 1) {
+
+		if ((bytes = read(sock, buffer, BUFFSIZE - 1)) < 1)
 			die("Failed to receive bytes from server");
-		}
+
 		received += bytes;
 		buffer[bytes] = '\0';        // Assure null terminated string
 		cprintf("%s", buffer);

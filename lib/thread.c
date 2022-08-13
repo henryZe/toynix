@@ -174,6 +174,7 @@ thread_create(thread_id_t *tid, const char *name,
 				void (*entry)(uint32_t), uint32_t arg)
 {
 	struct thread_context *tc = malloc(sizeof(struct thread_context));
+
 	if (!tc)
 		return -E_NO_MEM;
 
@@ -189,6 +190,7 @@ thread_create(thread_id_t *tid, const char *name,
 	}
 
 	void *stacktop = tc->tc_stack_bottom + stack_size;
+
 	stacktop -= 4;
 	memset(stacktop, 0, 4);
 

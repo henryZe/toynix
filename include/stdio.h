@@ -13,16 +13,17 @@ int	getchar(void);
 int	iscons(int fd);
 
 // lib/printfmt.c
+void vprintfmt(void (*putch)(int, void *), void *putdat, const char *fmt, va_list ap);
+int vsnprintf(char *str, int size, const char *fmt, va_list ap);
+// __attribute__((format(printf, string-index, first-to-check)))
 void printfmt(void (*putch)(int, void *), void *putdat, const char *fmt, ...)
-                __attribute__((format(printf, 3, 4)));
-void vprintfmt(void (*putch)(int, void *), void *putdat, const char *fmt, va_list);
+		__attribute__((format(printf, 3, 4)));
 int snprintf(char *str, int size, const char *fmt, ...)
-                __attribute__((format(printf, 3, 4)));
-int	vsnprintf(char *str, int size, const char *fmt, va_list);
+		__attribute__((format(printf, 3, 4)));
 
 // lib/printf.c
 int cprintf(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
-int vcprintf(const char *fmt, va_list);
+int vcprintf(const char *fmt, va_list ap);
 
 // lib/fprintf.c
 int printf(const char *fmt, ...) __attribute__((format(printf, 1, 2)));

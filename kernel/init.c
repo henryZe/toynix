@@ -20,9 +20,9 @@ void
 init(void)
 {
 	/*
-	* Initialize the console.
-	* Can't call printf until after we do this!
-	*/
+	 * Initialize the console.
+	 * Can't call printf until after we do this!
+	 */
 	cons_init();
 	cprintf("Enter toynix...\n");
 
@@ -105,7 +105,7 @@ boot_aps(void)
 void
 mp_main(void)
 {
-	// We are in high EIP now, safe to switch to kern_pgdir 
+	// We are in high EIP now, safe to switch to kern_pgdir
 	lcr3(PADDR(kern_pgdir));
 	cprintf("SMP: CPU %d starting\n", cpunum());
 
@@ -115,7 +115,7 @@ mp_main(void)
 	xchg(&thiscpu->cpu_status, CPU_STARTED); // tell boot_aps() we're up
 
 	// Now that we have finished some basic setup, call sched_yield()
-	// to start running processes on this CPU.  But make sure that
+	// to start running processes on this CPU. But make sure that
 	// only one CPU can enter the scheduler at a time!
 	lock_kernel();
 	sched_yield();

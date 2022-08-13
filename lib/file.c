@@ -30,15 +30,16 @@ static int
 fsipc(unsigned int type, void *dstva)
 {
 	static envid_t fsenv;
+
 	if (!fsenv)
 		fsenv = ipc_find_env(ENV_TYPE_FS);
 
-	static_assert(sizeof(fsipcbuf) == PGSIZE);
-
 	if (debug)
-		cprintf("[%08x] fsipc %d %08x\n",
-			thisenv->env_id, type, *(uint32_t *)&fsipcbuf);
+		cprintf("[%08x] %s %d %08x\n",
+			thisenv->env_id, __func__,
+			type, *(uint32_t *)&fsipcbuf);
 
+	static_assert(sizeof(fsipcbuf) == PGSIZE);
 	ipc_send(fsenv, type, &fsipcbuf, PTE_W);
 	return ipc_recv(NULL, dstva, NULL);
 }
@@ -61,8 +62,8 @@ devfile_flush(struct Fd *fd)
 // Read at most 'n' bytes from 'fd' at the current position into 'buf'.
 //
 // Returns:
-// 	The number of bytes successfully read.
-// 	< 0 on error.
+//	The number of bytes successfully read.
+//	< 0 on error.
 static ssize_t
 devfile_read(struct Fd *fd, void *buf, size_t n)
 {
@@ -146,9 +147,9 @@ devfile_trunc(struct Fd *fd, off_t newsize)
 // Open a file (or directory).
 //
 // Returns:
-// 	The file descriptor index on success
-// 	-E_BAD_PATH if the path is too long (>= MAXPATHLEN)
-// 	< 0 for other errors.
+//	The file descriptor index on success
+//	-E_BAD_PATH if the path is too long (>= MAXPATHLEN)
+//	< 0 for other errors.
 int
 open(const char *path, int mode)
 {

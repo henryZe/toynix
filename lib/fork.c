@@ -50,7 +50,7 @@ pgfault(struct UTrapframe *utf)
 // Returns: 0 on success, < 0 on error.
 // It is also OK to panic on error.
 static int
-duppage(envid_t dst_env, unsigned pn)
+duppage(envid_t dst_env, unsigned int pn)
 {
 	int perm = PGOFF(uvpt[pn]);
 	int ret;
@@ -132,31 +132,31 @@ fork(void)
 
 	ret = sys_copy_vma(0, envid);
 	if (ret < 0)
-		panic("fork: %e", ret);
+		panic("%s: %e", __func__, ret);
 
 	/* allocate page for child exception stack */
 	ret = sys_page_alloc(envid, (void *)(UXSTACKTOP - PGSIZE), PTE_W);
 	if (ret < 0)
-		panic("fork: %e", ret);
+		panic("%s: %e", __func__, ret);
 
 	/* set upcall by kernel invoking */
 	ret = sys_env_set_pgfault_upcall(envid, _pgfault_upcall);
 	if (ret < 0)
-		panic("fork: %e", ret);
+		panic("%s: %e", __func__, ret);
 
 	ret = sys_env_name(envid, (const char *)thisenv->binaryname);
 	if (ret < 0)
-		panic("fork: %e", ret);
+		panic("%s: %e", __func__, ret);
 
 	ret = sys_env_set_status(envid, ENV_RUNNABLE);
 	if (ret < 0)
-		panic("fork: %e", ret);
+		panic("%s: %e", __func__, ret);
 
 	return envid;
 }
 
 static int
-share_page(envid_t dst_env, unsigned pn)
+share_page(envid_t dst_env, unsigned int pn)
 {
 	int ret, perm = PGOFF(uvpt[pn]);
 

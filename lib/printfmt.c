@@ -47,7 +47,7 @@ static const char * const error_string[MAXERROR] = {
  */
 static int
 printnum(void (*putch)(int, void*), void *putdat,
-		unsigned long long num, unsigned base,
+		unsigned long long num, unsigned int base,
 		int width, int padc, int upper)
 {
 	int w = 0;
@@ -100,7 +100,6 @@ printdouble(void (*putch)(int, void*), void *putdat, double num,
 	printnum(putch, putdat, inte, 10, width, padc, 0);
 	putch('.', putdat);
 	printnum(putch, putdat, deci, 10, precision, '0', 0);
-	return;
 }
 
 // Get an unsigned int of various possible sizes from a varargs list,
@@ -159,7 +158,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 		lflag = 0;
 		altflag = 0;
 		upper = 0;
-	reswitch:
+reswitch:
 		switch (ch = *(unsigned char *) fmt++) {
 
 		// flag to pad on the right
@@ -203,7 +202,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 			altflag = 1;
 			goto reswitch;
 
-		process_precision:
+process_precision:
 			if (width < 0)
 				width = precision, precision = -1;
 			goto reswitch;
@@ -282,7 +281,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 		case 'x':
 			num = getuint(&ap, lflag);
 			base = 16;
-		number:
+number:
 			num_width = printnum(putch, putdat, num, base, width, padc, upper);
 			for (; width - num_width > 0; width--)
 				putch(' ', putdat);
@@ -341,13 +340,13 @@ sprintputch(int ch, struct sprintbuf *b)
 int
 vsnprintf(char *buf, int n, const char *fmt, va_list ap)
 {
-	struct sprintbuf b = {buf, buf+n-1, 0};
+	struct sprintbuf b = { buf, buf + n - 1, 0 };
 
 	if (buf == NULL || n < 1)
 		return -E_INVAL;
 
 	// print the string to the buffer
-	vprintfmt((void*)sprintputch, &b, fmt, ap);
+	vprintfmt((void *)sprintputch, &b, fmt, ap);
 
 	// null terminate the buffer
 	*b.buf = '\0';

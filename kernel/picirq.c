@@ -47,20 +47,20 @@ pic_init(void)
 	// Set up slave (8259A-2)
 	outb(IO_PIC2, 0x11);			// ICW1
 	outb(IO_PIC2 + 1, IRQ_OFFSET + 8);	// ICW2
-	outb(IO_PIC2 + 1, IRQ_SLAVE); 	// ICW3
+	outb(IO_PIC2 + 1, IRQ_SLAVE);		// ICW3
 	// NB Automatic EOI mode doesn't tend to work on the slave.
 	// Linux source code says it's "to be investigated".
-	outb(IO_PIC2 + 1, 0x01);			// ICW4
+	outb(IO_PIC2 + 1, 0x01);		// ICW4
 
 	// OCW3:  0ef01prs
 	//	 ef:  0x = NOP, 10 = clear specific mask, 11 = set specific mask
 	//	  p:  0 = no polling, 1 = polling mode
 	//	 rs:  0x = NOP, 10 = read IRR, 11 = read ISR
-	outb(IO_PIC1, 0x68);			 /* clear specific mask */
-	outb(IO_PIC1, 0x0a);			 /* read IRR by default */
+	outb(IO_PIC1, 0x68);			/* clear specific mask */
+	outb(IO_PIC1, 0x0a);			/* read IRR by default */
 
-	outb(IO_PIC2, 0x68);			   /* OCW3 */
-	outb(IO_PIC2, 0x0a);			   /* OCW3 */
+	outb(IO_PIC2, 0x68);			/* OCW3 */
+	outb(IO_PIC2, 0x0a);			/* OCW3 */
 
 	if (irq_mask_8259A != 0xFFFF)
 		irq_setmask_8259A(irq_mask_8259A);
@@ -70,6 +70,7 @@ void
 irq_setmask_8259A(uint16_t mask)
 {
 	int i;
+
 	irq_mask_8259A = mask;
 	if (!didinit)
 		return;
