@@ -61,20 +61,6 @@ strncpy(char *dst, const char *src, size_t size)
 	return ret;
 }
 
-size_t
-strlcpy(char *dst, const char *src, size_t size)
-{
-	char *dst_in;
-
-	dst_in = dst;
-	if (size > 0) {
-		while (--size > 0 && *src != '\0')
-			*dst++ = *src++;
-		*dst = '\0';
-	}
-	return dst - dst_in;
-}
-
 int
 strcmp(const char *p, const char *q)
 {
