@@ -2,32 +2,36 @@
 #define INC_STDIO_H
 
 #include <stdarg.h>
+#include <compiler_attributes.h>
 
 #ifndef NULL
-#define NULL	((void *) 0)
+#define NULL	((void *)0)
 #endif /* !NULL */
 
 // lib/console.c
 void cputchar(int c);
-int	getchar(void);
-int	iscons(int fd);
+int getchar(void);
+int iscons(int fd);
 
 // lib/printfmt.c
 void vprintfmt(void (*putch)(int, void *), void *putdat, const char *fmt, va_list ap);
 int vsnprintf(char *str, int size, const char *fmt, va_list ap);
-// __attribute__((format(printf, string-index, first-to-check)))
-void printfmt(void (*putch)(int, void *), void *putdat, const char *fmt, ...)
-		__attribute__((format(printf, 3, 4)));
-int snprintf(char *str, int size, const char *fmt, ...)
-		__attribute__((format(printf, 3, 4)));
+// __printf(string-index, first-to-check)
+__printf(3, 4)
+void printfmt(void (*putch)(int, void *), void *putdat, const char *fmt, ...);
+__printf(3, 4)
+int snprintf(char *str, int size, const char *fmt, ...);
 
 // lib/printf.c
-int cprintf(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+__printf(1, 2)
+int cprintf(const char *fmt, ...);
 int vcprintf(const char *fmt, va_list ap);
 
 // lib/fprintf.c
-int printf(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
-int fprintf(int fd, const char *fmt, ...) __attribute__((format(printf, 2, 3)));
+__printf(1, 2)
+int printf(const char *fmt, ...);
+__printf(2, 3)
+int fprintf(int fd, const char *fmt, ...);
 int vfprintf(int fd, const char *fmt, va_list ap);
 
 // lib/readline.c
