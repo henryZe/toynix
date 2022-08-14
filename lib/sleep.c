@@ -9,7 +9,7 @@ sleep(int sec)
 	if ((int)now < 0 && (int)now > -MAXERROR)
 		panic("sys_time_msec: %e", (int)now);
 	if (now > end)
-		panic("sleep: wrap");
+		panic("%s: wrap", __func__);
 
 	while (sys_time_msec() < end)
 		sys_yield();

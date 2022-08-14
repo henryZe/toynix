@@ -19,7 +19,8 @@ primeproc(int fd)
 top:
 	ret = readn(fd, &p, 4);
 	if (ret != 4)
-		panic("primeproc could not read initial prime: %d, %e", ret, ret >= 0 ? 0 : ret);
+		panic("%s could not read initial prime: %d, %e",
+			__func__, ret, ret >= 0 ? 0 : ret);
 
 	cprintf("%d\n", p);
 
@@ -46,12 +47,14 @@ top:
 	for (;;) {
 		ret = readn(fd, &i, 4);
 		if (ret != 4)
-			panic("primeproc %d readn %d %d %e", p, fd, ret, ret >= 0 ? 0 : ret);
+			panic("%s %d readn %d %d %e",
+				__func__, p, fd, ret, ret >= 0 ? 0 : ret);
 
 		if (i % p) {
 			ret = write(wfd, &i, 4);
 			if (ret != 4)
-				panic("primeproc %d write: %d %e", p, ret, ret >= 0 ? 0 : ret);
+				panic("%s %d write: %d %e",
+					__func__, p, ret, ret >= 0 ? 0 : ret);
 		}
 	}
 }

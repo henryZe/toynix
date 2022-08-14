@@ -3,8 +3,6 @@
 
 #define debug 0
 
-union Nsipc nsipcbuf __attribute__((aligned(PGSIZE)));
-
 // Send an IP request to the network server, and wait for a reply.
 // The request body should be in nsipcbuf, and parts of the response
 // may be written back to nsipcbuf.

@@ -3,7 +3,7 @@
 #define LWIP_PROVIDE_ERRNO
 #include <lwip/arch.h>
 
-const char *sys_errlist[] = {
+const char * const sys_errlist[] = {
 	[EPERM] = "EPERM",			/* Operation not permitted */
 	[ENOENT] = "ENOENT",			/* No such file or directory */
 	[ESRCH] = "ESRCH",			/* No such process */

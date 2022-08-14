@@ -37,7 +37,7 @@ bc_pgfault(struct UTrapframe *utf)
 
 	// Check that the fault was within the block cache region
 	if (addr < (void *)DISKMAP || addr >= (void *)(DISKMAP + DISKSIZE))
-		panic("page fault in FS: eip %08x, va %08x, err %04x",
+		panic("page fault in FS: eip %08x, va %p, err %04x",
 		      utf->utf_eip, addr, utf->utf_err);
 
 	// Sanity check the block number

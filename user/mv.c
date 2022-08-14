@@ -3,7 +3,7 @@
 static void
 usage(void)
 {
-	cprintf("usage: mv SOURCE DIRECTORY\n");
+	cprintf("%s: mv SOURCE DIRECTORY\n", __func__);
 	exit();
 }
 

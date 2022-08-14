@@ -14,6 +14,8 @@ struct jif_pkt {
 	char jp_data[0];
 };
 
+union Nsipc nsipcbuf __attribute__((aligned(PGSIZE)));
+
 // Definitions for requests from clients to network server
 enum {
 	// The following messages pass a page containing an Nsipc.

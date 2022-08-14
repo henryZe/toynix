@@ -112,7 +112,7 @@ map_segment(envid_t child, uintptr_t va, size_t memsz,
 	size_t i;
 
 	if (debug)
-		cprintf("map_segment %x + %x\n", va, memsz);
+		cprintf("%s: %x + %x\n", __func__, va, memsz);
 
 	ret = sys_add_vma(child, va, memsz, perm);
 	if (ret < 0)

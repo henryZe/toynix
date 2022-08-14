@@ -1,7 +1,5 @@
 #include <net/ns.h>
 
-extern union Nsipc nsipcbuf;
-
 void
 input(envid_t ns_envid)
 {

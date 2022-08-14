@@ -116,8 +116,9 @@ devpipe_read(struct Fd *fd, void *vbuf, size_t n)
 
 	p = (struct Pipe *)fd2data(fd);
 	if (debug)
-		cprintf("[%08x] devpipe_read %08x %d rpos %d wpos %d\n",
-			thisenv->env_id, uvpt[PGNUM(p)], n, p->p_rpos, p->p_wpos);
+		cprintf("[%08x] %s %08x %d rpos %d wpos %d\n",
+			thisenv->env_id, __func__,
+			uvpt[PGNUM(p)], n, p->p_rpos, p->p_wpos);
 
 	buf = vbuf;
 	for (i = 0; i < n; i++) {
@@ -134,7 +135,7 @@ devpipe_read(struct Fd *fd, void *vbuf, size_t n)
 
 			// yield and see what happens
 			if (debug)
-				cprintf("devpipe_read yield\n");
+				cprintf("%s yield\n", __func__);
 
 			sys_yield();
 		}
@@ -157,8 +158,9 @@ devpipe_write(struct Fd *fd, const void *vbuf, size_t n)
 
 	p = (struct Pipe *)fd2data(fd);
 	if (debug)
-		cprintf("[%08x] devpipe_write %08x %d rpos %d wpos %d\n",
-			thisenv->env_id, uvpt[PGNUM(p)], n, p->p_rpos, p->p_wpos);
+		cprintf("[%08x] %s %08x %d rpos %d wpos %d\n",
+			thisenv->env_id, __func__,
+			uvpt[PGNUM(p)], n, p->p_rpos, p->p_wpos);
 
 	buf = vbuf;
 	for (i = 0; i < n; i++) {
@@ -175,7 +177,7 @@ devpipe_write(struct Fd *fd, const void *vbuf, size_t n)
 
 			/* yield and see what happens */
 			if (debug)
-				cprintf("devpipe_write yield\n");
+				cprintf("%s yield\n", __func__);
 
 			sys_yield();
 		}

@@ -4,7 +4,7 @@
 static void
 usage(void)
 {
-	cprintf("usage: lsfd\n");
+	cprintf("%s: lsfd\n", __func__);
 	exit();
 }
 

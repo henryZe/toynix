@@ -102,7 +102,7 @@ alloc_tid(void)
 	int tid = max_tid++;
 
 	if (max_tid == (uint32_t)~0)
-		panic("alloc_tid: no more thread ids");
+		panic("%s: no more thread ids", __func__);
 
 	return tid;
 }

@@ -1,8 +1,6 @@
 #include <kernel/e1000.h>
 #include <net/ns.h>
 
-extern union Nsipc nsipcbuf;
-
 void
 output(envid_t ns_envid)
 {

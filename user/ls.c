@@ -74,7 +74,7 @@ ls(const char *path, const char *prefix)
 static void
 usage(void)
 {
-	printf("usage: ls [-dFl] [file...]\n");
+	printf("%s: ls [-dFl] [file...]\n", __func__);
 	exit();
 }
 
