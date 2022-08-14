@@ -20,10 +20,10 @@ enum {
 
 // Per-CPU state
 struct CpuInfo {
-	uint8_t cpu_id;                 // Local APIC ID; index into cpus[] below
-	volatile unsigned cpu_status;   // The status of the CPU
-	struct Env *cpu_env;            // The currently-running environment.
-	struct Taskstate cpu_ts;        // Used by x86 to find stack for interrupt
+	uint8_t cpu_id;				// Local APIC ID; index into cpus[] below
+	volatile unsigned int cpu_status;	// The status of the CPU
+	struct Env *cpu_env;			// The currently-running environment.
+	struct Taskstate cpu_ts;		// Used by x86 to find stack for interrupt
 };
 
 // Initialized in mpconfig.c

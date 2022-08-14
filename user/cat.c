@@ -10,15 +10,15 @@ cat(int f, char *s)
 
 	while (1) {
 		n = read(f, buf, sizeof(buf));
-		if (n > 0) {
-			ret = write(1, buf, n);
-			if (ret != n)
-				panic("write error copying %s: %e", s, ret);
-		} else if (n == 0) {
-			break;
-		} else {
+		if (n < 0)
 			panic("error reading %s: %e", s, n);
-		}
+
+		if (n == 0)
+			break;
+
+		ret = write(1, buf, n);
+		if (ret != n)
+			panic("write error copying %s: %e", s, ret);
 	}
 }
 

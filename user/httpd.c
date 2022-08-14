@@ -112,7 +112,7 @@ send_error(struct http_request *req, int code)
 	r = snprintf(buf, sizeof(buf),
 			"HTTP/" HTTP_VERSION " %d %s\r\n"
 			"Server: jhttpd/" VERSION "\r\n"
-			"Connection: close"
+			"Connection: close "
 			"Content-type: text/html\r\n"
 			"\r\n"
 			"<html><body><p>%d - %s</p></body></html>\r\n",
