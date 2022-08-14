@@ -9,6 +9,7 @@
 #include <kernel/kclock.h>
 #include <kernel/env.h>
 #include <kernel/cpu.h>
+#include <kernel/ksymbol.h>
 
 #define OS_MAX_MEMORY (256 * 1024)	/* KB */
 
@@ -100,7 +101,6 @@ boot_alloc(uint32_t n)
 	// the first virtual address that the linker did *not* assign
 	// to any kernel code or global variables.
 	if (!nextfree) {
-		extern char end[];
 		// already used by loading image
 		nextfree = ROUNDUP((char *)end, PGSIZE);
 	}

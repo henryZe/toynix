@@ -1,6 +1,7 @@
 /* just testing */
 
 #include <lib.h>
+#include <symbol.h>
 
 envid_t dumbfork(void);
 
@@ -50,7 +51,6 @@ dumbfork(void)
 	envid_t envid;
 	uint8_t *addr;
 	int r;
-	extern unsigned char end[];
 
 	// Allocate a new child environment.
 	// The kernel will initialize it with a copy of our register state,

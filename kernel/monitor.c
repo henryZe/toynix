@@ -10,6 +10,7 @@
 #include <kernel/pmap.h>
 #include <kernel/trap.h>
 #include <kernel/env.h>
+#include <kernel/ksymbol.h>
 
 #define CMDBUF_SIZE	80	// enough for one VGA text line
 
@@ -46,11 +47,6 @@ mon_help(int argc, char **argv, struct Trapframe *tf)
 int
 mon_kerninfo(int argc, char **argv, struct Trapframe *tf)
 {
-	extern char _start[], entry[], stext[], etext[], srodata[], erodata[];
-	extern char __STAB_BEGIN__[], __STAB_END__[];
-	extern char __STABSTR_BEGIN__[], __STABSTR_END__[];
-	extern char sdata[], edata[], sbss[], end[];
-
 	cprintf("Special kernel symbols:\n");
 	cprintf("  entry   %p (_start)         %p (entry)\n", _start, entry);
 	cprintf("  text    %p (stext)          %p (etext)\n", stext, etext);

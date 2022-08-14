@@ -13,6 +13,7 @@
 #include <kernel/pci.h>
 #include <kernel/time.h>
 #include <kernel/init.h>
+#include <kernel/ksymbol.h>
 
 static void boot_aps(void);
 
@@ -76,7 +77,6 @@ void *mpentry_kstack;
 static void
 boot_aps(void)
 {
-	extern unsigned char mpentry_start[], mpentry_end[];
 	void *code;
 	struct CpuInfo *c;
 
