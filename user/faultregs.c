@@ -8,24 +8,24 @@ struct regs {
 };
 
 #define SAVE_REGS(base) \
-	"\tmovl %%edi, "base"+0x00\n" \
-	"\tmovl %%esi, "base"+0x04\n" \
-	"\tmovl %%ebp, "base"+0x08\n" \
-	"\tmovl %%ebx, "base"+0x10\n" \
-	"\tmovl %%edx, "base"+0x14\n" \
-	"\tmovl %%ecx, "base"+0x18\n" \
-	"\tmovl %%eax, "base"+0x1c\n" \
-	"\tmovl %%esp, "base"+0x28\n"
+	"\tmovl %%edi, 0x00+"base"\n" \
+	"\tmovl %%esi, 0x04+"base"\n" \
+	"\tmovl %%ebp, 0x08+"base"\n" \
+	"\tmovl %%ebx, 0x10+"base"\n" \
+	"\tmovl %%edx, 0x14+"base"\n" \
+	"\tmovl %%ecx, 0x18+"base"\n" \
+	"\tmovl %%eax, 0x1c+"base"\n" \
+	"\tmovl %%esp, 0x28+"base"\n"
 
 #define LOAD_REGS(base) \
-	"\tmovl "base"+0x00, %%edi\n" \
-	"\tmovl "base"+0x04, %%esi\n" \
-	"\tmovl "base"+0x08, %%ebp\n" \
-	"\tmovl "base"+0x10, %%ebx\n" \
-	"\tmovl "base"+0x14, %%edx\n" \
-	"\tmovl "base"+0x18, %%ecx\n" \
-	"\tmovl "base"+0x1c, %%eax\n" \
-	"\tmovl "base"+0x28, %%esp\n"
+	"\tmovl 0x00+"base", %%edi\n" \
+	"\tmovl 0x04+"base", %%esi\n" \
+	"\tmovl 0x08+"base", %%ebp\n" \
+	"\tmovl 0x10+"base", %%ebx\n" \
+	"\tmovl 0x14+"base", %%edx\n" \
+	"\tmovl 0x18+"base", %%ecx\n" \
+	"\tmovl 0x1c+"base", %%eax\n" \
+	"\tmovl 0x28+"base", %%esp\n"
 
 static struct regs before, during, after;
 
@@ -107,10 +107,10 @@ umain(int argc, char **argv)
 
 		// Save before registers
 		/* before->eflags */
-		"\tmov %%eax, %0+0x24\n"
+		"\tmov %%eax, 0x24 + %0\n"
 		/* before->eip */
 		"\tleal 0f, %%eax\n"
-		"\tmovl %%eax, %0+0x20\n"
+		"\tmovl %%eax, 0x20 + %0\n"
 
 		/* restore eax */
 		"\tpopl %%eax\n"
@@ -135,7 +135,7 @@ umain(int argc, char **argv)
 		"\tpushfl\n"
 		"\tpopl %%eax\n"
 		/* after->eflags */
-		"\tmov %%eax, %1+0x24\n"
+		"\tmov %%eax, 0x24+%1\n"
 		"\tpopl %%eax\n"
 		: : "m" (before), "m" (after) : "memory", "cc");
 
