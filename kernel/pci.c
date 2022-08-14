@@ -91,7 +91,7 @@ pci_print_func(struct pci_func *f)
 		f->irq_line);
 }
 
-static int __attribute__((warn_unused_result))
+static int __must_check
 pci_attach_match(uint32_t key1, uint32_t key2,
 		 struct pci_driver *list, struct pci_func *pcif)
 {

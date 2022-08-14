@@ -9,7 +9,7 @@
 
 #define LRT_STRAT 1
 
-static void sched_halt(void) __attribute__((noreturn));
+static __noreturn void sched_halt(void);
 
 // Choose a user environment to run and run it.
 void

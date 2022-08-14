@@ -69,7 +69,7 @@ lwip_init(struct netif *nif, void *if_state,
 	netif_set_up(nif);
 }
 
-static void __attribute__((noreturn))
+static void __noreturn
 net_timer(uint32_t arg)
 {
 	struct timer_thread *t = (struct timer_thread *)arg;

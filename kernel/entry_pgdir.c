@@ -1,5 +1,6 @@
 #include <mmu.h>
 #include <memlayout.h>
+#include <compiler_attributes.h>
 
 pte_t entry_pgtable[NPTENTRIES];
 
@@ -19,8 +20,7 @@ pte_t entry_pgtable[NPTENTRIES];
  * here, rather than the more standard "x | PTE_P".  Everywhere else
  * you should use "|" to combine flags.
  */
-__attribute__((__aligned__(PGSIZE)))
-pde_t entry_pgdir[NPDENTRIES] = {
+pde_t __aligned(PGSIZE) entry_pgdir[NPDENTRIES] = {
 	/* Map VA's [0, 4MB) to PA's [0, 4MB) */
 	[0]
 		= ((uintptr_t)entry_pgtable - KERNBASE) + PTE_P,
@@ -33,8 +33,7 @@ pde_t entry_pgdir[NPDENTRIES] = {
  * Entry 0 of the page table maps to physical page 0, entry 1 to
  * physical page 1, etc.
  */
-__attribute__((__aligned__(PGSIZE)))
-pte_t entry_pgtable[NPTENTRIES] = {
+pte_t __aligned(PGSIZE) entry_pgtable[NPTENTRIES] = {
 	0x000000 | PTE_P | PTE_W,
 	0x001000 | PTE_P | PTE_W,
 	0x002000 | PTE_P | PTE_W,

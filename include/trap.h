@@ -3,6 +3,7 @@
 
 #ifndef __ASSEMBLER__
 #include <types.h>
+#include <compiler_attributes.h>
 
 void traphandler_0(void);
 void traphandler_1(void);
@@ -80,7 +81,7 @@ struct PushRegs {
 	uint32_t reg_edx;
 	uint32_t reg_ecx;
 	uint32_t reg_eax;
-} __attribute__((__packed__));
+} __packed;
 
 struct Trapframe {
 	struct PushRegs tf_regs;
@@ -99,7 +100,7 @@ struct Trapframe {
 	uintptr_t tf_esp;
 	uint16_t tf_ss;
 	uint16_t tf_padding4;
-} __attribute__((packed));
+} __packed;
 
 struct UTrapframe {
 	/* information about the fault */
@@ -113,7 +114,7 @@ struct UTrapframe {
 
 	/* the trap-time stack to return to */
 	uintptr_t utf_esp;
-} __attribute__((packed));
+} __packed;
 
 #endif /* __ASSEMBLER__ */
 #endif /* !INC_TRAP_H */

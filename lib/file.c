@@ -2,7 +2,7 @@
 
 #define debug 0
 
-union Fsipc fsipcbuf __attribute__((aligned(PGSIZE)));
+union Fsipc __aligned(PGSIZE) fsipcbuf;
 
 static int devfile_flush(struct Fd *fd);
 static ssize_t devfile_read(struct Fd *fd, void *buf, size_t n);

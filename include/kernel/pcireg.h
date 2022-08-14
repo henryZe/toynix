@@ -41,6 +41,7 @@
  */
 
 #include <types.h>
+#include <compiler_attributes.h>
 
 /*
  * Device identification register; contains a vendor ID and a device ID.
@@ -645,14 +646,14 @@ typedef uint8_t pci_intr_line_t;
 struct pci_vpd_smallres {
 	uint8_t		vpdres_byte0;		/* length of data + tag */
 	/* Actual data. */
-} __attribute__((__packed__));
+} __packed;
 
 struct pci_vpd_largeres {
 	uint8_t		vpdres_byte0;
 	uint8_t		vpdres_len_lsb;		/* length of data only */
 	uint8_t		vpdres_len_msb;
 	/* Actual data. */
-} __attribute__((__packed__));
+} __packed;
 
 #define	PCI_VPDRES_ISLARGE(x)			((x) & 0x80)
 
@@ -673,7 +674,7 @@ struct pci_vpd {
 	uint8_t		vpd_key1;
 	uint8_t		vpd_len;		/* length of data only */
 	/* Actual data. */
-} __attribute__((__packed__));
+} __packed;
 
 /*
  * Recommended VPD fields:

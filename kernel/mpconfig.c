@@ -10,8 +10,7 @@ int ismp;
 int ncpu;
 
 // Per-CPU kernel stacks
-unsigned char percpu_kstacks[NCPU][KSTKSIZE]
-__attribute__ ((aligned(PGSIZE)));
+unsigned char __aligned(PGSIZE) percpu_kstacks[NCPU][KSTKSIZE];
 
 // See MultiProcessor Specification Version 1.[14]
 struct mp {							// floating pointer [MP 4.1]
@@ -23,7 +22,7 @@ struct mp {							// floating pointer [MP 4.1]
 	uint8_t type;                   // MP system config type
 	uint8_t imcrp;
 	uint8_t reserved[3];
-} __attribute__((__packed__));
+} __packed;
 
 struct mpconf {         // configuration table header [MP 4.2]
 	uint8_t signature[4];           // "PCMP"
@@ -39,7 +38,7 @@ struct mpconf {         // configuration table header [MP 4.2]
 	uint8_t xchecksum;              // extended table checksum
 	uint8_t reserved;
 	uint8_t entries[0];             // table entries
-} __attribute__((__packed__));
+} __packed;
 
 struct mpproc {         // processor table entry [MP 4.3.1]
 	uint8_t type;                   // entry type (0)
@@ -49,7 +48,7 @@ struct mpproc {         // processor table entry [MP 4.3.1]
 	uint8_t signature[4];           // CPU signature
 	uint32_t feature;               // feature flags from CPUID instruction
 	uint8_t reserved[8];
-} __attribute__((__packed__));
+} __packed;
 
 // mpproc flags
 #define MPPROC_BOOT 0x02                // This mpproc is the bootstrap processor

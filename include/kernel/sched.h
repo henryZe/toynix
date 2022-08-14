@@ -5,6 +5,6 @@
 #endif
 
 // This function does not return.
-void sched_yield(void) __attribute__((noreturn));
+void __noreturn sched_yield(void);
 
 #endif	// !KERN_SCHED_H
