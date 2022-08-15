@@ -1,7 +1,7 @@
 #include <lib.h>
 #include <fs/fs.h>
 
-#define BLKNO2ADDR(x) (void *)(DISKMAP + x * BLKSIZE)
+#define BLKNO2ADDR(x) ((void *)(DISKMAP + x * BLKSIZE))
 
 // --------------------------------------------------------------
 // Super block

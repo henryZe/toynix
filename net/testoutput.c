@@ -10,31 +10,31 @@ static struct jif_pkt *pkt = (struct jif_pkt *)REQVA;
 void
 umain(int argc, char **argv)
 {
-    envid_t ns_envid = sys_getenvid();
-    int i, ret;
+	envid_t ns_envid = sys_getenvid();
+	int i, ret;
 
-    output_envid = fork();
-    if (output_envid < 0)
-        panic("error forking");
-    else if (output_envid == 0) {
-        output(ns_envid);
-        return;
-    }
+	output_envid = fork();
+	if (output_envid < 0) {
+		panic("error forking");
+	} else if (output_envid == 0) {
+		output(ns_envid);
+		return;
+	}
 
-    for (i = 0; i < TESTOUTPUT_COUNT; i++) {
-        ret = sys_page_alloc(0, pkt, PTE_W);
-        if (ret < 0)
-            panic("sys_page_alloc: %e", ret);
+	for (i = 0; i < TESTOUTPUT_COUNT; i++) {
+		ret = sys_page_alloc(0, pkt, PTE_W);
+		if (ret < 0)
+			panic("sys_page_alloc: %e", ret);
 
-        pkt->jp_len = snprintf(pkt->jp_data,
-                            MAX_JIF_LEN,
-                            "Packet %02d", i);
-        cprintf("Transmitting packet %d\n", i);
-        ipc_send(output_envid, NSREQ_OUTPUT, pkt, PTE_W);
-        sys_page_unmap(0, pkt);
-    }
+		pkt->jp_len = snprintf(pkt->jp_data,
+					MAX_JIF_LEN,
+					"Packet %02d", i);
+		cprintf("Transmitting packet %d\n", i);
+		ipc_send(output_envid, NSREQ_OUTPUT, pkt, PTE_W);
+		sys_page_unmap(0, pkt);
+	}
 
-    // Spin for a while, just in case IPC's or packets need to be flushed
-    for (i = 0; i < TESTOUTPUT_COUNT * 2; i++)
-        sys_yield();
+	// Spin for a while, just in case IPC's or packets need to be flushed
+	for (i = 0; i < TESTOUTPUT_COUNT * 2; i++)
+		sys_yield();
 }

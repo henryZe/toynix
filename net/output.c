@@ -9,13 +9,13 @@ output(envid_t ns_envid)
 	int ret;
 
 	while (1) {
-		// 	- read a packet from the network server
+		//	- read a packet from the network server
 		ret = sys_ipc_recv(&nsipcbuf);
 		if (ret)
 			continue;
 
 		if (thisenv->env_ipc_from != ns_envid ||
-			thisenv->env_ipc_value != NSREQ_OUTPUT)
+		    thisenv->env_ipc_value != NSREQ_OUTPUT)
 			continue;
 
 		//	- send the packet to the device driver

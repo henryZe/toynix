@@ -41,7 +41,7 @@ fs_test(void)
 		panic("file_get_block returned wrong data");
 	cprintf("file_get_block is good\n");
 
-	*(volatile char*)blk = *(volatile char*)blk;
+	*(volatile char *)blk = *(volatile char *)blk;
 	assert((uvpt[PGNUM(blk)] & PTE_D));
 	file_flush(f);
 	assert(!(uvpt[PGNUM(blk)] & PTE_D));

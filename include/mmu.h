@@ -194,7 +194,7 @@ struct Segdesc {
 	}
 
 #define SEG16(type, base, lim, dpl)			\
-	(struct Segdesc) {				\
+	((struct Segdesc) {				\
 		(lim) & 0xffff,				\
 		(base) & 0xffff,			\
 		((base) >> 16) & 0xff,			\
@@ -208,7 +208,7 @@ struct Segdesc {
 		1,					\
 		0,					\
 		(unsigned int) (base) >> 24,		\
-	}
+	})
 
 #endif /* !__ASSEMBLER__ */
 

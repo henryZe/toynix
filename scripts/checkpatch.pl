@@ -56,7 +56,7 @@ my %ignore_type = ();
 my @ignore = ();
 my $help = 0;
 my $configuration_file = ".checkpatch.conf";
-my $max_line_length = 100;
+my $max_line_length = 150;
 my $ignore_perl_version = 0;
 my $minimum_perl_version = 5.10.0;
 my $min_conf_desc_length = 4;
@@ -3634,6 +3634,7 @@ sub process {
 
 				if ($comment !~ /^$/ &&
 				    $rawline !~ m@^\+\Q$comment\E SPDX-License-Identifier: @) {
+					# close warning
 					# WARN("SPDX_LICENSE_TAG",
 					#      "Missing or malformed SPDX-License-Identifier tag in line $checklicenseline\n" . $herecurr);
 				} elsif ($rawline =~ /(SPDX-License-Identifier: .*)/) {
@@ -3842,12 +3843,13 @@ sub process {
 				if ($newindent ne $goodtabindent &&
 				    $newindent ne $goodspaceindent) {
 
-					if (CHK("PARENTHESIS_ALIGNMENT",
-						"Alignment should match open parenthesis\n" . $hereprev) &&
-					    $fix && $line =~ /^\+/) {
-						$fixed[$fixlinenr] =~
-						    s/^\+[ \t]*/\+$goodtabindent/;
-					}
+					# close check
+					# if (CHK("PARENTHESIS_ALIGNMENT",
+					# 	"Alignment should match open parenthesis\n" . $hereprev) &&
+					#     $fix && $line =~ /^\+/) {
+					# 	$fixed[$fixlinenr] =~
+					# 	    s/^\+[ \t]*/\+$goodtabindent/;
+					# }
 				}
 			}
 		}
@@ -4635,6 +4637,7 @@ sub process {
 		    $line !~ /\btypedef\s+$Type\s+$Ident\s*\(/ &&
 		    $line !~ /\b$typeTypedefs\b/ &&
 		    $line !~ /\b__bitwise\b/) {
+			# close warning
 			# WARN("NEW_TYPEDEFS",
 			#      "do not add new typedefs\n" . $herecurr);
 		}
@@ -5555,6 +5558,7 @@ sub process {
 			my $fixed_assign_in_if = 0;
 
 			if ($c =~ /\bif\s*\(.*[^<>!=]=[^=].*/s) {
+				# close error
 				# if (ERROR("ASSIGN_IN_IF",
 				# 	  "do not use assignment in if condition\n" . $herecurr) &&
 				#     $fix && $perl_version_ok) {
@@ -5601,6 +5605,7 @@ sub process {
 					$stat_real = "[...]\n$stat_real";
 				}
 
+				# close error
 				# if (ERROR("TRAILING_STATEMENTS",
 				# 	  "trailing statements should be on next line\n" . $herecurr . $stat_real) &&
 				#     !$fixed_assign_in_if &&
@@ -5733,8 +5738,9 @@ sub process {
 					}
 					if (!defined $camelcase{$word}) {
 						$camelcase{$word} = 1;
-						CHK("CAMELCASE",
-						    "Avoid CamelCase: <$word>\n" . $herecurr);
+						# close check
+						# CHK("CAMELCASE",
+						#     "Avoid CamelCase: <$word>\n" . $herecurr);
 					}
 				}
 			}
@@ -6116,6 +6122,7 @@ sub process {
 # no volatiles please
 		my $asm_volatile = qr{\b(__asm__|asm)\s+(__volatile__|volatile)\b};
 		if ($line =~ /\bvolatile\b/ && $line !~ /$asm_volatile/) {
+			# close warning
 			# WARN("VOLATILE",
 			#      "Use of volatile is usually wrong: see Documentation/process/volatile-considered-harmful.rst\n" . $herecurr);
 		}
@@ -6682,11 +6689,12 @@ sub process {
 				$kernel_type = 's' if ($type =~ /^_*[si]/);
 				$type =~ /(\d+)/;
 				$kernel_type .= $1;
-				if (CHK("PREFER_KERNEL_TYPES",
-					"Prefer kernel type '$kernel_type' over '$type'\n" . $herecurr) &&
-				    $fix) {
-					$fixed[$fixlinenr] =~ s/\b$type\b/$kernel_type/;
-				}
+				# close check
+				# if (CHK("PREFER_KERNEL_TYPES",
+				# 	"Prefer kernel type '$kernel_type' over '$type'\n" . $herecurr) &&
+				#     $fix) {
+				# 	$fixed[$fixlinenr] =~ s/\b$type\b/$kernel_type/;
+				# }
 			}
 		}
 

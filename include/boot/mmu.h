@@ -76,7 +76,7 @@ struct segdesc {
 
 // Normal segment
 #define SEG(type, base, lim, dpl)		\
-	(struct segdesc) {			\
+	((struct segdesc) {			\
 		((lim) >> 12) & 0xffff,		\
 		(uint)(base) & 0xffff,		\
 		((uint)(base) >> 16) & 0xff,	\
@@ -90,9 +90,9 @@ struct segdesc {
 		1,				\
 		1,				\
 		(uint)(base) >> 24,		\
-	}
+	})
 #define SEG16(type, base, lim, dpl)		\
-	(struct segdesc) {			\
+	((struct segdesc) {			\
 		(lim) & 0xffff,			\
 		(uint)(base) & 0xffff,		\
 		((uint)(base) >> 16) & 0xff,	\
@@ -106,7 +106,7 @@ struct segdesc {
 		1,				\
 		0,				\
 		(uint)(base) >> 24,		\
-	}
+	})
 #endif
 
 #define DPL_USER	0x3	// User DPL

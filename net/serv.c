@@ -16,7 +16,7 @@
 
 #define debug 0
 
-int errno = 0;
+int errno;
 
 struct timer_thread {
 	uint32_t msec;
@@ -52,18 +52,17 @@ tcpip_init_done(void *arg)
 
 static void
 lwip_init(struct netif *nif, void *if_state,
-		uint32_t init_addr, uint32_t init_mask, uint32_t init_gw)
+	  uint32_t init_addr, uint32_t init_mask, uint32_t init_gw)
 {
 	struct ip_addr ipaddr, netmask, gateway;
+
 	ipaddr.addr  = init_addr;
 	netmask.addr = init_mask;
 	gateway.addr = init_gw;
 
-	if (0 == netif_add(nif, &ipaddr, &netmask, &gateway,
-			   if_state,
-			   jif_init,
-			   ip_input))
-		panic("lwip_init: error in netif_add\n");
+	if (netif_add(nif, &ipaddr, &netmask, &gateway,
+		      if_state, jif_init, ip_input) == 0)
+		panic("%s: error in netif_add\n", __func__);
 
 	netif_set_default(nif);
 	netif_set_up(nif);
@@ -105,6 +104,7 @@ serve_init(uint32_t ipaddr, uint32_t netmask, uint32_t gw)
 	lwip_core_lock();
 
 	uint32_t done = 0;
+
 	tcpip_init(&tcpip_init_done, &done);
 	lwip_core_unlock();
 	thread_wait(&done, 0, (uint32_t)~0);
@@ -117,8 +117,8 @@ serve_init(uint32_t ipaddr, uint32_t netmask, uint32_t gw)
 	start_timer(&t_tcps, &tcp_slowtmr, "tcp s timer", TCP_SLOW_INTERVAL);
 
 	struct in_addr ia = {ipaddr};
-	cprintf("ns: %02x:%02x:%02x:%02x:%02x:%02x"
-		" bound to static IP %s\n",
+
+	cprintf("ns: %02x:%02x:%02x:%02x:%02x:%02x bound to static IP %s\n",
 		nif.hwaddr[0], nif.hwaddr[1], nif.hwaddr[2],
 		nif.hwaddr[3], nif.hwaddr[4], nif.hwaddr[5],
 		inet_ntoa(ia));
@@ -153,6 +153,7 @@ static void
 put_buffer(void *va)
 {
 	int i = ((uint32_t)va - REQVA) / PGSIZE;
+
 	buse[i] = 0;
 }
 
@@ -162,8 +163,7 @@ process_timer(envid_t envid)
 	uint32_t start, now, to;
 
 	if (envid != timer_envid) {
-		cprintf("NS: received timer interrupt from envid %x"
-				" not timer env\n", envid);
+		cprintf("NS: received timer interrupt from envid %x not timer env\n", envid);
 		return;
 	}
 
@@ -171,7 +171,7 @@ process_timer(envid_t envid)
 	thread_yield();
 	now = sys_time_msec();
 
-	to = TIMER_INTERVAL - (now -start);
+	to = TIMER_INTERVAL - (now - start);
 	ipc_send(envid, to, NULL, 0);
 }
 
@@ -217,7 +217,7 @@ serve_thread(uint32_t a)
 		// Note that we read the request fields before we
 		// overwrite it with the response data.
 		r = lwip_recv(req->recv.req_s, req->recvRet.ret_buf,
-					req->recv.req_len, req->recv.req_flags);
+				req->recv.req_len, req->recv.req_flags);
 		break;
 
 	case NSREQ_SEND:
@@ -243,6 +243,7 @@ serve_thread(uint32_t a)
 
 	if (r < 0) {
 		char buf[100];
+
 		snprintf(buf, sizeof(buf), "ns req type %d", args->reqno);
 		perror(buf);
 	}
@@ -292,6 +293,7 @@ serve(void)
 		// Since some lwIP socket calls will block, create a thread and
 		// process the rest of the request in the thread.
 		struct st_args *args = malloc(sizeof(struct st_args));
+
 		if (!args)
 			panic("could not allocate thread args structure");
 
@@ -302,7 +304,6 @@ serve(void)
 		thread_create(NULL, "serve_thread", serve_thread, (uint32_t)args);
 		thread_yield(); // let the thread created run
 	}
-
 }
 
 static void
@@ -321,9 +322,9 @@ umain(int argc, char **argv)
 
 	// fork off the timer thread which will send us periodic messages
 	timer_envid = fork();
-	if (timer_envid < 0)
+	if (timer_envid < 0) {
 		panic("error forking");
-	else if (timer_envid == 0) {
+	} else if (timer_envid == 0) {
 		/* as the timer of thread scheduler */
 		timer(ns_envid, TIMER_INTERVAL);
 		return;
@@ -331,18 +332,18 @@ umain(int argc, char **argv)
 
 	// fork off the input thread which will poll the NIC driver for input packets
 	input_envid = fork();
-	if (input_envid < 0)
+	if (input_envid < 0) {
 		panic("error forking");
-	else if (input_envid == 0) {
+	} else if (input_envid == 0) {
 		input(ns_envid);
 		return;
 	}
 
 	// fork off the output thread that will send the packets to the NIC driver
 	output_envid = fork();
-	if (output_envid < 0)
+	if (output_envid < 0) {
 		panic("error forking");
-	else if (output_envid == 0) {
+	} else if (output_envid == 0) {
 		output(ns_envid);
 		return;
 	}
