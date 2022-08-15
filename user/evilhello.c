@@ -6,6 +6,6 @@
 void
 umain(int argc, char **argv)
 {
-	// try to print the kernel entry point as a string!  mua ha ha!
+	// try to print the kernel entry point as a string!
 	sys_cputs((char *)0xf010000c, 100);
 }

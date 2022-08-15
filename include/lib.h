@@ -20,7 +20,7 @@
 #include <ns.h>
 #include <debug.h>
 
-#define USED(x)		(void)(x)
+#define USED(x)		((void)(x))
 
 // main user program
 void umain(int argc, char **argv);

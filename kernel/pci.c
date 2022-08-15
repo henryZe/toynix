@@ -104,8 +104,8 @@ pci_attach_match(uint32_t key1, uint32_t key2,
 			if (r > 0)
 				return r;
 			if (r < 0)
-				warn("pci_attach_match: attaching %x.%x (%p): %e\n",
-					key1, key2, list[i].attachfn, r);
+				warn("%s: attaching %x.%x (%p): %e\n",
+					__func__, key1, key2, list[i].attachfn, r);
 		}
 	}
 	return 0;
