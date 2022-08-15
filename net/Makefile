@@ -1,14 +1,14 @@
 include $(NETDIR)/lwip/Makefile
 
 NET_SRCFILES := \
-		$(NETDIR)/input.c \
-		$(NETDIR)/output.c \
-		$(NETDIR)/timer.c \
+	$(NETDIR)/input.c \
+	$(NETDIR)/output.c \
+	$(NETDIR)/timer.c \
 
 NET_TESTFILES := \
-		$(NETDIR)/testoutput.c \
-		$(NETDIR)/testinput.c \
-		$(NETDIR)/testthread.c \
+	$(NETDIR)/testoutput.c \
+	$(NETDIR)/testinput.c \
+	$(NETDIR)/testthread.c \
 
 NET_OBJFILES := $(patsubst $(NETDIR)/%.c, $(OBJDIR)/$(NETDIR)/%.o, $(NET_SRCFILES))
 NET_TESTOBJS := $(patsubst $(NETDIR)/%.c, $(OBJDIR)/$(NETDIR)/%.o, $(NET_TESTFILES))

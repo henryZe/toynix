@@ -46,7 +46,7 @@ KERN_BINFILES := \
 		$(OBJDIR)/$(FSDIR)/fs \
 		$(OBJDIR)/$(NETDIR)/ns \
 		$(patsubst %.o, %, $(USER_OBJFILES)) \
-		#$(patsubst %.o, %, $(NET_TESTOBJS)) \
+		$(patsubst %.o, %, $(NET_TESTOBJS)) \
 
 # How to build kernel object files
 $(OBJDIR)/$(KERNDIR)/%.o: $(KERNDIR)/%.c
